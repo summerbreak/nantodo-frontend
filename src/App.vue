@@ -17,7 +17,7 @@
         <span style="margin-left: 10px;">登录</span>
       </div>
       <div class="nantodo" @click="toIndex">
-        <img src="./assets/nantodo.jpg" style="width: 100%;height: 80%;object-fit: cover;margin-top: 10px;">
+        <img src="./assets/pic/nantodo.png" style="width: 100%;height: 80%;object-fit: cover;margin-top: 10px;">
       </div>
     </el-header>
     <div class="main">
@@ -65,6 +65,8 @@ function handleLogin() {
   top: 0;
   right: 0;
   z-index: 10;
+  padding: 0;
+  /* background-color: oldlace; */
 }
 
 .main {
@@ -86,7 +88,7 @@ function handleLogin() {
   padding-right: 10px;
   &:hover {
     cursor: pointer;
-    background-color:	oldlace;
+    background-color:	wheat;
     border-radius: 10px;
   }
 }
@@ -106,7 +108,10 @@ function handleLogin() {
   display: flex;
   justify-content: center;
   height: 100%;
+  width: 100%;
+  margin: 0 !important;
   bottom: 0;
+  background-color: oldlace;
 }
 
 .menu-item {
