@@ -20,9 +20,10 @@
         <img src="./assets/nantodo.jpg" style="width: 100%;height: 80%;object-fit: cover;margin-top: 10px;">
       </div>
     </el-header>
-    <el-container class="main">
+    <div class="main">
+      <!-- 如有需要，在自定义组件内可以继续写el-container/aside/main... -->
       <router-view></router-view>
-    </el-container>
+    </div>
   </el-container>
 </template>
 
@@ -68,8 +69,8 @@ function handleLogin() {
 
 .main {
   margin-top: 80px;
-  display: flex;
-  flex-direction: column !important;
+  /* display: flex;
+  flex-direction: column !important; */
 }
 
 .login {
