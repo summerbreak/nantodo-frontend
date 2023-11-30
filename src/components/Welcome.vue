@@ -6,7 +6,7 @@
     </el-carousel>
     <div class="container">
         <div class="join">
-            <span class="headline">加入南土豆</span>
+            <span class="headline">南土豆，您的小组分工合作助手</span>
             <el-button class="button" @click="handleLogin">登录</el-button>
         </div>
         <div class="card-container">
@@ -115,6 +115,7 @@ function handleLogin() {
     font-weight:700;
     color: white;
     margin-bottom: 50px;
+    text-shadow: 0 0 4px #555;
 }
 
 .join {

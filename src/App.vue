@@ -10,6 +10,7 @@
       >
         <el-menu-item index="/" class="menu-item">首页</el-menu-item>
         <el-menu-item index="group" class="menu-item">小组</el-menu-item>
+        <el-menu-item index="course" class="menu-item">课程</el-menu-item>
         <el-menu-item index="discovery" class="menu-item">发现</el-menu-item>
       </el-menu>
       <div class="login" @click="handleLogin">
@@ -54,9 +55,8 @@ function handleLogin() {
 </script>
 
 <style scoped>
-
 .container {
-  min-height: 100vh;
+  min-height: 100%;
 }
 
 .header {
