@@ -1,6 +1,6 @@
 <template>
-  <el-container class="container">
-    <el-header class="header" height="80px">
+  <div class="container">
+    <div class="header">
       <el-menu ref="menu"
         :default-active="activeIndex"
         class="menu"
@@ -20,12 +20,12 @@
       <div class="nantodo" @click="toIndex">
         <img src="./assets/pic/nantodo.png" style="width: 100%;height: 80%;object-fit: cover;margin-top: 10px;">
       </div>
-    </el-header>
+    </div>
     <div class="main">
       <!-- 如有需要，在自定义组件内可以继续写el-container/aside/main... -->
       <router-view></router-view>
     </div>
-  </el-container>
+  </div>
 </template>
 
 <script setup>
@@ -56,23 +56,23 @@ function handleLogin() {
 
 <style scoped>
 .container {
-  min-height: 100%;
+  height: 100%;
 }
 
 .header {
+  height: 80px;
   position: fixed;
   left: 0;
   top: 0;
   right: 0;
   z-index: 10;
   padding: 0;
-  /* background-color: oldlace; */
 }
 
 .main {
-  margin-top: 80px;
-  /* display: flex;
-  flex-direction: column !important; */
+  /* margin-top: 80px; */
+  padding-top: 80px;
+  height: calc(100% - 80px);
 }
 
 .login {
