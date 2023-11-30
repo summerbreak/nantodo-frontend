@@ -1,12 +1,4 @@
 <template>
-    <!-- <el-container style="height: 100% !important;">
-        <el-aside class="aside" width="200px">
-            <div style="height: 100%;"></div>
-        </el-aside>
-        <el-main>
-
-        </el-main>
-    </el-container> -->
     <div class="container">
         <div class="aside">
             <div></div>
