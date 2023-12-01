@@ -73,6 +73,10 @@ function handleLogin() {
   /* margin-top: 80px; */
   padding-top: 80px;
   height: calc(100% - 80px);
+  background-color: #FFFAF0;
+  /* opacity: 1; */
+  background-image: radial-gradient(#FFDAB9 0.6000000000000001px, #FFFAF0 0.6000000000000001px);
+  background-size: 12px 12px;
 }
 
 .login {
@@ -98,7 +102,7 @@ function handleLogin() {
   position: fixed;
   z-index: 20;
   top: 0;
-  left: 400px;
+  left: 10%;
   &:hover {
     cursor: pointer;
   }
@@ -121,4 +125,6 @@ function handleLogin() {
   --el-menu-hover-text-color: darkorange;
   --el-menu-hover-bg-color: oldlace;
 }
+
+
 </style>
