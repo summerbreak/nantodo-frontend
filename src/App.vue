@@ -55,6 +55,12 @@ function handleLogin() {
 </script>
 
 <style scoped>
+div {
+  table-layout: fixed;
+  word-wrap: break-word;
+  overflow: hidden;
+}
+
 .container {
   height: 100%;
 }
