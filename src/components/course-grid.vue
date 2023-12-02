@@ -1,13 +1,13 @@
 <template>
   <div class="total">
-    <el-card shadow="hover" :body-style="{ padding: '0px'}">
+    <el-card shadow="hover" :body-style="{ padding: '0px'}" @click="gotoDetails" style="border-radius: 5%">
       <el-image
           :src="url"
           class="image"
           :fit="'cover'"
       />
       <div class="text">
-        <el-text tag="b" size="large" style="font-size: 16px;color: #1a1a1a">软件工程与计算</el-text>
+        <el-text tag="b" size="large" style="font-size: 16px;color: #1a1a1a">{{ props.name }}</el-text>
         <br/>
         <el-text class="t">
           <el-icon>
@@ -33,10 +33,23 @@
 </template>
 
 <script setup>
+import { useRouter } from 'vue-router'
 import {Check,Avatar} from '@element-plus/icons-vue'
+import { ref, onMounted } from 'vue'
 
-const props = defineProps(['url', 'name', 'teacher'])
+
+const props = defineProps(['url', 'name', 'teacher','index'])
 const url = "https://picdm.sunbangyan.cn/2023/12/01/dcb092f15f5649cc20185ce03e779f90.jpeg"
+const router = useRouter()
+
+onMounted(()=>{
+  console.log(router.currentRoute.value)
+})
+function gotoDetails(){
+  console.log(111)
+  router.push("/course-detail")
+}
+
 </script>
 
 

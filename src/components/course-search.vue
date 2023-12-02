@@ -1,7 +1,7 @@
 <template>
   <div class="search">
     <el-input
-        v-model="course"
+        v-model="inputText"
         size="large"
         placeholder="课程搜索"
         :suffix-icon="Search"
@@ -11,13 +11,13 @@
   </div>
 </template>
 
-<script lang="ts" setup>
+<script setup>
 import {onMounted, ref} from 'vue'
 import {Search} from '@element-plus/icons-vue'
 
-let course: string="";
+const inputText = ref('')
 const querySearch = () => {
-
+  console.log(inputText)
 }
 
 
@@ -27,8 +27,7 @@ onMounted(() => {
 
 <style>
 .search {
-  padding: 20px;
-  text-align: center;
+  text-align: right;
   width: 100%;
 }
 
