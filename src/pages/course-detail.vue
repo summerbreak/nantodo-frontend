@@ -1,6 +1,6 @@
 <template>
-  <el-scrollbar max-height="1000px" style="margin-bottom: 0;margin-top: 0">
-    <el-row>
+<!--  <el-scrollbar max-height="1000px" style="margin-bottom: 0;margin-top: 0">-->
+  <el-row>
       <el-col :span="20" :offset="2">
         <el-card class="box-card">
           <el-container>
@@ -50,8 +50,7 @@
         <el-divider/>
       </el-col>
     </el-row>
-
-  </el-scrollbar>
+<!--  </el-scrollbar>-->
 </template>
 
 <script setup>

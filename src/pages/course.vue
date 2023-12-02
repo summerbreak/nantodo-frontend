@@ -26,7 +26,7 @@
     <el-scrollbar max-height="600px" style="margin-bottom: 0;margin-top: 0">
       <el-row class="outside">
         <el-col
-            v-for="(o, index) in 24"
+            v-for="(o, index) in 0"
             :key="o"
             :span="6"
             :offset="0"
