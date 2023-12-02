@@ -12,10 +12,7 @@
         <el-table-column prop="organName" width="400" />
         <el-table-column>
             <template v-slot="scope" #default>
-                <i @click="playSong(scope.row)" 
-                    :class="`bi bi-${scope.row.isPlaying ? 'pause' : 'play'}-circle song-opt`"></i>
-                <i class="bi bi-arrow-down-up song-opt handle-drag"></i>
-                <i @click="deleteSong(scope.row)" class="bi bi-trash song-opt"></i>
+                <i class="bi bi-arrow-down-up handle-drag"></i>
             </template>
         </el-table-column>
     </el-table>
