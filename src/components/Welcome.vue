@@ -1,5 +1,5 @@
 <template>
-    <el-carousel class="bg" :height="bg_height" interval="6000">
+    <el-carousel class="bg" :height="bg_height" :interval="6000">
         <el-carousel-item v-for="(pic, index) in bg_pics" :key="index">
             <img :src="pic" class="bg-img">
         </el-carousel-item>
@@ -48,7 +48,6 @@ const bg_height = ref('')
 
 onMounted(() => {
     bg_height.value = document.documentElement.clientHeight - 80 + 'px'
-    console.log('height', bg_height.value)
 })
 
 function handleLogin() {

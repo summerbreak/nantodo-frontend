@@ -6,12 +6,11 @@
         class="menu"
         mode="horizontal"
         router
-        @select="handleSelect"
       >
         <el-menu-item index="/" class="menu-item">首页</el-menu-item>
-        <el-menu-item index="group" class="menu-item">小组</el-menu-item>
-        <el-menu-item index="course" class="menu-item">课程</el-menu-item>
-        <el-menu-item index="discovery" class="menu-item">发现</el-menu-item>
+        <el-menu-item index="/group" class="menu-item">小组</el-menu-item>
+        <el-menu-item index="/course" class="menu-item">课程</el-menu-item>
+        <el-menu-item index="/discovery" class="menu-item">发现</el-menu-item>
       </el-menu>
       <div class="login" @click="handleLogin">
         <i class="bi bi-box-arrow-in-right"></i>
@@ -23,29 +22,27 @@
     </div>
     <div class="main">
       <!-- 如有需要，在自定义组件内可以继续写el-container/aside/main... -->
-      <router-view></router-view>
+      <keep-alive>
+        <router-view></router-view>
+      </keep-alive>
     </div>
   </div>
 </template>
 
 <script setup>
 import { useRouter } from 'vue-router'
-import { ref, onMounted } from 'vue'
+import { ref, watch } from 'vue'
 
 const router = useRouter()
 const activeIndex = ref('/')
 
-onMounted(() => {
-  console.log(router.currentRoute.value)
-})
+watch(() => router.currentRoute.value.path, (newValue, oldValue) => {
+  console.log(newValue)
+  activeIndex.value = newValue
+}, {immediate: true})
 
 function toIndex() {
   location.href = "/"
-}
-
-function handleSelect(index) {
-  console.log(index)
-  activeIndex.value = index
 }
 
 function handleLogin() {
