@@ -75,7 +75,7 @@ div {
 .main {
   /* margin-top: 80px; */
   padding-top: 80px;
-  height: calc(100% - 80px);
+  min-height: calc(100% - 80px);
   background-color: #FFFAF0;
   /* opacity: 1; */
   background-image: radial-gradient(#FFDAB9 0.6000000000000001px, #FFFAF0 0.6000000000000001px);
