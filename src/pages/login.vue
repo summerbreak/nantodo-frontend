@@ -2,35 +2,17 @@
     <div class="login-container">
         <div class="background-image"></div>
         <div class="login-box">
-            <h2>登陆</h2>
-            <!-- 添加你的登录表单 -->
-            <form @submit.prevent="login">
-                <!-- 登录表单的输入字段 -->
-                <input type="text" id="username" v-model="username" required>
-                <input type="password" id="password" v-model="password" required>
-
-                <!-- 登录按钮 -->
-                <button type="submit">Login</button>
-            </form>
-        </div>
-
-
-
-        <!-- <div class="login-body">
-            <div class="t-tab-top">登录 <span style="font-size: 14px;color:red;">（首次登录请点击下方忘记密码来设置初始密码）</span></div>
+            <div class="t-tab-top">登录 </div>
             <div class="container-fluid" style="padding-bottom: 24px;">
                 <div class="form-horizontal">
                     <div style="padding:32px 48px;">
                         <div class="form-group" style="margin-bottom: 4px;">
                             <input type="text" class="form-control form-bg" name="email"
-                                style="background-color: #f8fafc;height: 48px;" placeholder="请输入手机号码">
+                                style="background-color: #f8fafc;height: 48px;" placeholder="请输入账号">
                         </div>
                         <div class="form-group" style="margin-bottom: 10px;">
                             <input type="password" id="id_login_password" class="form-control form-bg margin-top-20"
                                 style="height: 48px;" name="password" placeholder="请输入密码">
-                            <div class="eyecon"><img id="showText" src="/public/assets/images/all/eye_b.png" alt=""
-                                    onclick="hideShowPsw()"></div>
-
                         </div>
                         <div class="form-group has-error" style="margin-bottom: 0;">
                             <p class="help-block" style="font-size: 12px; margin-top: 0">
@@ -47,9 +29,7 @@
                     </div>
                 </div>
             </div>
-        </div> -->
-
-
+        </div>
 
     </div>
 </template>
@@ -80,16 +60,17 @@ export default {
 
 .background-image {
     position: absolute;
-    top: 0;
+    top: 0px;
     left: 0;
     width: 100%;
-    height: 100%;
-    background: url('../assets/pic/lion.jpg') center/cover no-repeat;
+    height: calc(100% - 80px);
+    background: url('../assets/pic/autumn.jpg') center/cover no-repeat;
     z-index: -1;
     /* 将背景图片放到最底层 */
 }
 
 .login-box {
+    border-radius: 5px;
     position: absolute;
     top: 50%;
     left: 75%;
@@ -120,5 +101,16 @@ export default {
     color: #fff;
     border: none;
     cursor: pointer;
+}
+
+
+.t-tab-top {
+    font-size: 24px;
+    font-weight: 700;
+    color: #333;
+    text-align: center;
+    padding: 20px 0;
+    border-bottom: 1px solid #e5e5e5;
+    margin-bottom: 20px;
 }
 </style>
