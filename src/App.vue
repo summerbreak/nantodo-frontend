@@ -6,12 +6,11 @@
         class="menu"
         mode="horizontal"
         router
-        @select="handleSelect"
       >
         <el-menu-item index="/" class="menu-item">首页</el-menu-item>
-        <el-menu-item index="group" class="menu-item">小组</el-menu-item>
-        <el-menu-item index="course" class="menu-item">课程</el-menu-item>
-        <el-menu-item index="discovery" class="menu-item">发现</el-menu-item>
+        <el-menu-item index="/group" class="menu-item">小组</el-menu-item>
+        <el-menu-item index="/course" class="menu-item">课程</el-menu-item>
+        <el-menu-item index="/discovery" class="menu-item">发现</el-menu-item>
       </el-menu>
       <div class="login" @click="handleLogin">
         <i class="bi bi-box-arrow-in-right"></i>
@@ -23,29 +22,27 @@
     </div>
     <div class="main">
       <!-- 如有需要，在自定义组件内可以继续写el-container/aside/main... -->
-      <router-view></router-view>
+      <keep-alive>
+        <router-view></router-view>
+      </keep-alive>
     </div>
   </div>
 </template>
 
 <script setup>
 import { useRouter } from 'vue-router'
-import { ref, onMounted } from 'vue'
+import { ref, watch } from 'vue'
 
 const router = useRouter()
 const activeIndex = ref('/')
 
-onMounted(() => {
-  console.log(router.currentRoute.value)
-})
+watch(() => router.currentRoute.value.path, (newValue, oldValue) => {
+  console.log(newValue)
+  activeIndex.value = newValue
+}, {immediate: true})
 
 function toIndex() {
   location.href = "/"
-}
-
-function handleSelect(index) {
-  console.log(index)
-  activeIndex.value = index
 }
 
 function handleLogin() {
@@ -55,6 +52,12 @@ function handleLogin() {
 </script>
 
 <style scoped>
+div {
+  table-layout: fixed;
+  word-wrap: break-word;
+  overflow: hidden;
+}
+
 .container {
   height: 100%;
 }
@@ -72,7 +75,11 @@ function handleLogin() {
 .main {
   /* margin-top: 80px; */
   padding-top: 80px;
-  height: calc(100% - 80px);
+  min-height: calc(100% - 80px);
+  background-color: #FFFAF0;
+  /* opacity: 1; */
+  background-image: radial-gradient(#FFDAB9 0.6000000000000001px, #FFFAF0 0.6000000000000001px);
+  background-size: 12px 12px;
 }
 
 .login {
@@ -98,7 +105,7 @@ function handleLogin() {
   position: fixed;
   z-index: 20;
   top: 0;
-  left: 400px;
+  left: 10%;
   &:hover {
     cursor: pointer;
   }
@@ -121,4 +128,6 @@ function handleLogin() {
   --el-menu-hover-text-color: darkorange;
   --el-menu-hover-bg-color: oldlace;
 }
+
+
 </style>
