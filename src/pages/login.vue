@@ -2,8 +2,8 @@
     <div class="login-container">
         <div class="background-image"></div>
 
-        <div class="login-box">
-            <div class="t-tab-top">登 录</div>
+        <div class="login-box" v-if="!isRegistering">
+            <div class="t-tab-top">欢迎您使用南土豆</div>
             <div class="container-fluid" style="padding-bottom: 24px;">
                 <div class="form">
                     <div style="padding:15px 5px;">
@@ -18,8 +18,8 @@
                                 录</el-button>
                         </div>
                         <div class="form-group margin-bottom-15 margin-top-35">
-                            <a target="_blank" style="color:#3fb5df;float:left;margin-left: 20px;">
-                                <span style="color: black;" @click="register">立即注册</span>
+                            <a target="_blank" style="color:#3fb5df;float:left;margin-left: 20px;" @click="showRegister">
+                                <span style="color: black;">立即注册</span>
                             </a>
                             <a target="_blank" style="color:#3fb5df;float:right;margin-right:29px;">
                                 <span style="color: black;">忘记密码</span>
@@ -29,13 +29,21 @@
                 </div>
             </div>
         </div>
-
+        <Register v-else />
     </div>
 </template>
 
 <script>
+import Register from '../components/Register.vue'
 import { ref } from 'vue'
 export default {
+    data() {
+        return {
+            isRegistering: false,
+            account: '',
+            password: ''
+        }
+    },
     setup() {
         const account = ref('')
         const password = ref('')
@@ -49,7 +57,13 @@ export default {
             // 在这里处理登录逻辑
             console.log('Logging in...', this.account, this.password);
         },
+        showRegister() {
+            this.isRegistering = true
+        },
     },
+    components: {
+        Register
+    }
 };
 </script> 
 
@@ -80,7 +94,7 @@ export default {
     left: 0;
     width: 100%;
     height: calc(100% - 80px);
-    background: url('../assets/pic/autumn.jpg') center/cover no-repeat;
+    background: url('../assets/pic/Autumn.jpg') center/cover no-repeat;
     z-index: 0;
     /* 将背景图片放到最底层 */
 }
