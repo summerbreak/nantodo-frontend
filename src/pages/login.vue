@@ -32,7 +32,6 @@
 
     </div>
 </template>
-  
 
 <script>
 import { ref } from 'vue'
@@ -45,16 +44,10 @@ export default {
             password,
         }
     },
-    data() {
-        return {
-            username: '',
-            password: '',
-        };
-    },
     methods: {
         login() {
             // 在这里处理登录逻辑
-            console.log('Logging in...', this.username, this.password);
+            console.log('Logging in...', this.account, this.password);
         },
     },
 };
