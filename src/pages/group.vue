@@ -134,7 +134,7 @@ function toGroup(id) {
     width: calc(100% - 20px);
     border-radius: 3px;
     margin: 10px;
-    margin-top: 50px;
+    margin-top: 10px;
     padding-top: 15px;
     background-color: #fffffa;
     box-shadow: var(--el-box-shadow-light);

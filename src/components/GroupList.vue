@@ -3,7 +3,7 @@
         <div>还没有小组哦，去 <router-link to="/course">课程</router-link> 或 <router-link to="/discovery">发现</router-link> 看看吧</div>
     </el-empty>
     <el-table v-else :data="currentGroupList" class="table" id="groupTable" :cell-style="cellStyle" :show-header="false"
-        :row-key="(row) => row.id">
+        :row-key="(row) => row.id" :row-style="{'background-color': '#fffffa'}">
         <el-table-column width="80">
             <template v-slot="scope" #default>
                 <i :class="`bi bi-${iconMap[scope.row.type]}`"></i>
@@ -105,6 +105,7 @@ function cellStyle({row, column, rowIndex, columnIndex}) {
     height: 100%;
     width: 100%;
     box-shadow: var(--el-box-shadow-light);
+    background-color: #fffffa;
     /* font-family: 'Microsoft YaHei', sans-serif; */
 }
 

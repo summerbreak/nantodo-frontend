@@ -65,15 +65,13 @@
       </div>
       <div style="text-align: center; margin-top: 10px; width: 10%;">
         <h3>关注我们</h3>
-        <div style="color: gray;">常见问题</div>
-        <div style="color: gray;">意见反馈</div>
-        <div style="color: gray;">联系我们</div>
-        <div style="color: gray;">法律条款</div>
+        <i class="bi bi-wechat" style="font-size: 24px; margin-right: 5px;"></i>
+        <i class="bi bi-sina-weibo" style="font-size: 24px; margin-left: 5px;"></i>
       </div>
       <div style="text-align: center; margin-top: 10px; width: 10%;">
         <h3>友情链接</h3>
-        <div style="color: gray;">南京大学</div>
-        <div style="color: gray;">教学立方</div>
+        <div style="color: gray;"><a href="https://www.nju.edu.cn" style="color: gray;">南京大学</a></div>
+        <div style="color: gray;"><a href="https://teaching.applysquare.com" style="color: gray;">教学立方</a></div>
       </div>
     </div>
     <div class="bottom">
