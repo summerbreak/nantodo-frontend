@@ -5,45 +5,74 @@
                 <div class="headline">我的小组</div>
                 <el-divider class="divider"></el-divider>
                 <div class="aside-list">
-                    <div :class="`aside-list-item ${isJoinPage ? 'aside-list-item-active' : ''}`" @click="toJoin">我加入的</div>
-                    <div :class="`aside-list-item ${!isJoinPage ? 'aside-list-item-active' : ''}`" @click="toManage">我管理的</div>
+                    <div :class="`aside-list-item ${pageIndex === 1 ? 'aside-list-item-active' : ''}`" @click="toJoin">我加入的</div>
+                    <div :class="`aside-list-item ${pageIndex === 2 ? 'aside-list-item-active' : ''}`" @click="toManage">我管理的</div>
                 </div>
             </div>
             <div class="latest">
                 <div class="headline">最近浏览</div>
                 <el-divider class="divider"></el-divider>
                 <div class="aside-list">
-                    <div :class="`aside-list-item `" @click="toJoin">人机交互小组</div>
-                    <div :class="`aside-list-item `" @click="toJoin">DevOps小组</div>
-                    <div :class="`aside-list-item `" @click="toJoin">移动互联网小组</div>
-                    <div :class="`aside-list-item `" @click="toJoin">操作系统小组</div>
-                    <div :class="`aside-list-item `" @click="toJoin">编译原理小组</div>
+                    <div :class="`aside-list-item `" @click="toGroup('rjjh')">人机交互小组</div>
+                    <div :class="`aside-list-item `" @click="toGroup()">DevOps小组</div>
+                    <div :class="`aside-list-item `" @click="toGroup()">移动互联网小组</div>
+                    <div :class="`aside-list-item `" @click="toGroup()">操作系统小组</div>
+                    <div :class="`aside-list-item `" @click="toGroup()">编译原理小组</div>
                 </div>
             </div>
         </div>
         <div class="group-main">
-            <!-- <keep-alive>
-                <component :is="compList[compListIndex]"></component>
-            </keep-alive> -->
-            <GroupList></GroupList>
+            <GroupList v-show="!showDetail" :is-admin="pageIndex === 2" @to-detail="toGroup"></GroupList>
+            <GroupDetail v-show="showDetail" :group-id="groupId"></GroupDetail>
         </div>
     </div>
 </template>
 
 <script setup>
-import { ref } from 'vue'
-import GroupList from '../components/GroupList.vue'
+import { ref, onActivated, watch } from 'vue'
+import { useRoute, useRouter, onBeforeRouteUpdate } from 'vue-router'
 
-const isJoinPage = ref(true)
-const compList = [GroupList]
-const compListIndex = ref(0)
+const route = useRoute()
+const router = useRouter()
+
+const pageIndex = ref(1)
+const showDetail = ref(false)
+const groupId = ref('')
+
+onBeforeRouteUpdate(to => {
+    if ("id" in to.query) {
+        groupId.value = to.query.id
+        showDetail.value = true
+    }
+})
+
+onActivated(() => {
+    if ("id" in route.query) {
+        groupId.value = route.query.id
+        showDetail.value = true
+    }
+})
 
 function toJoin() {
-    isJoinPage.value = true
+    pageIndex.value = 1
+    showDetail.value = false
 }
 
 function toManage() {
-    isJoinPage.value = false
+    pageIndex.value = 2
+    showDetail.value = false
+}
+
+function toGroup(id) {
+    pageIndex.value = 0
+    showDetail.value = true
+    groupId.value = id
+    router.push({
+        path: "/group",
+        query: {
+            id
+        }
+    })
 }
 
 </script>
@@ -96,7 +125,7 @@ function toManage() {
     border-radius: 3px;
     margin: 10px;
     margin-top: 30px;
-    background-color: white;
+    background-color: #fffffa;
     padding-top: 15px;
     box-shadow: var(--el-box-shadow-light);
 }
@@ -107,7 +136,7 @@ function toManage() {
     margin: 10px;
     margin-top: 50px;
     padding-top: 15px;
-    background-color: white;
+    background-color: #fffffa;
     box-shadow: var(--el-box-shadow-light);
 }
 
@@ -126,10 +155,9 @@ function toManage() {
 }
 
 .group-main {
-    /* background-color: #bbb; */
-    height: calc(100% - 60px);
+    height: calc(85vh);
     margin-top: 30px;
-    margin-bottom: 30px;
+    /* margin-bottom: 30px; */
     width: 850px;
     border-radius: 3px;
 }
