@@ -6,11 +6,13 @@ import routes from '~pages'
 import ElementPlus from 'element-plus'
 import { setupCalendar} from 'v-calendar'
 
+import 'element-plus/dist/index.css'
+import { createPinia } from 'pinia'
 
 const app = createApp(App)
 const router = createRouter({
     history: createWebHistory(),
     routes,
 })
-app.use(router).use(ElementPlus).use(setupCalendar, {})
+app.use(router).use(ElementPlus).use(setupCalendar, {}).use(createPinia())
 app.mount('#app')
