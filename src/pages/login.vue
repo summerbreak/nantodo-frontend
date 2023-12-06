@@ -36,30 +36,43 @@
 <script>
 import Register from '../components/Register.vue'
 import { ref } from 'vue'
+import axios from 'axios'
 export default {
-    data() {
-        return {
-            isRegistering: false,
-            account: '',
-            password: ''
-        }
-    },
     setup() {
+        const isRegistering = ref(false)
         const account = ref('')
         const password = ref('')
+
+        const login = async () => {
+            try {
+                const response = await axios.get('/login', {
+                    params: {
+                        phone: account.value,
+                        password: password.value
+                    }
+                })
+
+                if (response.status === 200) {
+                    console.log('登录成功', response.data)
+                } else {
+                    console.log('登录失败', response.status)
+                }
+            } catch (error) {
+                console.error('请求失败', error)
+            }
+        }
+
+        const showRegister = () => {
+            isRegistering.value = true
+        }
+
         return {
+            isRegistering,
             account,
             password,
+            login,
+            showRegister
         }
-    },
-    methods: {
-        login() {
-            // 在这里处理登录逻辑
-            console.log('Logging in...', this.account, this.password);
-        },
-        showRegister() {
-            this.isRegistering = true
-        },
     },
     components: {
         Register
@@ -73,7 +86,7 @@ export default {
     border-radius: 8px;
     /* border: 1px solid #db8916; */
     background-color: #ffffff;
-    color: #db8916;
+    color: rgb(89, 94, 94);
     font-size: 16px;
     font-weight: 400;
     font-style: normal;
@@ -108,7 +121,7 @@ export default {
     transform: translate(-50%, -50%);
     width: 325px;
     padding: 30px;
-    background: rgba(255, 255, 255, 0.8);
+    background: rgba(255, 255, 255, 0.9);
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.6);
 }
 
