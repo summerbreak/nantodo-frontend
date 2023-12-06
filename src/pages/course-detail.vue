@@ -42,6 +42,9 @@
               <el-button :icon="Position" type="warning" plain @click="createTeam" size="large" v-else>
                 查看我的小队
               </el-button>
+              <el-button :icon="DocumentDelete" type="danger" plain @click="dropOut" size="large" style="margin-left: 20px">
+                退出课程
+              </el-button>
             </div>
           </el-main>
         </el-container>
@@ -58,7 +61,7 @@
     <el-col :span="20" :offset="2">
       <el-tabs type="border-card" class="tabs" style="border-radius: 10px;min-height: 300px;margin-bottom: 20px">
         <el-tab-pane label="任务">
-          Route
+          <homework/>
         </el-tab-pane>
         <el-tab-pane label="通知">
           <el-empty description="暂无通知"/>
@@ -96,9 +99,10 @@
 
 <script setup>
 import {ref, onMounted} from 'vue'
-import {Plus, Position, Connection, Calendar, Search} from '@element-plus/icons-vue'
+import {Plus, Position, Connection, DocumentDelete, Search} from '@element-plus/icons-vue'
 import CourseTeam from "../components/course-team.vue";
 import CourseGrid from "../components/course-grid.vue";
+import Homework from "../components/homework.vue";
 
 const props = defineProps(['url', 'name', 'teacher', 'index'])
 const url = "https://picdm.sunbangyan.cn/2023/12/01/dcb092f15f5649cc20185ce03e779f90.jpeg"
@@ -115,6 +119,10 @@ let findTeam = () => {
 }
 
 let queryTeam = () => {
+
+}
+
+let dropOut = () => {
 
 }
 
