@@ -5,14 +5,15 @@
         <el-text tag="ins" class="title">我的课程</el-text>
       </el-col>
     </el-row>
+  <invitation-button/>
     <el-row class="outside">
       <el-col
-          v-for="(o, index) in 4"
-          :key="o"
+          v-for="(o, index) in allCourses"
+          :key="index"
           :span="6"
           :offset="0"
       >
-        <course-grid teacher="67" name="软件工程与计算"/>
+        <course-grid :courseInfo="o"/>
       </el-col>
     </el-row>
     <el-row style="margin-right: 100px;margin-bottom: 10px">
@@ -26,22 +27,39 @@
     <el-scrollbar max-height="600px" style="margin-bottom: 0;margin-top: 0">
       <el-row class="outside">
         <el-col
-            v-for="(o, index) in 5"
-            :key="o"
+            v-for="(o, index) in allCourses"
+            :key="index"
             :span="6"
             :offset="0"
         >
-          <course-grid teacher="67" name="软件工程与计算"/>
+          <course-grid :courseInfo="o"/>
         </el-col>
       </el-row>
     </el-scrollbar>
 <!--  </el-scrollbar>-->
 </template>
 <script setup>
+import {ref,onActivated} from "vue";
 import CourseSearch from "../components/course-search.vue";
 import CourseGrid from "../components/course-grid.vue";
+import axios from "axios";
+import InvitationButton from "../components/invitation-button.vue";
+
+const allCourses=ref([])
 
 
+onActivated(async () => {
+  await axios.get('http://localhost:11300/course/allCourse').then(
+      res => {
+        allCourses.value = []
+        for (let i=0;i<res.data.length;i++) {
+          console.log(res.data[i])
+          allCourses.value.push(res.data[i])
+        }
+      }
+  )
+  console.log(allCourses.value)
+})
 </script>
 <style scoped>
 .title {
@@ -55,7 +73,7 @@ import CourseGrid from "../components/course-grid.vue";
 }
 
 .outside {
-  margin: 0 100px 5px;
+  margin: 0 140px 5px;
   padding: 0;
 }
 </style>

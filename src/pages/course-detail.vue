@@ -6,23 +6,23 @@
         <el-container>
           <el-aside width="40%">
             <el-image
-                :src="url"
+                :src="courseInfo.url"
                 class="image"
                 :fit="'cover'"
             />
           </el-aside>
           <el-main style="padding: 5px;margin-top: 0;margin-left: 10px">
-            <el-text line-clamp="1" class="text">{{ name }}</el-text>
+            <el-text line-clamp="1" class="text">{{ courseInfo.name }}</el-text>
             <el-card shadow="never"
                      class="description">
-              <el-text size="large">教师：67</el-text>
+              <el-text size="large">教师：{{ courseInfo.teacher }}</el-text>
               <br/>
               <el-row>
                 <el-col :span="5">
                   <el-text size="large">学期：2023秋</el-text>
                 </el-col>
                 <el-col :span="8">
-                  <el-text size="large">授课年级：2023</el-text>
+                  <el-text size="large">授课年级：{{ courseInfo.grade }}</el-text>
                 </el-col>
               </el-row>
               <el-text size="large" style="color: #82CD47">小队数目：60（20支小队正在招募中）</el-text>
@@ -42,7 +42,8 @@
               <el-button :icon="Position" type="warning" plain @click="createTeam" size="large" v-else>
                 查看我的小队
               </el-button>
-              <el-button :icon="DocumentDelete" type="danger" plain @click="dropOut" size="large" style="margin-left: 20px">
+              <el-button :icon="DocumentDelete" type="danger" plain @click="dropOut" size="large"
+                         style="margin-left: 20px">
                 退出课程
               </el-button>
             </div>
@@ -78,7 +79,8 @@
               />
             </el-col>
             <el-col :span="4">
-              <el-check-tag :checked="ifPossible" @change="choosePossible" class="possible">仅看可加入的队伍</el-check-tag>
+              <el-check-tag :checked="ifPossible" @change="choosePossible" class="possible">仅看可加入的队伍
+              </el-check-tag>
             </el-col>
           </el-row>
           <el-row class="outside">
@@ -98,19 +100,30 @@
 </template>
 
 <script setup>
-import {ref, onMounted} from 'vue'
+import {ref, onActivated} from 'vue'
 import {Plus, Position, Connection, DocumentDelete, Search} from '@element-plus/icons-vue'
 import CourseTeam from "../components/course-team.vue";
-import CourseGrid from "../components/course-grid.vue";
 import Homework from "../components/homework.vue";
+import {useRouter, useRoute} from "vue-router";
+import axios from "axios";
 
-const props = defineProps(['url', 'name', 'teacher', 'index'])
-const url = "https://picdm.sunbangyan.cn/2023/12/01/dcb092f15f5649cc20185ce03e779f90.jpeg"
-const name = "软件工程与计算"
-const activeDescription = ref(['1'])
+const router = useRouter()
+const route = useRoute()
+
+const props = defineProps(['courseId'])
+const courseInfo = ref({})
 const inputText = ref('')
 const hasTeam = ref(true)
 const ifPossible = ref(false)
+onActivated(async () => {
+  let id = route.query.id
+  await axios.get(`http://localhost:11300/course?id=${id}`).then(res => {
+    courseInfo.value = res.data
+  }).catch(error => {
+    alert(error)
+  })
+  console.log(courseInfo.value)
+})
 let createTeam = () => {
 
 }
