@@ -12,7 +12,7 @@ const router = useRouter()
 
 function toGroup1() {
     router.push({
-        path: '/group',
+        path: '/course',
         query: {
             id: 'xxxxxx'
         }
