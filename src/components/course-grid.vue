@@ -18,11 +18,17 @@
       </div>
       <el-row class="grid-bottom">
         <el-col :span="8" style="padding-left: 10px">
-          <el-text class="mx-1" style="font-size: 13px;padding-left: 2px" type="success">
+          <el-text class="mx-1" style="font-size: 13px;padding-left: 2px" type="success" v-if="props.courseInfo.open">
             <el-icon size="13px">
               <Check/>
             </el-icon>
             开放加入
+          </el-text>
+          <el-text class="mx-1" style="font-size: 13px;padding-left: 2px" type="danger" v-else>
+            <el-icon size="13px">
+              <Close/>
+            </el-icon>
+            课程关闭
           </el-text>
         </el-col>
         <el-col :span="6" :offset="10" style="text-align: right;padding-right: 10px">
@@ -34,24 +40,17 @@
 </template>
 
 <script setup>
-import {onBeforeRouteUpdate, useRouter} from 'vue-router'
-import {Check, Avatar} from '@element-plus/icons-vue'
-import {ref, onMounted} from 'vue'
+import {useRouter} from 'vue-router'
+import {Check, Avatar, Close} from '@element-plus/icons-vue'
 
-
-const props = defineProps(['courseInfo'])
-const url = "https://picdm.sunbangyan.cn/2023/12/01/dcb092f15f5649cc20185ce03e779f90.jpeg"
+const props = defineProps(['courseInfo', 'selected'])
 const router = useRouter()
 
-onMounted(() => {
-  // console.log(router.currentRoute.value)
-})
 
 function gotoDetails() {
-  router.push({path: "/course-detail", query: {id: props.courseInfo.id}})
+  console.log("course grid "+props.selected)
+  router.push({path: "/course-detail", query: {id: props.courseInfo.id, selected: props.selected}})
 }
-
-
 </script>
 
 

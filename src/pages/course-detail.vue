@@ -25,26 +25,12 @@
                   <el-text size="large">授课年级：{{ courseInfo.grade }}</el-text>
                 </el-col>
               </el-row>
-              <el-text size="large" style="color: #82CD47">小队数目：60（20支小队正在招募中）</el-text>
+              <el-text size="large">小队数目：{{ teamNumber }}</el-text>
             </el-card>
             <div style="margin-top: 20px">
-              <el-button-group size="large" v-if="hasTeam">
-                <el-button :icon="Plus" type="warning" plain @click="createTeam">
-                  创建我的小队
-                </el-button>
-                <el-button type="warning" plain @click="findTeam">
-                  通过邀请码加入小队
-                  <el-icon class="el-icon--right">
-                    <Connection/>
-                  </el-icon>
-                </el-button>
-              </el-button-group>
-              <el-button :icon="Position" type="warning" plain @click="createTeam" size="large" v-else>
-                查看我的小队
-              </el-button>
-              <el-button :icon="DocumentDelete" type="danger" plain @click="dropOut" size="large"
-                         style="margin-left: 20px">
-                退出课程
+              <course-button-group :has-team="hasTeam" :is-open="courseInfo.open" v-show="selected"/>
+              <el-button type="success" size="large" plain v-show="selected===false">
+                加入课程
               </el-button>
             </div>
           </el-main>
@@ -57,7 +43,7 @@
       <el-divider/>
     </el-col>
   </el-row>
-  <!--  </el-scrollbar>-->
+  <!--  详情分页 -->
   <el-row>
     <el-col :span="20" :offset="2">
       <el-tabs type="border-card" class="tabs" style="border-radius: 10px;min-height: 300px;margin-bottom: 20px">
@@ -101,35 +87,36 @@
 
 <script setup>
 import {ref, onActivated} from 'vue'
-import {Plus, Position, Connection, DocumentDelete, Search} from '@element-plus/icons-vue'
+import {Search} from '@element-plus/icons-vue'
 import CourseTeam from "../components/course-team.vue";
 import Homework from "../components/homework.vue";
 import {useRouter, useRoute} from "vue-router";
 import axios from "axios";
+import CourseButtonGroup from "../components/course-button-group.vue";
 
 const router = useRouter()
 const route = useRoute()
 
-const props = defineProps(['courseId'])
+const selected = ref(true)
 const courseInfo = ref({})
 const inputText = ref('')
-const hasTeam = ref(true)
+const hasTeam = ref(false)
+const teamNumber = ref(-1)
 const ifPossible = ref(false)
 onActivated(async () => {
+  document.documentElement.scrollTop = 0;
   let id = route.query.id
+  selected.value = route.query.selected
   await axios.get(`http://localhost:11300/course?id=${id}`).then(res => {
     courseInfo.value = res.data
   }).catch(error => {
     alert(error)
   })
+  teamNumber.value = courseInfo.value.groups.length
   console.log(courseInfo.value)
+  console.log(selected.value)
 })
-let createTeam = () => {
 
-}
-let findTeam = () => {
-
-}
 
 let queryTeam = () => {
 
@@ -139,6 +126,9 @@ let dropOut = () => {
 
 }
 
+let getTeamId = () => {
+
+}
 let choosePossible = () => {
   ifPossible.value = !ifPossible.value
 }
