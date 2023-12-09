@@ -28,9 +28,42 @@
               <el-text size="large">小队数目：{{ teamNumber }}</el-text>
             </el-card>
             <div style="margin-top: 20px">
-              <course-button-group :has-team="hasTeam" :is-open="courseInfo.open" v-show="selected"/>
-              <el-button type="success" size="large" plain v-show="selected===false">
-                加入课程
+              <div v-if="courseInfo.open">
+
+                <div v-if="selected">
+                  <el-button-group size="large" v-if="hasTeam">
+                    <el-button :icon="Position" type="warning" plain @click="createTeam">
+                      查看我的小队
+                    </el-button>
+                    <el-button type="warning" plain @click="getTeamId">
+                      复制邀请码
+                      <el-icon class="el-icon--right">
+                        <Connection/>
+                      </el-icon>
+                    </el-button>
+                  </el-button-group>
+                  <el-button-group size="large" v-else>
+                    <el-button :icon="Plus" type="warning" plain @click="createTeam">
+                      创建我的小队
+                    </el-button>
+                    <el-button type="warning" plain @click="findTeam">
+                      通过邀请码加入小队
+                      <el-icon class="el-icon--right">
+                        <Connection/>
+                      </el-icon>
+                    </el-button>
+                  </el-button-group>
+                  <el-button :icon="DocumentDelete" type="danger" plain @click="dropOut" size="large"
+                             style="margin-left: 20px">
+                    退出课程
+                  </el-button>
+                </div>
+                <el-button :icon="Pointer" type="success" size="large" plain v-else>
+                  加入课程
+                </el-button>
+              </div>
+              <el-button :icon="Lock" type="danger" size="large" plain disabled v-else>
+                课程已关闭
               </el-button>
             </div>
           </el-main>
@@ -87,12 +120,11 @@
 
 <script setup>
 import {ref, onActivated} from 'vue'
-import {Search} from '@element-plus/icons-vue'
+import {Connection, DocumentDelete, Lock, Plus, Position, Search,Pointer} from '@element-plus/icons-vue'
 import CourseTeam from "../components/course-team.vue";
 import Homework from "../components/homework.vue";
 import {useRouter, useRoute} from "vue-router";
 import axios from "axios";
-import CourseButtonGroup from "../components/course-button-group.vue";
 
 const router = useRouter()
 const route = useRoute()
@@ -106,7 +138,7 @@ const ifPossible = ref(false)
 onActivated(async () => {
   document.documentElement.scrollTop = 0;
   let id = route.query.id
-  selected.value = route.query.selected
+  selected.value = route.query.selected == 'true'
   await axios.get(`http://localhost:11300/course?id=${id}`).then(res => {
     courseInfo.value = res.data
   }).catch(error => {
@@ -131,6 +163,13 @@ let getTeamId = () => {
 }
 let choosePossible = () => {
   ifPossible.value = !ifPossible.value
+}
+
+let createTeam = () => {
+
+}
+let findTeam = () => {
+
 }
 </script>
 
