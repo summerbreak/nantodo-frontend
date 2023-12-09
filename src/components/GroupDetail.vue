@@ -68,7 +68,7 @@
                                     style="float: right;">开启新一轮任务</el-button>
                             </template>
                         </el-popconfirm>
-                        <el-button :disabled="!isAllFinished" type="success"
+                        <el-button :disabled="!isAllFinished" type="success" @click="toCourse"
                             style="float: right;margin-right: 10px;">交作业</el-button>
                     </div>
                     <el-table :data="taskInfo" :row-style="rowStyle">
@@ -100,17 +100,16 @@
                             </template>
                         </el-table-column>
                         <el-table-column label="操作" align="center">
-                            <template #default="{ row }">
+                            <template #default="{ row, $index }">
                                 <div
                                     style="display: flex; justify-content: space-evenly;padding-left: 20px;padding-right: 20px;">
-                                    <el-tooltip placement="top" content="编辑任务" @click="editTask(row.id)">
-                                        <el-icon v-show="isAdmin" size="24" class="click-icon">
+                                    <el-tooltip placement="top" content="编辑任务">
+                                        <el-icon v-show="isAdmin" size="24" class="click-icon" @click="editTask($index)">
                                             <Edit />
                                         </el-icon>
                                     </el-tooltip>
                                     <el-tooltip placement="top" :content="row.done ? '取消完成' : '强制完成'">
-                                        <el-icon v-show="isAdmin" size="24" class="click-icon"
-                                            @click="changeStatus(row.id)">
+                                        <el-icon v-show="isAdmin" size="24" class="click-icon" @click="changeStatus(row.id)">
                                             <CircleCheck v-show="!row.done" />
                                             <CircleClose v-show="row.done" />
                                         </el-icon>
@@ -139,7 +138,7 @@
                     <el-table :data="memberInfo" :row-style="rowStyle">
                         <el-table-column width="100" align="center">
                             <template #default="{ row }">
-                                <el-avatar :src="`https://picsum.photos/seed/${row.id}/100/100`" :size="40" />
+                                <el-avatar :src="row.avatarUrl" :size="40" />
                             </template>
                         </el-table-column>
                         <el-table-column prop="name" label="姓名" width="100" />
@@ -189,13 +188,13 @@
             </el-tabs>
         </div>
     </div>
-    <el-dialog v-model="createTask" title="创建任务" width="40%">
-        <TaskDetail :users="memberInfo" @close-form="closeForm"></TaskDetail>
+    <el-dialog v-model="createTask" :title="editingTaskIndex >= 0 ? '编辑任务':'创建任务'" width="40%" :before-close="resetIndex">
+        <TaskDetail :users="memberInfo" :task="editingTaskIndex >= 0 ? taskInfo[editingTaskIndex] : null" @close-form="closeForm"></TaskDetail>
     </el-dialog>
 </template>
 
 <script setup>
-import { ref, reactive, computed, onMounted } from 'vue'
+import { ref, reactive, computed, onMounted, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
 import { useUserStore } from '../stores/user'
 import { CirclePlus, ArrowLeft, Edit, Delete, CircleCheck, CircleClose, Check, Close } from '@element-plus/icons-vue';
@@ -209,6 +208,7 @@ const showRandomWarning = ref(false)
 const taskStatusText = ['未完成', '已完成', '已过期']
 const taskStatusColor = ['gray', '#00CD00', 'red']
 const createTask = ref(false)
+const editingTaskIndex = ref(-1)
 
 onMounted(() => {
 })
@@ -222,7 +222,8 @@ const taskProgress = computed(() => {
 })
 
 const urgentNum = computed(() => {
-    return taskInfo.filter(task => !task.done).length
+    // 计算已过期的任务数以及当前时间与截止时间相差小于3天的任务数
+    return taskInfo.filter(task => isUrgent(task)).length
 })
 
 const urgentColor = computed(() => {
@@ -251,14 +252,15 @@ const groupInfo = reactive({
     leaderId: '111',
     organName: '人机交互设计',
     type: 'course',
-    description: '欢迎大家加入我们小组，QQ群坚持中国特色社会主义道路，坚持马克思列宁主义，坚持人民民主专政'
+    description: '欢迎大家加入我们小组，QQ群坚持中国特色社会主义道路，坚持马克思列宁主义，坚持人民民主专政',
+    courseId: '1141514'
 })
 
 const memberInfo = reactive([
-    { id: '111', name: '张宏鑫', studentNumber: '211250167', phone: '11111111111', email: '123@321.com', grade: '大四' },
-    { id: '222', name: '周豪', studentNumber: '211250167', phone: '11111111111', email: '123@321.com', grade: '大四' },
-    { id: '333', name: '胡书毓', studentNumber: '211250167', phone: '11111111111', email: '123@321.com', grade: '大四' },
-    { id: '444', name: '唐扬', studentNumber: '211250167', phone: '11111111111', email: '123@321.com', grade: '大四' },
+    { id: '111', name: '张宏鑫', studentNumber: '211250167', phone: '11111111111', email: '123@321.com', grade: '大四', avatarUrl: 'https://picsum.photos/seed/111/100/100' },
+    { id: '222', name: '周豪', studentNumber: '211250167', phone: '11111111111', email: '123@321.com', grade: '大四' , avatarUrl: 'https://picsum.photos/seed/222/100/100' },
+    { id: '333', name: '胡书毓', studentNumber: '211250167', phone: '11111111111', email: '123@321.com', grade: '大四' , avatarUrl: 'https://picsum.photos/seed/333/100/100' },
+    { id: '444', name: '唐扬', studentNumber: '211250167', phone: '11111111111', email: '123@321.com', grade: '大四' , avatarUrl: 'https://picsum.photos/seed/444/100/100' },
 ])
 
 const taskInfo = reactive([
@@ -294,6 +296,12 @@ function progressColor(percentage) {
     }
 }
 
+function isUrgent(task) {
+    const now = new Date()
+    const deadline = new Date(task.deadline)
+    return now > deadline || deadline - now < 3 * 24 * 60 * 60 * 1000
+}
+
 function taskStatus(task) {
     if (task.done) {
         return 1
@@ -315,7 +323,11 @@ function memberName(id) {
 }
 
 function rowStyle({ row, rowIndex }) {
-    return { height: '70px' }
+    let style = { height: '70px' }
+    if (isUrgent(row)) {
+        style['background-color'] = '#ffe6e6'
+    }
+    return style
 }
 
 function backToGroup() {
@@ -334,7 +346,7 @@ function toCourse() {
     router.push({
         path: '/course',
         query: {
-            id: groupInfo.id
+            id: groupInfo.courseId
         }
     })
 }
@@ -360,8 +372,17 @@ function assignTaskRandomly() {
     ElMessage.success('任务已随机分配')
 }
 
-function editTask(id) {
-    console.log('edit task', id)
+function editTask(index) {
+    console.log('edit task', index)
+    editingTaskIndex.value = index
+    // nextTick(() => {
+        createTask.value = true
+    // })
+}
+
+function resetIndex(done) {
+    editingTaskIndex.value = -1
+    done()
 }
 
 function changeStatus(id) {
@@ -529,6 +550,8 @@ function refuseApp(app) {
 }
 </style>
 
-<style>.detail-tab>.el-tabs__header {
+<style>
+.detail-tab>.el-tabs__header {
     --el-color-primary: coral;
-}</style>
+}
+</style>

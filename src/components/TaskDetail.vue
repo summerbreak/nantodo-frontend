@@ -24,13 +24,15 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted } from 'vue'
+import { ref, reactive, onMounted, watch } from 'vue'
 import axios from 'axios';
 
 const props = defineProps(['users', 'task'])
 const emit = defineEmits(['closeForm'])
 
+
 const formRef = ref()
+const editing = ref(false)
 const task = reactive({
     title: '',
     content: '',
@@ -55,12 +57,28 @@ const rules = {
 
 
 onMounted(() => {
-    console.log('mounted')
     if (props.task) {
         task.title = props.task.title
         task.content = props.task.content
         task.deadline = props.task.deadline
         task.userId = props.task.userId
+        editing.value = true
+    }
+})
+
+watch(() => props.task, (newVal) => {
+    if (newVal) {
+        task.title = newVal.title
+        task.content = newVal.content
+        task.deadline = newVal.deadline
+        task.userId = newVal.userId
+        editing.value = true
+    } else {
+        task.title = ''
+        task.content = ''
+        task.deadline = ''
+        task.userId = ''
+        editing.value = false
     }
 })
 
@@ -69,16 +87,18 @@ function onlyFuture(time) {
 }
 
 async function submitForm() {
-    // console.log('form', formRef)
+    console.log('editing', editing.value)
     await formRef.value.validate((valid) => {
         if (valid) {
-            task.releaseTime = new Date()
-            axios.post('http://localhost:8080/task', task)
-                .then(res => {
-                    console.log(res)
-                }, err => {
-                    console.log(err)
-                })
+            if (editing.value) {
+                task.releaseTime = new Date()
+                axios.post('http://localhost:8080/task', task)
+                    .then(res => {
+                        console.log(res)
+                    }, err => {
+                        console.log(err)
+                    })
+            }
         }
     })
 }
