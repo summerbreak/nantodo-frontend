@@ -46,7 +46,9 @@ onBeforeRouteUpdate(to => {
         pageIndex.value = 0
     } else {
         showDetail.value = false
-        pageIndex.value = 1
+        if (pageIndex.value === 0) {
+            pageIndex.value = 1
+        }
     }
 })
 

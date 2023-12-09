@@ -116,7 +116,7 @@ const user = reactive({
 
 const messageList = reactive([
   {id: 'qwee', content: '您收到来自“人机交互小组”布置的任务', type: 'primary', timestamp: '2023-09-16 18:38'},
-  {id: 'dzfs', content: '您申请加入小组“操作系统小组”被拒绝', type: 'warning', timestamp: '2023-09-16 14:43'},
+  {id: 'dzfs', content: '您申请加入小组“操作系统小组”被拒绝', type: 'danger', timestamp: '2023-09-16 14:43'},
   {id: 'xsdf', content: '您已成功加入小组“人机交互小组”', type: 'success', timestamp: '2023-09-15 20:02'},
   {id: 'dsfs', content: '您已成功加入课程“人机交互系统”', type: 'success', timestamp: '2023-09-15 10:46'}
 ])
