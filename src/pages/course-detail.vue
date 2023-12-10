@@ -6,44 +6,64 @@
         <el-container>
           <el-aside width="40%">
             <el-image
-                :src="url"
+                :src="courseInfo.url"
                 class="image"
                 :fit="'cover'"
             />
           </el-aside>
           <el-main style="padding: 5px;margin-top: 0;margin-left: 10px">
-            <el-text line-clamp="1" class="text">{{ name }}</el-text>
+            <el-text line-clamp="1" class="text">{{ courseInfo.name }}</el-text>
             <el-card shadow="never"
                      class="description">
-              <el-text size="large">教师：67</el-text>
+              <el-text size="large">教师：{{ courseInfo.teacher }}</el-text>
               <br/>
               <el-row>
                 <el-col :span="5">
                   <el-text size="large">学期：2023秋</el-text>
                 </el-col>
                 <el-col :span="8">
-                  <el-text size="large">授课年级：2023</el-text>
+                  <el-text size="large">授课年级：{{ courseInfo.grade }}</el-text>
                 </el-col>
               </el-row>
-              <el-text size="large" style="color: #82CD47">小队数目：60（20支小队正在招募中）</el-text>
+              <el-text size="large">小队数目：{{ teamNumber }}</el-text>
             </el-card>
             <div style="margin-top: 20px">
-              <el-button-group size="large" v-if="hasTeam">
-                <el-button :icon="Plus" type="warning" plain @click="createTeam">
-                  创建我的小队
+              <div v-if="courseInfo.open">
+
+                <div v-if="selected">
+                  <el-button-group size="large" v-if="hasTeam">
+                    <el-button :icon="Position" type="warning" plain @click="createTeam">
+                      查看我的小队
+                    </el-button>
+                    <el-button type="warning" plain @click="getTeamId">
+                      复制邀请码
+                      <el-icon class="el-icon--right">
+                        <Connection/>
+                      </el-icon>
+                    </el-button>
+                  </el-button-group>
+                  <el-button-group size="large" v-else>
+                    <el-button :icon="Plus" type="warning" plain @click="createTeam">
+                      创建我的小队
+                    </el-button>
+                    <el-button type="warning" plain @click="findTeam">
+                      通过邀请码加入小队
+                      <el-icon class="el-icon--right">
+                        <Connection/>
+                      </el-icon>
+                    </el-button>
+                  </el-button-group>
+                  <el-button :icon="DocumentDelete" type="danger" plain @click="dropOut" size="large"
+                             style="margin-left: 20px">
+                    退出课程
+                  </el-button>
+                </div>
+                <el-button :icon="Pointer" type="success" size="large" plain v-else>
+                  加入课程
                 </el-button>
-                <el-button type="warning" plain @click="findTeam">
-                  通过邀请码加入小队
-                  <el-icon class="el-icon--right">
-                    <Connection/>
-                  </el-icon>
-                </el-button>
-              </el-button-group>
-              <el-button :icon="Position" type="warning" plain @click="createTeam" size="large" v-else>
-                查看我的小队
-              </el-button>
-              <el-button :icon="DocumentDelete" type="danger" plain @click="dropOut" size="large" style="margin-left: 20px">
-                退出课程
+              </div>
+              <el-button :icon="Lock" type="danger" size="large" plain disabled v-else>
+                课程已关闭
               </el-button>
             </div>
           </el-main>
@@ -56,7 +76,7 @@
       <el-divider/>
     </el-col>
   </el-row>
-  <!--  </el-scrollbar>-->
+  <!--  详情分页 -->
   <el-row>
     <el-col :span="20" :offset="2">
       <el-tabs type="border-card" class="tabs" style="border-radius: 10px;min-height: 300px;margin-bottom: 20px">
@@ -78,7 +98,8 @@
               />
             </el-col>
             <el-col :span="4">
-              <el-check-tag :checked="ifPossible" @change="choosePossible" class="possible">仅看可加入的队伍</el-check-tag>
+              <el-check-tag :checked="ifPossible" @change="choosePossible" class="possible">仅看可加入的队伍
+              </el-check-tag>
             </el-col>
           </el-row>
           <el-row class="outside">
@@ -98,25 +119,36 @@
 </template>
 
 <script setup>
-import {ref, onMounted} from 'vue'
-import {Plus, Position, Connection, DocumentDelete, Search} from '@element-plus/icons-vue'
+import {ref, onActivated} from 'vue'
+import {Connection, DocumentDelete, Lock, Plus, Position, Search,Pointer} from '@element-plus/icons-vue'
 import CourseTeam from "../components/course-team.vue";
-import CourseGrid from "../components/course-grid.vue";
 import Homework from "../components/homework.vue";
+import {useRouter, useRoute} from "vue-router";
+import axios from "axios";
 
-const props = defineProps(['url', 'name', 'teacher', 'index'])
-const url = "https://picdm.sunbangyan.cn/2023/12/01/dcb092f15f5649cc20185ce03e779f90.jpeg"
-const name = "软件工程与计算"
-const activeDescription = ref(['1'])
+const router = useRouter()
+const route = useRoute()
+
+const selected = ref(true)
+const courseInfo = ref({})
 const inputText = ref('')
-const hasTeam = ref(true)
+const hasTeam = ref(false)
+const teamNumber = ref(-1)
 const ifPossible = ref(false)
-let createTeam = () => {
+onActivated(async () => {
+  document.documentElement.scrollTop = 0;
+  let id = route.query.id
+  selected.value = route.query.selected == 'true'
+  await axios.get(`http://localhost:11300/course?id=${id}`).then(res => {
+    courseInfo.value = res.data
+  }).catch(error => {
+    alert(error)
+  })
+  teamNumber.value = courseInfo.value.groups.length
+  console.log(courseInfo.value)
+  console.log(selected.value)
+})
 
-}
-let findTeam = () => {
-
-}
 
 let queryTeam = () => {
 
@@ -126,8 +158,18 @@ let dropOut = () => {
 
 }
 
+let getTeamId = () => {
+
+}
 let choosePossible = () => {
   ifPossible.value = !ifPossible.value
+}
+
+let createTeam = () => {
+
+}
+let findTeam = () => {
+
 }
 </script>
 

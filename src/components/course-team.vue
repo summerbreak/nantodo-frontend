@@ -79,6 +79,7 @@ let joinTeam = ()=>{
   text-decoration-line: underline;
 }
 :deep(.join-team:hover){
+  cursor: pointer;
   background-color: #82CD47;
   color: #FFFAF0;
 }

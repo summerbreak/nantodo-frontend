@@ -2,8 +2,8 @@
     <div class="login-container">
         <div class="background-image"></div>
 
-        <div class="login-box">
-            <div class="t-tab-top">登 录</div>
+        <div class="login-box" v-if="!isRegistering">
+            <div class="t-tab-top">欢迎您使用南土豆</div>
             <div class="container-fluid" style="padding-bottom: 24px;">
                 <div class="form">
                     <div style="padding:15px 5px;">
@@ -18,8 +18,8 @@
                                 录</el-button>
                         </div>
                         <div class="form-group margin-bottom-15 margin-top-35">
-                            <a target="_blank" style="color:#3fb5df;float:left;margin-left: 20px;">
-                                <span style="color: black;" @click="register">立即注册</span>
+                            <a target="_blank" style="color:#3fb5df;float:left;margin-left: 20px;" @click="showRegister">
+                                <span style="color: black;">立即注册</span>
                             </a>
                             <a target="_blank" style="color:#3fb5df;float:right;margin-right:29px;">
                                 <span style="color: black;">忘记密码</span>
@@ -29,27 +29,54 @@
                 </div>
             </div>
         </div>
-
+        <Register v-else />
     </div>
 </template>
 
 <script>
+import Register from '../components/Register.vue'
 import { ref } from 'vue'
+import axios from 'axios'
 export default {
     setup() {
+        const isRegistering = ref(false)
         const account = ref('')
         const password = ref('')
+
+        const login = async () => {
+            try {
+                const response = await axios.get('/login', {
+                    params: {
+                        phone: account.value,
+                        password: password.value
+                    }
+                })
+
+                if (response.status === 200) {
+                    console.log('登录成功', response.data)
+                } else {
+                    console.log('登录失败', response.status)
+                }
+            } catch (error) {
+                console.error('请求失败', error)
+            }
+        }
+
+        const showRegister = () => {
+            isRegistering.value = true
+        }
+
         return {
+            isRegistering,
             account,
             password,
+            login,
+            showRegister
         }
     },
-    methods: {
-        login() {
-            // 在这里处理登录逻辑
-            console.log('Logging in...', this.account, this.password);
-        },
-    },
+    components: {
+        Register
+    }
 };
 </script> 
 
@@ -59,7 +86,7 @@ export default {
     border-radius: 8px;
     /* border: 1px solid #db8916; */
     background-color: #ffffff;
-    color: #db8916;
+    color: rgb(89, 94, 94);
     font-size: 16px;
     font-weight: 400;
     font-style: normal;
@@ -80,7 +107,7 @@ export default {
     left: 0;
     width: 100%;
     height: calc(100% - 80px);
-    background: url('../assets/pic/autumn.jpg') center/cover no-repeat;
+    background: url('../assets/pic/Autumn.jpg') center/cover no-repeat;
     z-index: 0;
     /* 将背景图片放到最底层 */
 }
@@ -94,7 +121,7 @@ export default {
     transform: translate(-50%, -50%);
     width: 325px;
     padding: 30px;
-    background: rgba(255, 255, 255, 0.8);
+    background: rgba(255, 255, 255, 0.9);
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.6);
 }
 
