@@ -9,10 +9,10 @@
                 <i :class="`bi bi-${iconMap[scope.row.type]}`"></i>
             </template>
         </el-table-column>
-        <el-table-column prop="name" width="200" />
+        <el-table-column prop="name" width="250" />
         <el-table-column prop="organName" width="250" />
-        <el-table-column prop="other" width="200" />
-        <el-table-column>
+        <el-table-column prop="other" width="150" />
+        <el-table-column align="center">
             <template v-slot="scope" #default>
                 <el-tooltip content="查看详情" placement="top">
                     <i class="bi bi-card-list check-detail" @click="emit('toDetail', scope.row.id)"></i>
@@ -36,9 +36,9 @@ const emit = defineEmits(['toDetail'])
 
 const user = userStore.getUser()
 const groupList = reactive([
-    {id: 'rjjh', name: '人机交互小组', organName: '人机交互系统', leader: '123', type: 'course', other: '1 项待办'},
-    {id: 'ydhl', name: '移动互联网小组', organName: '移动互联网软件工程', leader: '123', type: 'course', other: '1 项待办'},
-    {id: 'kjkt', name: '锟斤拷烫烫烫小队', organName: '2023EL程序设计竞赛', leader: '123', type: 'contest', other: '1 项待办' },
+    {id: 'rjjh', name: '人机交互小组', organName: '人机交互系统', leader: '111', type: 'course', other: '1 项待办'},
+    {id: 'ydhl', name: '移动互联网小组', organName: '移动互联网软件工程', leader: '111', type: 'course', other: '1 项待办'},
+    {id: 'kjkt', name: '锟斤拷烫烫烫小队', organName: '2023EL程序设计竞赛', leader: '111', type: 'contest', other: '1 项待办' },
     {id: 'devo', name: 'DevOps小组', organName: 'DevOps开发', leader: '456', type: 'course', other: '有新任务'},
     {id: 'czxt', name: '操作系统小组', organName: '操作系统', leader: '456', type: 'course', other: '1 项待办'},
     {id: 'qxss', name: '栖霞山赏枫', organName: '自由组队', leader: '456', type: 'outdoor', other: '1 项待办' },

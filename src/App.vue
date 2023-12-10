@@ -185,6 +185,7 @@ function deleteMessage(id, isAll=false) {
   right: 0;
   z-index: 10;
   padding: 0;
+  box-shadow: var(--el-box-shadow-light);
 }
 
 .main {
