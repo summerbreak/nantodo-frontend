@@ -17,12 +17,12 @@
                             <el-button type="warning" style="width: 100%; height: 42px;font-size: 18px;" @click="login">登
                                 录</el-button>
                         </div>
-                        <div class="form-group margin-bottom-15 margin-top-35">
-                            <a target="_blank" style="color:#3fb5df;float:left;margin-left: 20px;" @click="showRegister">
-                                <span style="color: black;">立即注册</span>
+                        <div class="links">
+                            <a class="link" target="_blank" @click="showRegister">
+                                立即注册
                             </a>
-                            <a target="_blank" style="color:#3fb5df;float:right;margin-right:29px;">
-                                <span style="color: black;">忘记密码</span>
+                            <a class="link" target="_blank">
+                                忘记密码
                             </a>
                         </div>
                     </div>
@@ -37,11 +37,13 @@
 import Register from '../components/Register.vue'
 import { ref } from 'vue'
 import axios from 'axios'
+import { useUserStore } from '../stores/user.js'
 export default {
     setup() {
         const isRegistering = ref(false)
         const account = ref('')
         const password = ref('')
+        const userStore = useUserStore()
 
         const login = async () => {
             try {
@@ -54,8 +56,11 @@ export default {
 
                 if (response.status === 200) {
                     console.log('登录成功', response.data)
+                    userStore.setUser(response.data)
+                } else if (response.status === 401) {
+                    console.log('密码错误', response.status)
                 } else {
-                    console.log('登录失败', response.status)
+                    console.log('账号不存在', response.status)
                 }
             } catch (error) {
                 console.error('请求失败', error)
@@ -86,7 +91,7 @@ export default {
     border-radius: 8px;
     /* border: 1px solid #db8916; */
     background-color: #ffffff;
-    color: rgb(89, 94, 94);
+    color: #db8916;
     font-size: 16px;
     font-weight: 400;
     font-style: normal;
@@ -139,4 +144,24 @@ export default {
     display: flex;
     flex-direction: column;
 }
+
+.links {
+    display: flex;
+    justify-content: space-evenly;
+    align-items: center;
+    margin-top: 10px;
+}
+
+.link {
+    font-size: 16px;
+    font-weight: 400;
+    color: gray;
+
+    &:hover {
+        cursor: pointer;
+        color: #db8916;
+    }
+
+}
 </style>
+
