@@ -187,10 +187,10 @@
                 </el-tab-pane>
             </el-tabs>
         </div>
+        <el-dialog v-model="createTask" :title="editingTaskIndex >= 0 ? '编辑任务':'创建任务'" width="40%" :before-close="resetIndex">
+            <TaskDetail :users="memberInfo" :task="editingTaskIndex >= 0 ? taskInfo[editingTaskIndex] : null" @close-form="closeForm"></TaskDetail>
+        </el-dialog>
     </div>
-    <el-dialog v-model="createTask" :title="editingTaskIndex >= 0 ? '编辑任务':'创建任务'" width="40%" :before-close="resetIndex">
-        <TaskDetail :users="memberInfo" :task="editingTaskIndex >= 0 ? taskInfo[editingTaskIndex] : null" @close-form="closeForm"></TaskDetail>
-    </el-dialog>
 </template>
 
 <script setup>

@@ -61,6 +61,7 @@ onActivated(() => {
         showDetail.value = false
         pageIndex.value = 1
     }
+    console.log("activated", showDetail.value)
 })
 
 function toJoin() {

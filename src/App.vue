@@ -194,6 +194,8 @@ function deleteMessage(id, isAll=false) {
   /* opacity: 1; */
   background-image: radial-gradient(#FFDAB9 0.6px, oldlace 0.6px);
   background-size: 12px 12px;
+  
+  overflow: hidden;
 }
 
 .footer {
