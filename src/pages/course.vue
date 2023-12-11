@@ -19,7 +19,7 @@
         </el-col>
       </el-row>
     </div>
-    <el-empty v-else>
+    <el-empty v-else-if="!isLoading">
       <template #image>
         <svg t="1702088362166" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg"
              p-id="2084" data-spm-anchor-id="a313x.search_index.0.i9.34973a81NrY7xU" width="200" height="200">
@@ -90,33 +90,26 @@ onActivated(async () => {
       res => {
         allCourses.value = []
         for (let i = 0; i < res.data.length; i++) {
-          console.log(res.data[i])
           allCourses.value.push(res.data[i])
         }
       }
   )
   await axios.get(`http://localhost:11300/user?id=${user.id}`).then(
       res => {
-        console.log(res)
         userInfo.value = res.data
       }
   ).catch(err => {
     alert(err)
   })
-  console.log(allCourses.value)
-  console.log(userInfo.value)
+
   userCourses.value = []
   for (let i = 0, len = userInfo.value.courses.length; i < len; i++) {
     const result = allCourses.value.find(({id}) => id === userInfo.value.courses[i])
     userCourses.value.push(result)
   }
-  console.log(userCourses.value)
   isLoading.value = false
 })
 
-const emptyCourse = () => {
-  return userInfo.value.courses.length !== 0;
-}
 </script>
 <style scoped>
 .title {

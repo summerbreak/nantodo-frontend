@@ -29,10 +29,9 @@
             </el-card>
             <div style="margin-top: 20px">
               <div v-if="courseInfo.open">
-
                 <div v-if="selected">
                   <el-button-group size="large" v-if="hasTeam">
-                    <el-button :icon="Position" type="warning" plain @click="createTeam">
+                    <el-button :icon="Position" type="warning" plain @click="queryTeam">
                       查看我的小队
                     </el-button>
                     <el-button type="warning" plain @click="getTeamId">
@@ -71,6 +70,34 @@
       </el-card>
     </el-col>
   </el-row>
+  <!--  小组添加框-->
+  <el-dialog
+      v-model="creatVisible"
+      title="创建我的小组"
+      width="60%"
+      :before-close="handleClose"
+  >
+    <el-form :model="groupInfo" label-width="auto">
+      <el-form-item label="小组名称" required="true">
+        <el-input v-model="groupInfo.name" placeholder="请输入不超过十五个字符" :maxlength="15"/>
+      </el-form-item>
+      <el-form-item label="小组成员数量" required="true">
+        <el-input-number v-model="groupInfo.capacity" :min="1" :max="15"/>
+      </el-form-item>
+      <el-form-item label="小组简介">
+        <el-input v-model="groupInfo.description" type="textarea" :max="500"
+                  placeholder="简要介绍一下你的小组，别忘了附上联系方式..."/>
+      </el-form-item>
+    </el-form>
+    <template #footer>
+      <span class="dialog-footer">
+        <el-button @click="clearTeam">取消创建</el-button>
+        <el-button type="primary" @click="addTeam">
+          确认
+        </el-button>
+      </span>
+    </template>
+  </el-dialog>
   <el-row>
     <el-col :span="20" :offset="2">
       <el-divider/>
@@ -119,22 +146,50 @@
 </template>
 
 <script setup>
-import {ref, onActivated} from 'vue'
-import {Connection, DocumentDelete, Lock, Plus, Position, Search,Pointer} from '@element-plus/icons-vue'
+import {ref, onActivated, reactive} from 'vue'
+import {Connection, DocumentDelete, Lock, Plus, Position, Search, Pointer} from '@element-plus/icons-vue'
 import CourseTeam from "../components/course-team.vue";
 import Homework from "../components/homework.vue";
 import {useRouter, useRoute} from "vue-router";
 import axios from "axios";
+import {useUserStore} from "../stores/user.js";
 
 const router = useRouter()
 const route = useRoute()
+const user = useUserStore().getUser()
 
+const userInfo = ref({})
 const selected = ref(true)
 const courseInfo = ref({})
 const inputText = ref('')
 const hasTeam = ref(false)
 const teamNumber = ref(-1)
+const teamId = ref("")
 const ifPossible = ref(false)
+const groupInfo = reactive({
+  name: '',
+  leaderId: '',
+  organName: '',
+  description: '',
+  type: '',
+  capacity: 0,
+  courseId: '',
+  members: [],
+  tasks: [],
+  applications: [],
+})
+const creatVisible = ref(false)
+const clearTeam = () => {
+  groupInfo.name = ''
+  groupInfo.capacity = 0
+  groupInfo.description = ''
+  creatVisible.value = false
+}
+const handleClose = (done) => {
+  clearTeam()
+  done()
+}
+
 onActivated(async () => {
   document.documentElement.scrollTop = 0;
   let id = route.query.id
@@ -144,16 +199,68 @@ onActivated(async () => {
   }).catch(error => {
     alert(error)
   })
+
+  await axios.get(`http://localhost:11300/user?id=${user.id}`).then(
+      res => {
+        userInfo.value = res.data
+      }
+  ).catch(err => {
+    alert(err)
+  })
+
   teamNumber.value = courseInfo.value.groups.length
-  console.log(courseInfo.value)
-  console.log(selected.value)
+
+  for (let i = 0, len = userInfo.value.groups.length; i < len; i++) {
+    let tmp={}
+    await axios.get(`http://localhost:11300/group?id=${userInfo.value.groups[i]}`).then(
+        res => {
+          tmp = res.data
+        }
+    ).catch(err => {
+      alert(err)
+    })
+    console.log(tmp.courseId)
+    console.log(courseInfo.value.id)
+    if (tmp.courseId == courseInfo.value.id ) {
+      hasTeam.value = true
+      teamId.value = tmp.id
+      groupInfo.members=tmp.members
+      groupInfo.name=tmp.name
+      groupInfo.capacity=tmp.capacity
+      groupInfo.id=tmp.id
+      groupInfo.description=tmp.description
+      groupInfo.leaderId=tmp.leaderId
+      break
+    }
+
+  }
+
+  if (!hasTeam.value) {
+    groupInfo.organName = courseInfo.value.name
+    groupInfo.leaderId = user.id
+    groupInfo.type = 'course'
+    groupInfo.courseId = courseInfo.value.id
+    groupInfo.members.push(user.id)
+  }
 })
 
 
-let queryTeam = () => {
+const queryTeam = () => {
 
 }
 
+const addTeam = async () => {
+  await axios.post('http://localhost:11300/group', groupInfo).then(
+      res => {
+        hasTeam.value = true
+        groupInfo.id = res.data
+        console.log(groupInfo)
+      }
+  ).catch(err => {
+    alert(err)
+  })
+  creatVisible.value = false
+}
 let dropOut = () => {
 
 }
@@ -166,7 +273,7 @@ let choosePossible = () => {
 }
 
 let createTeam = () => {
-
+  creatVisible.value = true
 }
 let findTeam = () => {
 
