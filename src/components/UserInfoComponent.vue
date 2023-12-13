@@ -1,54 +1,77 @@
 <template>
   <div style="display: flex; flex-direction: column">
-    <!-- <div v-if="edit" style="display: flex; flex-direction: row; justify-content: flex-end">
-        <el-button @click="edit = false;">取消</el-button>
-        <el-button type="primary" @click="submitForm(ruleFormRef)">提交</el-button>
-      </div>
-      <div v-else style="display: flex; flex-direction: row-reverse; align-items: flex-end">
-        <el-button type="primary" @click="edit = true; setForm()">编辑</el-button>
-      </div>
-  
-      <br /> -->
-    <!-- <div class="block" v-if="!edit">
-        
-      <el-form ref="ruleFormRef" :model="form" :rules="rules" label-width="30%" class="demo-ruleForm" label-position="right"
-        hide-required-asterisk size="large">
-        <el-form-item label="姓名" prop="name">
-          <el-text v-model="form.username" style="width: 25vh" :disabled="true" />
+    <div class="block" v-if="!edit">
+      <el-form label-width="30%" class="selfInfo" label-position="right" hide-required-asterisk size="large">
+        <el-form-item label="姓名" prop="name" style="font-weight: bold;">
+          <el-text style="width: 25vh; font-size: 18px; font-weight: normal;"> {{ form.name }}</el-text>
         </el-form-item>
-        <el-form-item label="姓名" prop="name">
-          <el-input v-model="form.name" style="width: 25vh" :disabled="!edit" />
+        <el-form-item label="手机号" prop="phone" style="font-weight: bold;">
+          <el-text style="width: 25vh; font-size: 18px;font-weight: normal;">{{ form.phone }}</el-text>
         </el-form-item>
-        <el-form-item label="证件类型" prop="type">
-          <el-select v-model="form.type" placeholder=" " style="width: 25vh" :disabled="!edit">
-            <el-option value="身份证" />
-            <el-option value="护照" />
-            <el-option value="其他" />
-          </el-select>
+        <el-form-item label="学号" prop="studentNumber" style="font-weight: bold;">
+          <el-text style="width: 25vh; font-size: 18px;font-weight: normal;">{{ form.studentNumber
+          }}</el-text>
         </el-form-item>
-        <el-form-item label="证件号码" prop="idn">
-          <el-input v-model="form.idn" type="text" style="width: 25vh" :disabled="!edit" />
+        <el-form-item label="年级" prop="grade" style="font-weight: bold;">
+          <el-text style="width: 25vh; font-size: 18px;font-weight: normal;">{{ form.grade }}</el-text>
         </el-form-item>
-  
-        <el-form-item label="手机号" prop="phone">
-          <el-input v-model="form.phone" style="width: 25vh" :disabled="!edit" />
+        <el-form-item label="邮箱" prop="email" style="font-weight: bold;">
+          <el-text style="width: 25vh; font-size: 18px;font-weight: normal;"> {{ form.email }}</el-text>
+        </el-form-item>
+        <el-form-item>
+          <el-button type="warning"
+            style="width: 50%; height: 42px;font-size: 18px;display: flex; justify-content: center;"
+            @click="edit = true; setForm()">编辑</el-button>
         </el-form-item>
       </el-form>
-    </div> -->
+
+    </div>
+    <div v-else>
+      <el-form label-width="30%" class="selfInfo" label-position="right" hide-required-asterisk size="large">
+        <el-form-item label="姓名" prop="name" style="font-weight: bold;">
+          <el-text style="width: 25vh; font-size: 18px; font-weight: normal;"> {{ form.name }}</el-text>
+        </el-form-item>
+        <el-form-item label="手机号" prop="phone" style="font-weight: bold;">
+          <el-text style="width: 25vh; font-size: 18px;font-weight: normal;" :disabled="true">{{ form.phone }}</el-text>
+        </el-form-item>
+
+        <el-form-item label="学号" prop="studentNumber" style="font-weight: bold;">
+          <el-input v-model="form.studentNumber" style="width: 25vh;font-size: 18px" :disabled="true" />
+        </el-form-item>
+        <el-form-item label="年级" prop="grade" style="font-weight: bold;">
+          <el-input v-model="form.grade" style="width: 25vh ;font-size: 18px" :disabled="true" />
+        </el-form-item>
+        <el-form-item label="邮箱" prop="email" style="font-weight: bold;">
+          <el-input v-model="form.email" style="width: 25vh ;font-size: 18px" :disabled="true" />
+        </el-form-item>
+        <el-form-item>
+
+          <el-button style="height: 42px;font-size: 18px;" @click="edit = false;">取消</el-button>
+          <el-button type="warning" style="height: 42px;font-size: 18px;" @click="submitForm(ruleFormRef)">提交</el-button>
+        </el-form-item>
+      </el-form>
+
+    </div>
   </div>
 </template>
+<style scoped>
+.el-form-item__label {
+  font-weight: bold;
+}
+</style>
 
 
 <script setup>
-import { ref } from 'vue'
+import { reactive, ref, watch } from "vue"
 import { useUserStore } from '../stores/user.js'
 import axios from 'axios'
 
+const ruleFormRef = ref()
 const userStore = useUserStore()
+const user = userStore.getUser()
 const edit = ref(false)
-const form = ref({
+const form = reactive({
   name: '',
-  type: '',
   id: '',
   phone: '',
   email: '',
@@ -56,21 +79,34 @@ const form = ref({
   grade: '',
 })
 
+const rule = reactive({
+  email: [
+    { required: true, message: '请输入邮箱', trigger: 'blur' },
+    { type: 'email', message: '请输入正确的邮箱地址', trigger: ['blur', 'change'] },
+  ],
+  studentNumber: [
+    { required: true, message: '请输入学号', trigger: 'blur' },
+  ],
+  grade: [
+    { required: true, message: '请选择年级', trigger: 'change' },
+  ],
+})
+
 const setForm = async () => {
-  form.value = {
-    name: userStore.user.name,
-    type: userStore.user.type,
-    id: userStore.user.id,
-    phone: userStore.user.phone,
-    email: userStore.user.email,
-    studentNumber: userStore.user.studentNumber,
-    grade: userStore.user.grade,
-  }
+  console.log(user)
+  form.id = user.id;
+  form.name = user.name;
+  form.phone = user.phone;
+  form.email = user.email;
+  form.studentNumber = user.studentNumber;
+  form.grade = user.grade;
 }
 
-watch(user, () => {
+watch(userStore.getUser, () => {
   setForm()
 })
 
 setForm()
+
+
 </script>
