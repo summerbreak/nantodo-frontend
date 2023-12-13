@@ -1,98 +1,123 @@
 <template>
-  <el-tabs
-    v-model="activeName"
-    class="demo-tabs"
-    @tab-click="handleClick"
-  >
-    <el-tab-pane name="first"
-      ><template #label><span class="my-label">未完成事项</span></template>
-      <el-scrollbar class="myscroll">
-        <p v-for="item in tableData" :key="item.date" class="scrollbar-item">
-          Date: {{ item.date }}, Name: {{ item.name }}, Address: {{ item.address }}
-        </p>
-      </el-scrollbar>
-    </el-tab-pane>
-    <el-tab-pane name="second"
-      ><template #label><span class="my-label">已完成事项</span></template>
-      <el-scrollbar class="myscroll">
-        <p v-for="item in tableData" :key="item.date" class="scrollbar-item">
-          Date: {{ item.date }}, Name: {{ item.name }}, Address: {{ item.address }}
-        </p>
-      </el-scrollbar>
-    </el-tab-pane>
-  </el-tabs>
+  <div style="position: relative">
+    <el-tabs v-model="activeName" class="demo-tabs">
+      <el-tab-pane name="first"
+        ><template #label><span class="my-label">未完成事项</span></template>
+        <el-scrollbar class="myscroll" :height="heg">
+          <el-empty description="最近暂无任务" v-if="Undone.length == 0" />
+          <el-row v-if="Undone.length != 0">
+            <el-col v-for="item in Undone" :key="item" :span="12">
+              <task-card
+                :title="item.title"
+                :content="item.content"
+                :releaseTime="item.releaseTime.toString()"
+                :deadline="item.deadline.toString()"
+                :starred="item.starred"
+                :done="item.done"
+                :id="item.id"
+                :userId="item.userId"
+              />
+            </el-col>
+          </el-row>
+        </el-scrollbar>
+      </el-tab-pane>
+      <el-tab-pane name="second"
+        ><template #label><span class="my-label">已完成事项</span></template>
+        <el-scrollbar class="myscroll" :height="heg">
+          <el-empty description="最近暂无任务" v-if="Done.length == 0" />
+          <el-row v-if="Done.length != 0">
+            <el-col v-for="item in Done" :key="item" :span="12">
+              <task-card
+                :title="item.title"
+                :content="item.content"
+                :releaseTime="item.releaseTime.toString()"
+                :deadline="item.deadline.toString()"
+                :starred="item.starred"
+                :done="item.done"
+                :id="item.id"
+                :userId="item.userId"
+              />
+            </el-col>
+          </el-row>
+        </el-scrollbar>
+      </el-tab-pane>
+    </el-tabs>
+    <div style="position: absolute; right: 0px; top: 5px">
+      <el-input
+        v-model="inputText"
+        size="large"
+        placeholder="任务搜索"
+        :suffix-icon="Search"
+        style="width: 80%"
+        @change="querySearch"
+      />
+    </div>
+  </div>
 </template>
     
-<script lang="ts" setup>
-import Sortable from "sortablejs";
-import { onMounted } from "vue";
-import { ref } from "vue";
-import type { TabsPaneContext } from "element-plus";
+<script setup>
+import { onMounted , watch} from "vue";
+import axios from "axios";
+import { ref , reactive } from "vue";
+import { Search } from "@element-plus/icons-vue";
 
+const inputText = ref("");
 const activeName = ref("first");
-
-const handleClick = (tab: TabsPaneContext, event: Event) => {
-  console.log(tab, event);
+const heg = ref("");
+const querySearch = () => {
+  console.log(inputText);
 };
 
-const tableData = [
-  {
-    date: "2016-05-03",
-    name: "Tom",
-    address: "No. 189, Grove St, Los Angeles",
-  },
-  {
-    date: "2016-05-02",
-    name: "Cilly",
-    address: "No. 189, Grove St, Los Angeles",
-  },
-  {
-    date: "2016-05-04",
-    name: "Linda",
-    address: "No. 189, Grove St, Los Angeles",
-  },
-  {
-    date: "2016-05-01",
-    name: "John",
-    address: "No. 189, Grove St, Los Angeles",
-  },
-  {
-    date: "2016-05-03",
-    name: "Tom",
-    address: "No. 189, Grove St, Los Angeles",
-  },
-  {
-    date: "2016-05-02",
-    name: "Cilly",
-    address: "No. 189, Grove St, Los Angeles",
-  },
-  {
-    date: "2016-05-04",
-    name: "Linda",
-    address: "No. 189, Grove St, Los Angeles",
-  },
-  {
-    date: "2016-05-01",
-    name: "John",
-    address: "No. 189, Grove St, Los Angeles",
-  },
-];
+
+const tableData = reactive([]);
+const Done = reactive([]);
+const Undone = reactive([]);
+
+
+onMounted(() => {
+  heg.value = document.documentElement.clientHeight - 200 + "px";
+  console.log(heg.value);
+  getAllTasks();
+});
+
+watch(activeName, (newTab, oldTab) => {
+  console.log(`Tab switched from ${oldTab} to ${newTab}`);
+  // 在这里可以执行你希望在切换标签时触发的操作
+  getAllTasks();
+});
+
+function getAllTasks() {
+  //获取所有任务
+  let myUserid = "657434b0b522ce741d1489bb";
+  axios.get(`http://localhost:8080/task/all?userId=${myUserid}`).then((res) => {
+    tableData.length = 0;
+    tableData.splice(0, 0, ...res.data);
+    console.log(tableData);
+    splitTask();
+  }),
+  (err) => {
+    console.log(err);
+  };
+}
+
+function splitTask(){
+  //根据done属性划分tableData为Done和Undone
+  Done.length = 0;
+  Undone.length = 0;
+  for(let item of tableData){
+    if(item.done == true){
+      Done.push(item);
+    }
+    else{
+      Undone.push(item);
+    }
+  }
+}
 </script>
 
 <style>
-.myscroll{
-  height: 600px;
-}
-.scrollbar-item {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 15px;
-  height: 50px;
-  margin: 10px;
-  border-radius: 4px;
-  background: #FAEBD7;
-  color: var(--el-color-primary);
+.task-card {
+  margin-left: 15px !important;
 }
 .my-label {
   font-size: 18px;
@@ -105,17 +130,11 @@ const tableData = [
 }
 
 .el-tabs__item.is-active {
-    opacity: 1; /* 选中时完全不透明 */
-  }
+  opacity: 1; /* 选中时完全不透明 */
+}
 
-  .el-tabs__item:not(.is-active) {
-    opacity: 0.5; 
-  }
-
-.demo-tabs > .el-tabs__content {
-  color: #6b778c;
-  font-size: 50px;
-  font-weight: 600;
+.el-tabs__item:not(.is-active) {
+  opacity: 0.5;
 }
 
 /*去掉tabs底部的下划线*/

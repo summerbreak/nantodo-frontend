@@ -1,5 +1,5 @@
 <template>
-  <Calendar ref="calendar" :attributes="attrs" expanded >
+  <Calendar ref="calendar" :attributes="attrs" expanded transparent borderless>
     <template #footer>
       <div>
         <button
@@ -51,18 +51,23 @@ function moveToday() {
 
 <style scoped>
 .mybutton{
-  display: block;
+  display: grid;
   margin: auto;
-  background-color: #3498db; /* 蓝色背景色 */
-  color: #ffffff; /* 文字颜色为白色 */
+  background-color: #3498db; 
+  color: #ffffff;
   font-weight: bold;
-  padding: 10px 20px; /* 调整内边距，根据需要进行调整 */
   border: none;
-  border-radius: 5px; /* 圆角边框 */
+  border-radius: 5px;
   cursor: pointer;
 }
 
 .mybutton:hover {
   background-color: #2980b9; /* 鼠标悬停时的背景颜色 */
+}
+</style>
+
+<style>
+.vc-day{
+  min-height: 30px;
 }
 </style>
