@@ -57,7 +57,7 @@
                     退出课程
                   </el-button>
                 </div>
-                <el-button :icon="Pointer" type="success" size="large" plain v-else>
+                <el-button :icon="Pointer" type="success" size="large" plain v-else @click="attendCourse">
                   加入课程
                 </el-button>
               </div>
@@ -74,7 +74,7 @@
   <el-dialog
       v-model="creatVisible"
       title="创建我的小组"
-      width="60%"
+      width="40%"
       :before-close="handleClose"
   >
     <el-form :model="groupInfo" label-width="auto">
@@ -85,7 +85,7 @@
         <el-input-number v-model="groupInfo.capacity" :min="1" :max="15"/>
       </el-form-item>
       <el-form-item label="小组简介">
-        <el-input v-model="groupInfo.description" type="textarea" :max="500"
+        <el-input v-model="groupInfo.description" type="textarea" :max="50" resize="none"
                   placeholder="简要介绍一下你的小组，别忘了附上联系方式..."/>
       </el-form-item>
     </el-form>
@@ -146,7 +146,7 @@
 </template>
 
 <script setup>
-import {ref, onActivated, reactive} from 'vue'
+import {ref, onActivated, reactive,onUpdated} from 'vue'
 import {Connection, DocumentDelete, Lock, Plus, Position, Search, Pointer} from '@element-plus/icons-vue'
 import CourseTeam from "../components/course-team.vue";
 import Homework from "../components/homework.vue";
@@ -174,10 +174,9 @@ const groupInfo = reactive({
   type: '',
   capacity: 0,
   courseId: '',
-  members: [],
-  tasks: [],
-  applications: [],
+
 })
+const allTeam = ref([])
 const creatVisible = ref(false)
 const clearTeam = () => {
   groupInfo.name = ''
@@ -191,11 +190,22 @@ const handleClose = (done) => {
 }
 
 onActivated(async () => {
+  hasTeam.value=false
   document.documentElement.scrollTop = 0;
   let id = route.query.id
   selected.value = route.query.selected == 'true'
   await axios.get(`http://localhost:11300/course?id=${id}`).then(res => {
     courseInfo.value = res.data
+  }).catch(error => {
+    alert(error)
+  })
+
+  await axios.get(`http://localhost:11300/course/allGroup?courseId=${id}`).then(res => {
+    let allGroups = res.data
+    allTeam.value.length = 0
+    for (let i = 0, len = allGroups.length; i < len; i++) {
+      allTeam.value.push(allGroups[i])
+    }
   }).catch(error => {
     alert(error)
   })
@@ -208,10 +218,10 @@ onActivated(async () => {
     alert(err)
   })
 
-  teamNumber.value = courseInfo.value.groups.length
+  teamNumber.value = allTeam.value.length
 
   for (let i = 0, len = userInfo.value.groups.length; i < len; i++) {
-    let tmp={}
+    let tmp = {}
     await axios.get(`http://localhost:11300/group?id=${userInfo.value.groups[i]}`).then(
         res => {
           tmp = res.data
@@ -221,27 +231,20 @@ onActivated(async () => {
     })
     console.log(tmp.courseId)
     console.log(courseInfo.value.id)
-    if (tmp.courseId == courseInfo.value.id ) {
+    if (tmp.courseId == courseInfo.value.id) {
       hasTeam.value = true
       teamId.value = tmp.id
-      groupInfo.members=tmp.members
-      groupInfo.name=tmp.name
-      groupInfo.capacity=tmp.capacity
-      groupInfo.id=tmp.id
-      groupInfo.description=tmp.description
-      groupInfo.leaderId=tmp.leaderId
+      groupInfo.members = tmp.members
+      groupInfo.name = tmp.name
+      groupInfo.capacity = tmp.capacity
+      groupInfo.id = tmp.id
+      groupInfo.description = tmp.description
+      groupInfo.leaderId = tmp.leaderId
       break
     }
 
   }
 
-  if (!hasTeam.value) {
-    groupInfo.organName = courseInfo.value.name
-    groupInfo.leaderId = user.id
-    groupInfo.type = 'course'
-    groupInfo.courseId = courseInfo.value.id
-    groupInfo.members.push(user.id)
-  }
 })
 
 
@@ -250,11 +253,18 @@ const queryTeam = () => {
 }
 
 const addTeam = async () => {
+  groupInfo.organName = courseInfo.value.name
+  groupInfo.leaderId = user.id
+  groupInfo.type = 'course'
+  groupInfo.courseId = courseInfo.value.id
+  groupInfo.members.length = 0
+  groupInfo.tasks.length = 0
+  groupInfo.applications.length = 0
   await axios.post('http://localhost:11300/group', groupInfo).then(
       res => {
         hasTeam.value = true
         groupInfo.id = res.data
-        console.log(groupInfo)
+        courseInfo.value.groups.push(groupInfo.id)
       }
   ).catch(err => {
     alert(err)
@@ -275,9 +285,19 @@ let choosePossible = () => {
 let createTeam = () => {
   creatVisible.value = true
 }
-let findTeam = () => {
+const findTeam = () => {
 
 }
+
+const attendCourse = () => {
+  userInfo.value.courses.push(courseInfo.value.id)
+  axios.put(`http://localhost:11300/user?id=${userInfo.value.id}`, userInfo.value).then(res => {
+    selected.value = true
+  }).catch(err => {
+    alert(err)
+  })
+}
+
 </script>
 
 <style scoped>

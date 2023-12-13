@@ -15,7 +15,7 @@
             :span="6"
             :offset="0"
         >
-          <course-grid :courseInfo="o" :selected="true"/>
+          <course-grid :courseInfo="o"/>
         </el-col>
       </el-row>
     </div>
@@ -55,16 +55,16 @@
   </el-row>
   <el-scrollbar max-height="600px" style="margin-bottom: 0;margin-top: 0">
     <div v-loading="isLoading" element-loading-text="加载中..." element-loading-background="transparent">
-    <el-row class="outside">
-      <el-col
-          v-for="(o, index) in allCourses"
-          :key="index"
-          :span="6"
-          :offset="0"
-      >
-        <course-grid :courseInfo="o" :selected="false"/>
-      </el-col>
-    </el-row>
+      <el-row class="outside">
+        <el-col
+            v-for="(o, index) in allCourses"
+            :key="index"
+            :span="6"
+            :offset="0"
+        >
+          <course-grid :courseInfo="o"/>
+        </el-col>
+      </el-row>
     </div>
   </el-scrollbar>
   <!--  </el-scrollbar>-->
@@ -75,7 +75,7 @@ import {useUserStore} from "../stores/user.js";
 import CourseSearch from "../components/course-search.vue";
 import CourseGrid from "../components/course-grid.vue";
 import axios from "axios";
-import InvitationButton from "../components/invitation-button.vue";
+import InvitationButton from "../components/course-button.vue";
 
 const allCourses = ref([])
 const userCourses = ref([])
@@ -88,7 +88,7 @@ onActivated(async () => {
   isLoading.value = true
   await axios.get('http://localhost:11300/course/allCourse').then(
       res => {
-        allCourses.value = []
+        allCourses.value.length = 0
         for (let i = 0; i < res.data.length; i++) {
           allCourses.value.push(res.data[i])
         }
@@ -102,13 +102,14 @@ onActivated(async () => {
     alert(err)
   })
 
-  userCourses.value = []
+  userCourses.value.length = 0
   for (let i = 0, len = userInfo.value.courses.length; i < len; i++) {
     const result = allCourses.value.find(({id}) => id === userInfo.value.courses[i])
     userCourses.value.push(result)
   }
   isLoading.value = false
 })
+
 
 </script>
 <style scoped>

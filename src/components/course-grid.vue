@@ -42,14 +42,28 @@
 <script setup>
 import {useRouter} from 'vue-router'
 import {Check, Avatar, Close} from '@element-plus/icons-vue'
+import {onActivated, ref} from "vue";
+import axios from "axios";
+import {useUserStore} from "../stores/user.js";
 
-const props = defineProps(['courseInfo', 'selected'])
+const props = defineProps(['courseInfo'])
 const router = useRouter()
+const isSelected = ref(true)
+const user = useUserStore().getUser()
 
+onActivated(() => {
+  axios.get(`http://localhost:11300/user?id=${user.id}`).then(
+      res => {
+        isSelected.value = res.data.courses.includes(props.courseInfo.id)
+      }
+  ).catch(err => {
+    alert(err)
+  })
+
+})
 
 function gotoDetails() {
-  console.log("course grid "+props.selected)
-  router.push({path: "/course-detail", query: {id: props.courseInfo.id, selected: props.selected}})
+  router.push({path: "/course-detail", query: {id: props.courseInfo.id, selected: isSelected.value}})
 }
 </script>
 
