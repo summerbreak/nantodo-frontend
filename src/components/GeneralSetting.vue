@@ -88,8 +88,8 @@ import axios from 'axios'
 const ruleFormRef = ref()
 const userStore = useUserStore()
 const user = userStore.getUser()
-const swichDisable = ref(true)
 const edit = ref(false)
+const id = ref(user.id)
 const settings = reactive({
     emergencyDays: '',
     noticeFrequency: '',
@@ -100,16 +100,31 @@ const settings = reactive({
 
 const setSettings = async () => {
     console.log(user)
-    settings.emergencyDays = user.settings.emergencyDays
-    settings.noticeFrequency = user.settings.noticeFrequency
-    settings.quietMode = user.settings.quietMode
-    settings.quietModeStart = user.settings.quietModeStart
-    settings.quietModeEnd = user.settings.quietModeEnd
+
+    const { emergencyDays, noticeFrequency, quietMode, quietModeStart, quietModeEnd } = user.settings;
+    settings = { emergencyDays, noticeFrequency, quietMode, quietModeStart, quietModeEnd };
+    console.log(settings)
+    // settings.emergencyDays = user.settings.emergencyDays
+    // settings.noticeFrequency = user.settings.noticeFrequency
+    // settings.quietMode = user.settings.quietMode
+    // settings.quietModeStart = user.settings.quietModeStart
+    // settings.quietModeEnd = user.settings.quietModeEnd
 }
 
 watch(userStore.getUser, () => {
     setSettings()
 })
 
-setSettings()
+async function updateUser(user) {
+    const response = await axios.put(`http://localhost:8080/updateUser?id=${this.id}`, user);
+    console.log(response.data);
+}
+
+const submitForm = () => {
+    const User = userStore.getUser()
+    User.settings = settings
+    userStore.setUser(User)
+    console.log(userStore.getUser())
+    updateUser(User);
+}
 </script >

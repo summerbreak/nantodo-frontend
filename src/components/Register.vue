@@ -1,9 +1,10 @@
 <template>
     <div class="register-box">
         <el-container>
-            <div class="t-tab-top">欢迎您注册南土豆账号</div>
+
             <el-main style="width: 375px;">
-                <div class="form">
+                <div class="t-tab-top">欢迎您注册南土豆账号</div>
+                <!-- <div class="form">
                     <div class="form-group">
                         <label
                             style="margin-right: 10px;font-size: 20px;min-width: 60px;font-weight: bold;width: 150px;text-align: right;">账号：</label>
@@ -51,61 +52,128 @@
                             册</el-button>
                     </div>
 
-                </div>
+                </div> -->
+
+                <el-form :rules="rules" :model="registerForm" label-position="right" label-width="150px">
+                    <el-form-item label="账号：">
+                        <el-input v-model="registerForm.phone" placeholder="请输入手机号" />
+                    </el-form-item>
+                    <el-form-item label="密码：">
+                        <el-input v-model="registerForm.password" type="password" placeholder="请输入密码" show-password />
+                    </el-form-item>
+                    <el-form-item label="确认密码：">
+                        <el-input v-model="registerForm.passwordConfirm" type="password" placeholder="请确认密码"
+                            show-password />
+                    </el-form-item>
+                    <el-form-item label="姓名：">
+                        <el-input v-model="registerForm.name" placeholder="您的姓名" />
+                    </el-form-item>
+                    <el-form-item label="学号：">
+                        <el-input v-model="registerForm.studentNumber" placeholder="您的学号" />
+                    </el-form-item>
+                    <el-form-item label="年级：">
+                        <el-select v-model="registerForm.selectedGrade" placeholder="选择您的年级">
+                            <el-option v-for="item in options" :key="item.value" :label="item.label" :value="item.value" />
+                        </el-select>
+                    </el-form-item>
+                    <el-form-item label="邮箱：">
+                        <el-input v-model="registerForm.email" placeholder="您的邮箱" />
+                    </el-form-item>
+                    <el-form-item>
+                        <el-checkbox v-model="registerForm.agree">同意</el-checkbox>
+                        <a class="regulation" style="color:#db8916">《南土豆使用条例》</a>
+                    </el-form-item>
+                    <el-form-item>
+                        <el-button type="warning" style="width: 75%; height: 42px;font-size: 20px;" @click="register">注
+                            册</el-button>
+                    </el-form-item>
+                </el-form>
             </el-main>
-            <el-footer>Footer</el-footer>
         </el-container>
     </div>
 </template>
   
-<script>
-import { ref } from 'vue'
+<script setup>
+import { ref, reactive } from 'vue'
+import axios from 'axios'
+const options = ref([
+    { label: '大一', value: '大一' },
+    { label: '大二', value: '大二' },
+    { label: '大三', value: '大三' },
+    { label: '大四', value: '大四' },
+    // 添加更多年级...
+]);
+const registerForm = reactive({
+    phone: '',
+    password: '',
+    passwordConfirm: '',
+    name: '',
+    studentNumber: '',
+    email: '',
+    selectedGrade: '',
+    agree: false
 
-export default {
-    setup() {
-        const phone = ref('')
-        const password = ref('')
-        const passwordConfirm = ref('')
-        const name = ref('')
-        const studentNumber = ref('')
-        const email = ref('')
-        const selectedGrade = ref('');
-        const options = ref([
-            { label: '大一', value: '大一' },
-            { label: '大二', value: '大二' },
-            { label: '大三', value: '大三' },
-            { label: '大四', value: '大四' },
-            // 添加更多年级...
-        ]);
-        const agree = ref(false);
+})
 
-        var user = {
-            phone: phone,
-            password: password,
-            name: name,
-            studentNumber: studentNumber,
-            email: email,
-            grade: selectedGrade,
-        }
-        const register = async () => {
-            if (password.value != passwordConfirm.value) {
-                alert("两次密码不一致");
-                return;
-            }
-            if (!agree) {
-                alert("请同意使用条例");
-                return;
-            }
+const rules = {
+    phone: [
+        { required: true, message: '请输入手机号', trigger: 'blur' },
+        { pattern: /^1[3-9]\d{9}$/, message: '请输入正确的手机号', trigger: 'blur' }
+    ],
+    password: [
+        { required: true, message: '请输入密码', trigger: 'blur' },
+        { min: 6, max: 12, message: '密码长度在 6 到 12 个字符', trigger: 'blur' }
+    ],
+    passwordConfirm: [
+        { required: true, message: '请确认密码', trigger: 'blur' },
+        { validator: validatePasswordConfirm, trigger: 'blur' }
+    ],
+    name: [
+        { required: true, message: '请输入姓名', trigger: 'blur' }
+    ],
+    studentNumber: [
+        { required: true, message: '请输入学号', trigger: 'blur' }
+    ],
+    selectedGrade: [
+        { required: true, message: '请选择年级', trigger: 'change' }
+    ],
+    email: [
+        { required: true, message: '请输入邮箱地址', trigger: 'blur' },
+        { type: 'email', message: '请输入正确的邮箱地址', trigger: ['blur', 'change'] }
+    ],
+    agree: [
+        { validator: validateAgree, trigger: 'change' }
+    ]
+}
 
-        }
+async function register() {
+    console.log(registerForm)
+    const user = {
+        phone: registerForm.phone,
+        password: registerForm.password,
+        name: registerForm.name,
+        studentNumber: registerForm.studentNumber,
+        grade: registerForm.selectedGrade,
+        email: registerForm.email,
+        avatarUrl: ""
+    }
+    console.log(user)
+    const response = await axios.post('http://localhost:8080/user', user);
+    console.log(response)
+}
+function validatePasswordConfirm(rule, value, callback) {
+    if (value !== registerForm.value.password) {
+        callback(new Error('两次输入密码不一致!'));
+    } else {
+        callback();
+    }
+}
 
-
-        return {
-            password,
-            selectedGrade,
-            options,
-            agree,
-        }
+function validateAgree(rule, value, callback) {
+    if (!value) {
+        callback(new Error('你必须同意条款!'));
+    } else {
+        callback();
     }
 }
 </script>

@@ -100,13 +100,27 @@ const setForm = async () => {
   form.email = user.email;
   form.studentNumber = user.studentNumber;
   form.grade = user.grade;
+
 }
 
 watch(userStore.getUser, () => {
   setForm()
 })
 
-setForm()
 
+async function updateUser(user) {
+  const response = await axios.put(`http://localhost:8080/updateUser?id=${this.form.id}`, user);
+  console.log(response.data);
+}
+
+const submitForm = () => {
+  const User = userStore.getUser()
+  User.email = form.email
+  User.studentNumber = form.studentNumber
+  User.grade = form.grade
+  userStore.setUser(User)
+  console.log(userStore.getUser())
+  updateUser(User);
+}
 
 </script>
