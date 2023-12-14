@@ -32,34 +32,38 @@
       ></i>
     </div>
     <div class="footer">
-      <el-tooltip
-        class="box-item"
-        content="AI建议"
-        placement="top"
-        effect="light"
-      >
-        <button @click="handleButtonClick('Button 1')">
-          <i class="bi bi-robot"></i>
-        </button>
-      </el-tooltip>
+      <el-popover placement="bottom" trigger="click" :width="200">
+        <template #reference>
+          <div>
+            <el-tooltip
+              content="AI建议"
+              placement="top"
+              effect="light">
+              <button @click="askChatGPT">
+                <i class="bi bi-robot" style="font-size: 20px;"></i>
+              </button>
+            </el-tooltip>
+          </div>
+        </template>
+        <el-skeleton v-if="aiSuggestion.length === 0" :rows="2" animated />
+        <div v-else>{{ aiSuggestion }}</div>
+      </el-popover>
 
       <el-tooltip
-        class="box-item"
         content="更多详情"
         placement="top"
         effect="light"
       >
         <button @click="moreDetails">
-          <i class="bi bi-three-dots"></i></button
+          <i class="bi bi-three-dots" style="font-size: 20px;"></i></button
       ></el-tooltip>
       <el-tooltip
-        class="box-item"
         content="完成"
         placement="top"
         effect="light"
       >
         <button @click="completeTask">
-          <i class="bi bi-check-lg"></i></button
+          <i class="bi bi-check-lg" style="font-size: 20px;"></i></button
       ></el-tooltip>
     </div>
   </div>
@@ -84,6 +88,7 @@
 <script>
 import axios from 'axios';
 import { useDonelistStore } from '../stores/donelist.js';
+import { ElMessage } from 'element-plus';
 
 export default {
   props: {
@@ -107,13 +112,33 @@ export default {
       myId: this.id,
       myUserId: this.userId,
       dialogVisible: false,
-      urgent: false
+      urgent: false,
+      aiSuggestion: ''
     };
   },
   methods: {
     // 处理按钮点击事件
-    handleButtonClick(buttonName) {
-      console.log(`${buttonName} clicked`);
+    askChatGPT() {
+      if (this.aiSuggestion.length === 0) {
+        const xhr = new XMLHttpRequest();
+        let content = "请针对下述任务描述给出30-50字的建议：" + this.myContent;
+        xhr.open('GET', `http://47.115.201.228:8080/ai/chatgpt?content=${content}&username=DEFAULT`);
+        xhr.setRequestHeader('Content-Type', 'text/event-stream');
+        xhr.onreadystatechange = () => {
+          if (xhr.readyState === 3) {
+            this.aiSuggestion = xhr.responseText;
+          }
+          if (xhr.readyState === 4) {
+            if (xhr.status === 200) {
+              this.aiSuggestion = xhr.responseText;
+            }
+          }
+          if (xhr.status !== 200) {
+            ElMessage.error('AI接口访问失败，请检查网络设置');
+          }
+        };
+        xhr.send();
+      }
     },
     toggleStar() {
       this.isStarred = !this.isStarred;
@@ -252,17 +277,17 @@ export default {
 }
 
 .footer button {
-  width: 50px;
+  width: 100px;
   height: 50px;
   font-size: 15px;
-  flex: 1;
   border-radius: 4px;
 }
+
 .outside {
   margin: 0 100px 5px;
   padding: 0;
 }
-.footer button:not(:last-child) {
+/* .footer button:not(:last-child) {
   margin-right: 8px; 
-}
+} */
 </style>
