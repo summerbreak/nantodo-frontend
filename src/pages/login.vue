@@ -42,6 +42,7 @@ import { reactive, ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router';
 import axios from 'axios'
 import { useUserStore } from '../stores/user.js'
+
 const loginFormRef = ref(null);
 const isRegistering = ref(false)
 const loginForm = reactive({
@@ -85,7 +86,8 @@ function handleLoginResponse(response) {
         console.log('登录成功', response.data)
         userStore.setUser(response.data)
         console.log(userStore.getUser())
-        router.push('/');
+        localStorage.setItem('currentUser', JSON.stringify(response.data.id))
+        location.href = '/'
     } else if (response.status === 401) {
         console.log('密码错误', response.status)
     } else if (response.status === 404) {

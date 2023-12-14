@@ -139,7 +139,7 @@ onActivated(async () => {
   document.documentElement.scrollTop = 0;
   let id = route.query.id
   selected.value = route.query.selected == 'true'
-  await axios.get(`http://localhost:11300/course?id=${id}`).then(res => {
+  await axios.get(`http://localhost:8080/course?id=${id}`).then(res => {
     courseInfo.value = res.data
   }).catch(error => {
     alert(error)

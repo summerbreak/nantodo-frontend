@@ -1,19 +1,40 @@
 import { defineStore } from "pinia";
+import { ref } from "vue";
+import axios from "axios";
 
 export const useUserStore = defineStore('user', () => {
     let user = {
-        id: '111',
-        name: '匡宏宇',
-        studentNumber: '211250250',
+        id: '',
+        name: '',
+        studentNumber: '',
+        email: '',
+        phone: '',
+        avatarUrl: '',
+        grade: ''
     }
+
+    let isLogin = ref(false)
 
     function getUser() {
         return user
     }
 
     function setUser(newUser) {
-        user = {...newUser}
+        if (newUser) {
+            user = {...newUser}
+            isLogin.value = true
+        }
     }
 
-    return {getUser, setUser}
+    function updateUser() {
+        axios.put(`http://localhost:8080/user?id=${user.id}`, user).then(
+            res => {
+                console.log('update user success', res)
+            }, err => {
+                console.log('update user fail', err)
+            }
+        )
+    }
+
+    return {isLogin, getUser, setUser, updateUser}
 })

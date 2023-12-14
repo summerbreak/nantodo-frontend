@@ -86,7 +86,7 @@ const user = useUserStore().getUser()
 
 onActivated(async () => {
   isLoading.value = true
-  await axios.get('http://localhost:11300/course/allCourse').then(
+  await axios.get('http://localhost:8080/course/allCourse').then(
       res => {
         allCourses.value = []
         for (let i = 0; i < res.data.length; i++) {
@@ -95,7 +95,7 @@ onActivated(async () => {
         }
       }
   )
-  await axios.get(`http://localhost:11300/user?id=${user.id}`).then(
+  await axios.get(`http://localhost:8080/user?id=${user.id}`).then(
       res => {
         console.log(res)
         userInfo.value = res.data
