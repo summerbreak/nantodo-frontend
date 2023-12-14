@@ -11,7 +11,7 @@
                     }}小时提醒</el-text>
                 </el-form-item>
                 <el-form-item label="静默模式是否开启" prop="quietMode" style="font-weight: bold;">
-                    <el-switch v-model="settings.quietMode" active-color="#db8916" disabled="true"></el-switch>
+                    <el-switch v-model="settings.quietMode" active-color="#db8916" disabled></el-switch>
                 </el-form-item>
                 <el-form-item label="静默模式开始时间" prop="quietModeStart" style="font-weight: bold;">
                     <el-text style="width: 25vh; font-size: 18px;font-weight: normal;">从{{ settings.quietModeStart
@@ -81,7 +81,7 @@
 
 <script setup>
 
-import { reactive, ref, watch } from "vue"
+import { reactive, ref, watch, onActivated } from "vue"
 import { useUserStore } from '../stores/user.js'
 import axios from 'axios'
 
@@ -99,24 +99,26 @@ const settings = reactive({
 })
 
 const setSettings = async () => {
-    console.log(user)
-
-    const { emergencyDays, noticeFrequency, quietMode, quietModeStart, quietModeEnd } = user.settings;
-    settings = { emergencyDays, noticeFrequency, quietMode, quietModeStart, quietModeEnd };
-    console.log(settings)
-    // settings.emergencyDays = user.settings.emergencyDays
-    // settings.noticeFrequency = user.settings.noticeFrequency
-    // settings.quietMode = user.settings.quietMode
-    // settings.quietModeStart = user.settings.quietModeStart
-    // settings.quietModeEnd = user.settings.quietModeEnd
+    console.log("setSettings", user)
+    if (!user || !user.settings) {
+        console.error('User or user settings is undefined');
+        return;
+    }
+    settings.emergencyDays = user.settings.emergencyDays
+    settings.noticeFrequency = user.settings.noticeFrequency
+    settings.quietMode = user.settings.quietMode
+    settings.quietModeStart = user.settings.quietModeStart
+    settings.quietModeEnd = user.settings.quietModeEnd
 }
 
-watch(userStore.getUser, () => {
+onActivated(() => {
     setSettings()
 })
 
+
 async function updateUser(user) {
-    const response = await axios.put(`http://localhost:8080/updateUser?id=${this.id}`, user);
+    const response = await axios.put(`http://localhost:8080/user?id=${user.id}`, user);
+
     console.log(response.data);
 }
 
@@ -126,5 +128,6 @@ const submitForm = () => {
     userStore.setUser(User)
     console.log(userStore.getUser())
     updateUser(User);
+    edit.value = false
 }
 </script >

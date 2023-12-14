@@ -32,22 +32,24 @@
                 </div>
             </div>
         </div>
-        <Register v-else />
+        <Register v-else @register-success="isRegistering = false" />
     </div>
 </template>
 
 <script setup>
 import Register from '../components/Register.vue'
-import { ref } from 'vue'
+import { reactive, ref } from 'vue'
+import { useRouter } from 'vue-router';
 import axios from 'axios'
 import { useUserStore } from '../stores/user.js'
 
 const isRegistering = ref(false)
-const loginForm = ref({
+const loginForm = reactive({
     account: '',
     password: ''
 })
 const userStore = useUserStore()
+const router = useRouter();
 const rules = {
     account: [
         { required: true, message: '请输入账号', trigger: 'blur' }
@@ -57,20 +59,32 @@ const rules = {
     ]
 }
 async function login() {
-    const response = await axios.get(' http://localhost:8080/user/login', {
+    console.log(loginForm)
+    console.log(loginForm.account)
+    console.log(loginForm.password)
+    await axios.get('http://localhost:8080/user/login', {
         params: {
             phone: loginForm.account,
             password: loginForm.password
         }
+    }).then(response => {
+        handleLoginResponse(response)
+    }, err => {
+        console.log(err) // 请求失败的回调
     })
+}
+
+function handleLoginResponse(response) {
     if (response.status === 200) {
         console.log('登录成功', response.data)
         userStore.setUser(response.data)
         console.log(userStore.getUser())
+        router.push('/');
     } else if (response.status === 401) {
         console.log('密码错误', response.status)
-    } else {
+    } else if (response.status === 404) {
         console.log('账号不存在', response.status)
+        console.log(response.data)
     }
 }
 

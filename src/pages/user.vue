@@ -26,8 +26,9 @@
                 <el-text type="warning" style="display: flex;justify-content: center ;font-size:15px">
                     <h1>个人信息</h1>
                 </el-text>
-                <UserInfoComponent style="width: 50vh; margin: 0 auto" />
-
+                <keep-alive>
+                    <UserInfoComponent style="width: 50vh; margin: 0 auto" />
+                </keep-alive>
             </div>
 
 
@@ -54,11 +55,15 @@
 </style>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
 import GeneralSetting from '../components/GeneralSetting.vue';
 import UserInfoComponent from '../components/UserInfoComponent.vue';
+import { useUserStore } from '../stores/user.js'
 
 const index = ref(1)
+onMounted(() => {
+    console.log('mounted', useUserStore().getUser())
+})
 
 const menuSelect = (key) => {
     index.value = key
