@@ -1,7 +1,7 @@
 <template>
   <div class="demo-progress">
     <div class="progress-container">
-      <el-progress type="dashboard" :percentage="80" >
+      <el-progress type="dashboard" :percentage="percent" >  
         <template #default="{ percentage }">
           <span class="percentage-value">{{ percentage }}%</span>
           <span class="percentage-label">Progressing</span>
@@ -9,16 +9,39 @@
       </el-progress>
     </div>
     <p class="remaining-items">
-      还剩 <span class="remaining-number">10</span> 项待办
+      还剩 <span class="remaining-number">{{store.change.total-store.change.done}}</span> 项待办
     </p>
   </div>
 </template>
   
-  <script lang="ts" setup>
-import { Check } from "@element-plus/icons-vue";
+<script setup>
+  import { useDonelistStore } from '../stores/donelist.js';
+  import { onMounted , watch, computed, ref , reactive} from "vue";
+  const store = useDonelistStore();
+  function loadData() {
+    // 从localStorage加载数据
+    // const data = JSON.parse(localStorage.getItem('doneList'));
+    // if (data) {
+    //   doneList.total = data.total;
+    //   doneList.done = data.done;
+    //   console.log(doneList);
+    // } else {
+    //   alert('No data found!');
+    // }
+  };
+  onMounted(() => {
+    loadData();
+  });
+  const percent = computed(() => {
+    console.log(store.change);
+    if (store.change.total==0){
+      return 0;
+    }
+    return Math.round((store.change.done / store.change.total) * 100);
+  });
 </script>
   
-  <style scoped>
+<style scoped>
 .demo-progress {
   display: flex;
   align-items: center;

@@ -15,7 +15,7 @@
         <h2 class="title">{{ myTitle }}</h2>
       </div>
 
-      <p class="date">发布日期 <br/>{{ myReleaseTime }}</p>
+      <p class="date">发布日期 <br/>{{ myReleaseTime.toLocaleString('af') }}</p>
     </div>
     <div class="content">
       <p class="content-text">{{ myContent }}</p>
@@ -23,7 +23,7 @@
     <div class="group-name">
       <p>来自移动互联网</p>
     </div>
-    <p class="deadline">截止日期 <br/> {{ myDeadline }}</p>
+    <p :class="{deadline: urgent}">截止日期 <br/> {{ myDeadline.toLocaleString('af') }}</p>
     <div class="completion-overlay" v-if="isCompleted">
       <i
         class="bi bi-check-lg"
@@ -71,7 +71,7 @@
   >
     <p>发布日期 {{ releaseTime }}</p>
     <span>{{ content }}</span>
-    <p class="deadline">截止日期 {{ deadline }}</p>
+    <p :class="{deadline: urgent}">截止日期 {{ deadline }}</p>
     <p>来自移动互联网</p>
     <template #footer>
       <span class="dialog-footer">
@@ -83,6 +83,7 @@
   
 <script>
 import axios from 'axios';
+import { useDonelistStore } from '../stores/donelist.js';
 
 export default {
   props: {
@@ -101,11 +102,12 @@ export default {
       isCompleted: this.done,
       myTitle: this.title,
       myContent: this.content,
-      myReleaseTime: this.releaseTime,
-      myDeadline: this.deadline,
+      myReleaseTime: new Date(this.releaseTime),
+      myDeadline: new Date(this.deadline),
       myId: this.id,
       myUserId: this.userId,
       dialogVisible: false,
+      urgent: false
     };
   },
   methods: {
@@ -119,10 +121,15 @@ export default {
     },
     completeTask() {
       this.isCompleted = true;
+      const store = useDonelistStore();
+      //增加useDonelistStore中change的值
+      store.change.done++;
       this.updateTask();
     },
     undoCompletion() {
       this.isCompleted = false;
+      const store = useDonelistStore();
+      store.change.done--;
       this.updateTask();
     },
     moreDetails() {
@@ -141,19 +148,28 @@ export default {
           id: this.myId,
           title: this.myTitle,
           content: this.myContent,
-          releaseTime: this.myReleaseTime,
-          deadline: this.myDeadline,
+          releaseTime: this.releaseTime,
+          deadline: this.deadline,
           starred: this.isStarred,
           done: this.isCompleted,
           userId: this.myUserId,
         })
         .then((res) => {
           console.log(res);
+          this.urgent = this.isUrgent();
         })
         .catch((err) => {
           console.log(err);
         });
     },
+    isUrgent() {
+      if (isCompleted) {
+          return false
+      }
+      const now = new Date()
+      const deadline = new Date(this.myDeadline)
+      return now > deadline || deadline - now < 3 * 24 * 60 * 60 * 1000
+    }
   }
 };
 </script>
@@ -183,10 +199,12 @@ export default {
 .group-name {
   font-size: 15px;
 }
-.deadline {
-  color: #ff6666; /* 淡红色 */
+.unurgent{ 
   font-size: 15px;
   margin-top: 0%;
+}
+.deadline {
+  color: #ff6666; /* 淡红色 */
 }
 .icon-and-title {
   display: flex;

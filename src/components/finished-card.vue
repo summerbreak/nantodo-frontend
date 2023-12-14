@@ -1,5 +1,5 @@
 <template>
-    <div class="task-card" :class="{ completed: isCompleted }">
+    <div class="task-card" :class="{ completed: !isCompleted }">
       <div class="header">
         <div class="icon-and-title">
           <div class="star">
@@ -15,7 +15,7 @@
           <h2 class="title">{{ myTitle }}</h2>
         </div>
   
-        <p class="date">发布日期 <br/>{{ myReleaseTime }}</p>
+        <p class="date">发布日期 <br/>{{ myReleaseTime.toLocaleString('af') }}</p>
       </div>
       <div class="content">
         <p class="content-text">{{ myContent }}</p>
@@ -23,26 +23,15 @@
       <div class="group-name">
         <p>来自移动互联网</p>
       </div>
-      <p class="deadline">截止日期 <br/> {{ myDeadline }}</p>
-      <div class="completion-overlay" v-if="isCompleted">
+      <p class="deadline">截止日期 <br/> {{ myDeadline.toLocaleString('af') }}</p>
+      <div class="completion-overlay" v-if="!isCompleted">
         <i
-          class="bi bi-check-lg"
+          class="bi bi-arrow-counterclockwise"
           style="font-size: 150px; color: #a9a9a9"
           @click="undoCompletion"
         ></i>
       </div>
       <div class="footer">
-        <el-tooltip
-          class="box-item"
-          content="Chatgpt描述"
-          placement="top-start"
-          effect="light"
-        >
-          <button @click="handleButtonClick('Button 1')">
-            <i class="bi bi-robot"></i>
-          </button>
-        </el-tooltip>
-  
         <el-tooltip
           class="box-item"
           content="更多详情"
@@ -54,12 +43,12 @@
         ></el-tooltip>
         <el-tooltip
           class="box-item"
-          content="完成"
+          content="恢复为未完成"
           placement="top-start"
           effect="light"
         >
-          <button @click="completeTask">
-            <i class="bi bi-check-lg"></i></button
+          <button @click="redoTask">
+            <i class="bi bi-arrow-counterclockwise"></i></button
         ></el-tooltip>
       </div>
     </div>
@@ -83,6 +72,7 @@
     
   <script>
   import axios from 'axios';
+  import { useDonelistStore } from '../stores/donelist.js';
   
   export default {
     props: {
@@ -101,8 +91,8 @@
         isCompleted: this.done,
         myTitle: this.title,
         myContent: this.content,
-        myReleaseTime: this.releaseTime,
-        myDeadline: this.deadline,
+        myReleaseTime: new Date(this.releaseTime),
+        myDeadline: new Date(this.deadline),
         myId: this.id,
         myUserId: this.userId,
         dialogVisible: false,
@@ -117,12 +107,16 @@
         this.isStarred = !this.isStarred;
         this.updateTask();
       },
-      completeTask() {
-        this.isCompleted = true;
+      redoTask() {
+        this.isCompleted = false;
+        const store = useDonelistStore();
+        store.change.done--;
         this.updateTask();
       },
       undoCompletion() {
-        this.isCompleted = false;
+        this.isCompleted = true;
+        const store = useDonelistStore();
+        store.change.done++;
         this.updateTask();
       },
       moreDetails() {
@@ -141,8 +135,8 @@
             id: this.myId,
             title: this.myTitle,
             content: this.myContent,
-            releaseTime: this.myReleaseTime,
-            deadline: this.myDeadline,
+            releaseTime: this.releaseTime,
+            deadline: this.deadline,
             starred: this.isStarred,
             done: this.isCompleted,
             userId: this.myUserId,
@@ -184,7 +178,6 @@
     font-size: 15px;
   }
   .deadline {
-    color: #ff6666; /* 淡红色 */
     font-size: 15px;
     margin-top: 0%;
   }

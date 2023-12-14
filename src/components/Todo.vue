@@ -55,8 +55,8 @@ export default {
 .mainPage {
   display: flex;
   padding: 10px;
-  margin-left: 10%;
-  margin-right: 10%;
+  margin-left: 7%;
+  margin-right: 7%;
 }
 .calender {
   flex: 4;
