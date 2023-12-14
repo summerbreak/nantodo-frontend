@@ -7,12 +7,15 @@
             <div class="container-fluid" style="padding-bottom: 24px;">
                 <div class="form">
                     <div style="padding:15px 5px;">
-                        <div class="form-group" style="margin-bottom: 10px;">
-                            <el-input v-model="account" placeholder="请输入账号" height="20px" size="large" />
-                        </div>
-                        <div class="form-group" style="margin-bottom: 20px;">
-                            <el-input v-model="password" type="password" placeholder="请输入密码" size="large" show-password />
-                        </div>
+                        <el-form :model="loginForm" :rules="rules" ref="loginFormRef" label-position="top">
+                            <el-form-item prop="account">
+                                <el-input v-model="loginForm.account" placeholder="请输入手机号" size="large" />
+                            </el-form-item>
+                            <el-form-item prop="password">
+                                <el-input v-model="loginForm.password" type="password" placeholder="请输入密码" size="large"
+                                    show-password />
+                            </el-form-item>
+                        </el-form>
                         <div class="form-group" style=" margin-bottom: 22px; display: flex; justify-content: center;">
                             <el-button type="warning" style="width: 100%; height: 42px;font-size: 18px;" @click="login">登
                                 录</el-button>
@@ -29,60 +32,73 @@
                 </div>
             </div>
         </div>
-        <Register v-else />
+        <Register v-else @register-success="isRegistering = false" />
     </div>
 </template>
 
-<script>
+<script setup>
 import Register from '../components/Register.vue'
-import { ref } from 'vue'
+import { reactive, ref, onMounted } from 'vue'
+import { useRouter } from 'vue-router';
 import axios from 'axios'
 import { useUserStore } from '../stores/user.js'
-export default {
-    setup() {
-        const isRegistering = ref(false)
-        const account = ref('')
-        const password = ref('')
-        const userStore = useUserStore()
+const loginFormRef = ref(null);
+const isRegistering = ref(false)
+const loginForm = reactive({
+    account: '',
+    password: ''
+})
+const userStore = useUserStore()
+const router = useRouter();
+const rules = {
+    account: [
+        { required: true, message: '请输入账号', trigger: 'blur' }
+    ],
+    password: [
+        { required: true, message: '请输入密码', trigger: 'blur' }
+    ]
+}
 
-        const login = async () => {
-            try {
-                const response = await axios.get('/login', {
-                    params: {
-                        phone: account.value,
-                        password: password.value
-                    }
-                })
-
-                if (response.status === 200) {
-                    console.log('登录成功', response.data)
-                    userStore.setUser(response.data)
-                } else if (response.status === 401) {
-                    console.log('密码错误', response.status)
-                } else {
-                    console.log('账号不存在', response.status)
+async function login() {
+    loginFormRef.value.validate(valid => {
+        if (valid) {
+            // 如果表单验证成功，执行登录操作
+            axios.get('http://localhost:8080/user/login', {
+                params: {
+                    phone: loginForm.account,
+                    password: loginForm.password
                 }
-            } catch (error) {
-                console.error('请求失败', error)
-            }
+            }).then(response => {
+                handleLoginResponse(response)
+            }, err => {
+                console.log(err) // 请求失败的回调
+            })
+        } else {
+            // 如果表单验证失败，显示错误信息
+            console.log('表单验证失败');
+            return false;
         }
-
-        const showRegister = () => {
-            isRegistering.value = true
-        }
-
-        return {
-            isRegistering,
-            account,
-            password,
-            login,
-            showRegister
-        }
-    },
-    components: {
-        Register
+    });
+}
+function handleLoginResponse(response) {
+    if (response.status === 200) {
+        console.log('登录成功', response.data)
+        userStore.setUser(response.data)
+        console.log(userStore.getUser())
+        router.push('/');
+    } else if (response.status === 401) {
+        console.log('密码错误', response.status)
+    } else if (response.status === 404) {
+        console.log('账号不存在', response.status)
+        console.log(response.data)
     }
-};
+}
+
+const showRegister = () => {
+    isRegistering.value = true
+}
+
+
 </script> 
 
 <style scoped>
@@ -102,7 +118,7 @@ export default {
 
 .login-container {
     position: relative;
-    height: 100vh;
+    height: calc(100vh - 80px);
 }
 
 
@@ -111,7 +127,7 @@ export default {
     top: 0px;
     left: 0;
     width: 100%;
-    height: calc(100% - 80px);
+    height: 100%;
     background: url('../assets/pic/Autumn.jpg') center/cover no-repeat;
     z-index: 0;
     /* 将背景图片放到最底层 */
