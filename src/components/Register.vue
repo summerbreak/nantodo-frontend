@@ -1,10 +1,10 @@
 <template>
     <div class="register-box">
         <el-container>
-
             <el-main style="width: 375px;">
                 <div class="t-tab-top">欢迎您注册南土豆账号</div>
-                <el-form :model="registerForm" :rules="rules" label-position="right" label-width="150px">
+                <el-form :model="registerForm" :rules="rules" ref="registerFormRef" label-position="right"
+                    label-width="150px">
                     <el-form-item label="账号：" prop="phone">
                         <el-input v-model="registerForm.phone" placeholder="请输入手机号" />
                     </el-form-item>
@@ -12,8 +12,7 @@
                         <el-input v-model="registerForm.password" type="password" placeholder="请输入密码" show-password />
                     </el-form-item>
                     <el-form-item label="确认密码：" prop="passwordConfirm">
-                        <el-input v-model="registerForm.passwordConfirm" type="password" placeholder="请确认密码"
-                            show-password />
+                        <el-input v-model="registerForm.passwordConfirm" placeholder="请确认密码" show-password />
                     </el-form-item>
                     <el-form-item label="姓名：" prop="name">
                         <el-input v-model="registerForm.name" placeholder="您的姓名" />
@@ -54,6 +53,7 @@ const options = ref([
     { label: '大四', value: '大四' },
     // 添加更多年级...
 ]);
+const registerFormRef = ref(null);
 const registerForm = reactive({
     phone: '',
     password: '',
@@ -98,23 +98,31 @@ const rules = {
 }
 
 async function register() {
-    console.log(registerForm)
-    const user = {
-        phone: registerForm.phone,
-        password: registerForm.password,
-        name: registerForm.name,
-        studentNumber: registerForm.studentNumber,
-        grade: registerForm.selectedGrade,
-        email: registerForm.email,
-        avatarUrl: ""
-    }
-    console.log(user)
-    const response = await axios.post('http://localhost:8080/user', user);
-    console.log(response)
-    emit('register-success');
+    registerFormRef.value.validate(async valid => {
+        if (valid) {
+            const user = {
+                phone: registerForm.phone,
+                password: registerForm.password,
+                name: registerForm.name,
+                studentNumber: registerForm.studentNumber,
+                grade: registerForm.selectedGrade,
+                email: registerForm.email,
+                avatarUrl: ""
+            }
+            console.log(user)
+            const response = await axios.post('http://localhost:8080/user', user);
+            console.log(response)
+            emit('register-success');
+        } else {
+            console.log('表单验证失败');
+            return false;
+        }
+    });
+
+
 }
 function validatePasswordConfirm(rule, value, callback) {
-    if (value !== registerForm.value.password) {
+    if (value !== registerForm.password) {
         callback(new Error('两次输入密码不一致!'));
     } else {
         callback();

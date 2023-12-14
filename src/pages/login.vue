@@ -7,7 +7,7 @@
             <div class="container-fluid" style="padding-bottom: 24px;">
                 <div class="form">
                     <div style="padding:15px 5px;">
-                        <el-form :model="loginForm" :rules="rules" label-position="top">
+                        <el-form :model="loginForm" :rules="rules" ref="loginFormRef" label-position="top">
                             <el-form-item prop="account">
                                 <el-input v-model="loginForm.account" placeholder="请输入手机号" size="large" />
                             </el-form-item>
@@ -38,11 +38,11 @@
 
 <script setup>
 import Register from '../components/Register.vue'
-import { reactive, ref } from 'vue'
+import { reactive, ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router';
 import axios from 'axios'
 import { useUserStore } from '../stores/user.js'
-
+const loginFormRef = ref(null);
 const isRegistering = ref(false)
 const loginForm = reactive({
     account: '',
@@ -58,22 +58,28 @@ const rules = {
         { required: true, message: '请输入密码', trigger: 'blur' }
     ]
 }
-async function login() {
-    console.log(loginForm)
-    console.log(loginForm.account)
-    console.log(loginForm.password)
-    await axios.get('http://localhost:8080/user/login', {
-        params: {
-            phone: loginForm.account,
-            password: loginForm.password
-        }
-    }).then(response => {
-        handleLoginResponse(response)
-    }, err => {
-        console.log(err) // 请求失败的回调
-    })
-}
 
+async function login() {
+    loginFormRef.value.validate(valid => {
+        if (valid) {
+            // 如果表单验证成功，执行登录操作
+            axios.get('http://localhost:8080/user/login', {
+                params: {
+                    phone: loginForm.account,
+                    password: loginForm.password
+                }
+            }).then(response => {
+                handleLoginResponse(response)
+            }, err => {
+                console.log(err) // 请求失败的回调
+            })
+        } else {
+            // 如果表单验证失败，显示错误信息
+            console.log('表单验证失败');
+            return false;
+        }
+    });
+}
 function handleLoginResponse(response) {
     if (response.status === 200) {
         console.log('登录成功', response.data)

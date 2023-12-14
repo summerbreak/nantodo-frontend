@@ -27,7 +27,8 @@
 
     </div>
     <div v-else>
-      <el-form label-width="30%" class="selfInfo" label-position="right" hide-required-asterisk size="large">
+      <el-form :rules="rule" ref="ruleFormRef" label-width="30%" class="selfInfo" label-position="right"
+        hide-required-asterisk size="large">
         <el-form-item label="姓名" prop="name" style="font-weight: bold;">
           <el-text style="width: 25vh; font-size: 18px; font-weight: normal;"> {{ form.name }}</el-text>
         </el-form-item>
