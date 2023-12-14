@@ -7,6 +7,7 @@ import ElementPlus from 'element-plus'
 import zhCn from 'element-plus/dist/locale/zh-cn.mjs'
 import 'element-plus/dist/index.css'
 import { createPinia } from 'pinia'
+import { setupCalendar} from 'v-calendar'
 
 const app = createApp(App)
 const router = createRouter({
@@ -21,5 +22,5 @@ router.beforeEach((to, from, next) => {
         next()
     }
 })
-app.use(router).use(ElementPlus, {locale: zhCn}).use(createPinia())
+app.use(router).use(ElementPlus, {locale: zhCn}).use(createPinia()).use(setupCalendar, {})
 app.mount('#app')
