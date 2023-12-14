@@ -3,8 +3,7 @@
         <el-container>
             <el-main style="width: 375px;">
                 <div class="t-tab-top">欢迎您注册南土豆账号</div>
-                <el-form :model="registerForm" :rules="rules" ref="registerFormRef" label-position="right"
-                    label-width="150px">
+                <el-form :model="registerForm" :rules="rules" ref="registerFormRef" label-width="auto">
                     <el-form-item label="账号：" prop="phone">
                         <el-input v-model="registerForm.phone" placeholder="请输入手机号" />
                     </el-form-item>
@@ -161,7 +160,7 @@ function validateAgree(rule, value, callback) {
     font-weight: 700;
     color: #000000;
     text-align: center;
-    padding: 25px 0 20px 0;
+    padding: 35px 0 15px 0;
     border-bottom: 1px solid #db8916;
     margin-bottom: 5px;
 }
