@@ -13,5 +13,13 @@ const router = createRouter({
     history: createWebHistory(),
     routes,
 })
+// 若当前未登录，则跳转至登录页
+router.beforeEach((to, from, next) => {
+    if (to.path !== '/login' && to.path !== '/' && !localStorage.getItem('currentUser')) {
+        next('/login')
+    } else {
+        next()
+    }
+})
 app.use(router).use(ElementPlus, {locale: zhCn}).use(createPinia())
 app.mount('#app')

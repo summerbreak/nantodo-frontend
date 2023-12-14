@@ -12,43 +12,56 @@
             <div class="latest">
                 <div class="headline">最近浏览</div>
                 <el-divider class="divider"></el-divider>
-                <div class="aside-list">
-                    <div :class="`aside-list-item `" @click="toGroup('rjjh')">人机交互小组</div>
-                    <div :class="`aside-list-item `" @click="toGroup()">DevOps小组</div>
-                    <div :class="`aside-list-item `" @click="toGroup()">移动互联网小组</div>
-                    <div :class="`aside-list-item `" @click="toGroup()">操作系统小组</div>
-                    <div :class="`aside-list-item `" @click="toGroup()">编译原理小组</div>
+                <div class="recent-list">
+                    <div v-for="group in recentGroupList" :key="group.id"
+                     class="recent-list-item" @click="toGroup(group.id, group.name)">{{ group.name }}</div>
                 </div>
             </div>
         </div>
         <div class="group-main">
-            <GroupList v-show="!showDetail" :is-admin="pageIndex === 2" @to-detail="toGroup"></GroupList>
-            <GroupDetail v-show="showDetail" :group-id="groupId"></GroupDetail>
+            <GroupList v-if="!showDetail" :is-admin="pageIndex === 2" @to-detail="toGroup"></GroupList>
+            <GroupDetail v-else :group-id="groupId"></GroupDetail>
         </div>
     </div>
 </template>
 
 <script setup>
-import { ref, onActivated, watch } from 'vue'
-import { useRoute, useRouter, onBeforeRouteUpdate } from 'vue-router'
+import { ref, reactive, onMounted, onActivated, onDeactivated, watch } from 'vue'
+import { useRoute, useRouter, onBeforeRouteUpdate, onBeforeRouteLeave } from 'vue-router'
 
 const route = useRoute()
 const router = useRouter()
 
 const pageIndex = ref(1)
+let lastPageIndex = 1
 const showDetail = ref(false)
 const groupId = ref('')
+const recentGroupList = reactive([])
 
 onBeforeRouteUpdate(to => {
+    console.log('before route update', to.query)
     if ("id" in to.query) {
         groupId.value = to.query.id
         showDetail.value = true
         pageIndex.value = 0
     } else {
         showDetail.value = false
-        if (pageIndex.value === 0) {
-            pageIndex.value = 1
+        if (lastPageIndex !== 0) {
+            pageIndex.value = lastPageIndex
         }
+    }
+})
+
+onBeforeRouteLeave(() => {
+    pageIndex.value = 2
+    lastPageIndex = 2
+    // localStorage.removeItem('groupList')
+})
+
+onMounted(() => {
+    let recentGroupListStr = localStorage.getItem('recentGroupList')
+    if (recentGroupListStr) {
+        recentGroupList.push(...JSON.parse(recentGroupListStr))
     }
 })
 
@@ -59,9 +72,19 @@ onActivated(() => {
         pageIndex.value = 0
     } else {
         showDetail.value = false
-        pageIndex.value = 1
+        if (lastPageIndex !== 0) {
+            pageIndex.value = lastPageIndex
+        }
     }
-    console.log("activated", showDetail.value)
+})
+
+onDeactivated(() => {
+    console.log("deactivated group")
+    localStorage.removeItem('groupList')
+})
+
+watch(pageIndex, (newValue, oldValue) => {
+    lastPageIndex = oldValue
 })
 
 function toJoin() {
@@ -76,7 +99,8 @@ function toManage() {
     router.push({ query: {} })
 }
 
-function toGroup(id) {
+function toGroup(id, name) {
+    updateRecentGroupList({id, name})
     pageIndex.value = 0
     showDetail.value = true
     groupId.value = id
@@ -86,6 +110,18 @@ function toGroup(id) {
             id
         }
     })
+}
+
+function updateRecentGroupList({id, name}) {
+    let index = recentGroupList.findIndex(group => group.id === id)
+    if (index !== -1) {
+        return
+    }
+    if (recentGroupList.length >= 6) {
+        recentGroupList.pop()
+    }
+    recentGroupList.unshift({id, name})
+    localStorage.setItem('recentGroupList', JSON.stringify(recentGroupList))
 }
 
 </script>
@@ -113,6 +149,13 @@ function toGroup(id) {
     height: calc(100% - 50px);
 }
 
+.recent-list {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    height: calc(100% - 50px);
+}
+
 .aside-list-item {
     width: calc(100% - 20px);
     margin-left: 10px;
@@ -121,6 +164,23 @@ function toGroup(id) {
     line-height: 50px;
     text-align: center;
     font-size: 20px;
+    &:hover {
+        cursor: pointer;
+        background-color: peachpuff;
+        border-radius: 8px;
+    }
+}
+.recent-list-item {
+    width: calc(100% - 20px);
+    margin: 10px 5px 10px 5px;
+    height: 50px;
+    line-height: 50px;
+    text-align: center;
+    font-size: 20px;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 1;
+    overflow: hidden;
     &:hover {
         cursor: pointer;
         background-color: peachpuff;
@@ -143,7 +203,7 @@ function toGroup(id) {
     box-shadow: var(--el-box-shadow-light);
 }
 .latest {
-    height: 400px;
+    height: 500px;
     width: calc(100% - 20px);
     border-radius: 3px;
     margin: 10px;

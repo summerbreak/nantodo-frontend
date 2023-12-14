@@ -69,7 +69,7 @@ const handleClose = (done) => {
 const addCourse = () => {
   dialogVisible.value = false
   console.log(courseInfo)
-  axios.post('http://localhost:11300/course', courseInfo).then(res => {
+  axios.post('http://localhost:8080/course', courseInfo).then(res => {
     console.log(res)
   }).catch(error => {
     alert(error)

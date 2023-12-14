@@ -25,9 +25,10 @@
           </el-badge>
           <el-dropdown>
             <div class="personal-center" @click="toUser">
-              <el-avatar :size="32" style="--el-avatar-bg-color: gold;margin-top: 4px;">
+              <el-avatar v-if="user.avatarUrl === ''" :size="32" style="--el-avatar-bg-color: gold;margin-top: 4px;">
                 <i class="bi bi-person-fill" style="font-size: 22px;"></i>
               </el-avatar>
+              <el-avatar v-else :size="32" :src="user.avatarUrl" style="margin-top: 4px;"></el-avatar>
               <span style="line-height: 40px;margin-left: 10px; color: black; font-size: 16px;">{{ user.name }}</span>
             </div>
             <template #dropdown>
@@ -78,6 +79,7 @@
       ©2023-2033 NANTODO 苏ICP备19073881号-1
     </div>
   </div>
+  <el-backtop :right="100" :bottom="100" style="color: coral;" />
   <el-drawer v-model="showNotice">
     <template #header>
       <h3>消息列表</h3>
@@ -87,14 +89,14 @@
     <el-timeline v-show="messageList.length">
       <el-timeline-item
       v-for="message in messageList"
-      :key="message.id"
+      :key="message.timestamp"
       :type="message.type"
       :timestamp="message.timestamp"
       class="timeline-item"
       >
         <div class="message">
           <span>{{ message.content }}</span>
-          <i class="bi bi-x-lg delete-message" @click="deleteMessage(message.id)"></i>
+          <i class="bi bi-x-lg delete-message" @click="deleteMessage(message.timestamp)"></i>
         </div>
       </el-timeline-item>
     </el-timeline>
@@ -103,23 +105,51 @@
 
 <script setup>
 import { useRouter } from 'vue-router'
-import { reactive, ref, watch } from 'vue'
+import { reactive, ref, watch, onMounted } from 'vue'
+import { ElMessage } from 'element-plus';
+import { useUserStore } from './stores/user';
+import axios from 'axios';
 
 const router = useRouter()
+const userStore = useUserStore()
+
 const activeIndex = ref('/')
-const isLogin = ref(true)
-const isRedDot = ref(true)
+const isLogin = ref(false)
+const isRedDot = ref(false)
 const showNotice = ref(false)
 const user = reactive({
-  name: '匡宏宇'
+  id: '',
+  name: '',
+  avatarUrl: ''
 })
 
-const messageList = reactive([
-  {id: 'qwee', content: '您收到来自“人机交互小组”布置的任务', type: 'primary', timestamp: '2023-09-16 18:38'},
-  {id: 'dzfs', content: '您申请加入小组“操作系统小组”被拒绝', type: 'danger', timestamp: '2023-09-16 14:43'},
-  {id: 'xsdf', content: '您已成功加入小组“人机交互小组”', type: 'success', timestamp: '2023-09-15 20:02'},
-  {id: 'dsfs', content: '您已成功加入课程“人机交互系统”', type: 'success', timestamp: '2023-09-15 10:46'}
-])
+const messageList = reactive([])
+
+// const messageList = reactive([
+//   {id: 'qwee', content: '您收到来自“人机交互小组”布置的任务', type: 'primary', timestamp: '2023-09-16 18:38'},
+//   {id: 'dzfs', content: '您申请加入小组“操作系统小组”被拒绝', type: 'danger', timestamp: '2023-09-16 14:43'},
+//   {id: 'xsdf', content: '您已成功加入小组“人机交互小组”', type: 'success', timestamp: '2023-09-15 20:02'},
+//   {id: 'dsfs', content: '您已成功加入课程“人机交互系统”', type: 'success', timestamp: '2023-09-15 10:46'}
+// ])
+
+onMounted(() => {
+  let currentUser = JSON.parse(localStorage.getItem('currentUser'))
+  if (currentUser) {
+    axios.get(`http://localhost:8080/user?id=${currentUser}`).then(
+      res => {
+        user.id = res.data.id
+        user.name = res.data.name
+        user.avatarUrl = res.data.avatarUrl
+        userStore.setUser(res.data)
+        getMessage(res.data.messages)
+        isLogin.value = true
+      }, err => {
+        console.log(err)
+        ElMessage.error('获取用户数据失败')
+      }
+    )
+  }
+})
 
 watch(() => router.currentRoute.value.path, (newValue, oldValue) => {
   let secondIndex = newValue.indexOf('/', 1)
@@ -143,26 +173,57 @@ function openNotice() {
   showNotice.value = true
 }
 
-function closeNotice() {
-  // showNotice.value = false
-}
-
 function handleLogin() {
   // router.push("/login")
-  isLogin.value = true
+  let id = '657434b0b522ce741d1489bb'
+  // let id = '656f21da73a92462abe20a28'
+  axios.get(`http://localhost:8080/user?id=${id}`).then(
+    res => {
+      ElMessage.success('登录成功')
+      console.log(res.data)
+      user.id = res.data.id
+      user.name = res.data.name
+      user.avatarUrl = res.data.avatarUrl
+      userStore.setUser(res.data)
+      getMessage(res.data.messages)
+      localStorage.setItem('currentUser', JSON.stringify(res.data.id))
+      isLogin.value = true
+    }, err => {
+      ElMessage.error('登录失败')
+    }
+  )
 }
 
 function handleLogout() {
+  localStorage.removeItem('currentUser')
   isLogin.value = false
+  location.href = "/"
 }
 
-function deleteMessage(id, isAll=false) {
+function getMessage(messages) {
+  messages.forEach(message => {
+    let m = {...message}
+    m.timestamp = new Date(message.timestamp).toLocaleString('af')
+    messageList.push(m)
+  })
+  if (messages.length) {
+    isRedDot.value = true
+  }
+}
+
+function deleteMessage(timestamp, isAll=false) {
+  let user = userStore.getUser()
   if (isAll) {
     messageList.length = 0
+    user.messages.length = 0
   } else {
-    let index = messageList.findIndex(message => message.id == id)
+    let index = messageList.findIndex(message => message.timestamp == timestamp)
     messageList.splice(index, 1)
+    user.messages.splice(index, 1)
   }
+  console.log(user)
+  userStore.setUser(user)
+  userStore.updateUser()
 }
 
 </script>

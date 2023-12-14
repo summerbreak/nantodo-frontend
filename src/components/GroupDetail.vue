@@ -1,6 +1,6 @@
 <template>
     <!-- <h2>detail of group {{ props.groupId }}</h2> -->
-    <div class="detail-container" ref="detailContainer">
+    <div class="detail-container">
         <div class="group-info">
             <div class="group-desc">
                 <div class="title">
@@ -11,7 +11,7 @@
                     <span style="font-size: 28px;font-weight: bold;">{{ groupInfo.name }}</span>
                 </div>
                 <div class="desc-item" style="display: flex; flex-direction: row;">
-                    <div style="width: 50%;">组长: {{ memberInfo[0].name }}</div>
+                    <div style="width: 50%;">组长: {{ leaderName }}</div>
                     <span>邀请码: {{ invitingCode }}
                         <div class="colored-icon" @click="copyCode"><i class="bi bi-copy"></i></div>
                     </span>
@@ -46,7 +46,7 @@
                         <i class="bi bi-list-task"></i>
                         <span style="margin-left: 10px;">任务列表</span>
                     </template>
-                    <div style="margin-bottom: 10px;">
+                    <div v-show="isAdmin" style="margin-bottom: 10px;">
                         <el-button type="primary" :icon="CirclePlus" @click="addTask"
                             style="background-color: #ff7f50; border-color: #ff7f50;">添加任务</el-button>
                         <el-popover placement="top" content="将每个未分配任务随机分配给一位成员。使用随机分配需要保证未分配任务数与成员数相同" :hide-after="50">
@@ -73,7 +73,7 @@
                     </div>
                     <el-table :data="taskInfo" :row-style="rowStyle">
                         <template #empty>
-                            <div v-if="!isAdmin" style="height: 70px; line-height: 70px;">
+                            <div v-if="isAdmin" style="height: 70px; line-height: 70px;">
                                 暂无任务，快来 <a class="click-icon" @click="addTask">添加任务</a> 吧
                             </div>
                             <div v-else style="height: 70px; line-height: 70px;">
@@ -86,7 +86,11 @@
                                 <div class="content">{{ row.content }}</div>
                             </template>
                         </el-table-column>
-                        <el-table-column prop="deadline" label="DDL" width="180" />
+                        <el-table-column label="DDL" width="180">
+                            <template #default="{ row }">
+                                <div>{{ row.deadline.toLocaleString('af') }}</div>
+                            </template>
+                        </el-table-column>
                         <el-table-column label="完成状态" align="center" width="100">
                             <template #default="{ row }">
                                 <span :style="`color: ${taskStatusColor[taskStatus(row)]}`">{{
@@ -170,7 +174,8 @@
                         <span style="margin-left: 10px;">申请审核</span>
                     </template>
                     <el-scrollbar height="500px">
-                    <el-timeline>
+                    <el-empty v-if="applicationList.length === 0"></el-empty>
+                    <el-timeline v-else>
                         <el-timeline-item v-for="app in applicationList" :key="app.id"
                             :timestamp="app.timestamp" :type="applicationType(app.status)" class="timeline-item">
                             <div class="message">
@@ -187,30 +192,117 @@
                 </el-tab-pane>
             </el-tabs>
         </div>
-        <el-dialog v-model="createTask" :title="editingTaskIndex >= 0 ? '编辑任务':'创建任务'" width="40%" :before-close="resetIndex">
-            <TaskDetail :users="memberInfo" :task="editingTaskIndex >= 0 ? taskInfo[editingTaskIndex] : null" @close-form="closeForm"></TaskDetail>
+        <el-dialog v-model="createTask" :title="editingTaskIndex >= 0 ? '编辑任务':'创建任务'" width="40%"
+             :before-close="resetIndex" :close-on-click-modal="false" :close-on-press-escape="false">
+            <TaskDetail :users="memberInfo" :task="editingTaskIndex >= 0 ? taskInfo[editingTaskIndex] : null"
+                :group-id="groupInfo.id" @close-form="closeForm" @update-task="getTaskInfo"></TaskDetail>
         </el-dialog>
     </div>
 </template>
 
 <script setup>
-import { ref, reactive, computed, onMounted, nextTick } from 'vue'
+import { ref, reactive, computed, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useUserStore } from '../stores/user'
 import { CirclePlus, ArrowLeft, Edit, Delete, CircleCheck, CircleClose, Check, Close } from '@element-plus/icons-vue';
 import { ElMessage } from 'element-plus'
+import axios from 'axios';
 const props = defineProps(['groupId'])
 const userStore = useUserStore()
 const router = useRouter()
 
-const detailContainer = ref()
+let user = {}
+const groupInfo = reactive({
+    id: '',
+    name: '',
+    leaderId: '',
+    organName: '',
+    type: '',
+    description: '',
+    courseId: ''
+})
+const memberInfo = reactive([{
+    id: '',
+    name: '',
+    studentNumber: '',
+    phone: '',
+    email: '',
+    grade: '',
+    avatarUrl: ''
+}])
+const taskInfo = reactive([])
+const applicationList = reactive([])
+
+const loading = ref(false)
 const showRandomWarning = ref(false)
 const taskStatusText = ['未完成', '已完成', '已过期']
 const taskStatusColor = ['gray', '#00CD00', 'red']
 const createTask = ref(false)
 const editingTaskIndex = ref(-1)
 
+watch(() => props.groupId, () => {
+    getData()
+})
+
 onMounted(() => {
+    getData()
+})
+
+function getData() {
+    user = userStore.getUser()
+    loading.value = true
+    axios.get(`http://localhost:8080/group?id=${props.groupId}`).then(res => {
+        // console.log('group', res.data)
+        Object.keys(res.data).forEach(key => {
+            groupInfo[key] = res.data[key]
+        })
+        getMemberInfo()
+        getTaskInfo()
+        loading.value = false
+        applicationList.length = 0
+        applicationList.splice(0, 0, ...res.data.applications)
+    }).catch(err => {
+        console.log(err)
+        loading.value = false
+    })
+}
+
+function getMemberInfo() {
+    memberInfo.length = 0
+    axios.get(`http://localhost:8080/group/allMember?groupId=${props.groupId}`).then(
+        res => {
+            res.data.forEach(member => {
+                memberInfo.push({...member})
+            })
+        }, err => {
+            console.log('获取成员列表失败', err)
+        }
+    )
+}
+
+function getTaskInfo() {
+    taskInfo.length = 0
+    axios.get(`http://localhost:8080/task/ofGroup?groupId=${props.groupId}`).then(
+        res => {
+            res.data.forEach(task => {
+                task.deadline = new Date(task.deadline)
+                taskInfo.push({...task})
+            })
+        }, err => {
+            console.log('获取任务列表失败', err)
+        }
+    )
+}
+
+const leaderName = computed(() => {
+    if (memberInfo.length === 0) {
+        return ''
+    }
+    const leader = memberInfo.find(member => member.id === groupInfo.leaderId)
+    if (leader) {
+        return leader.name
+    }
+    return ''
 })
 
 const taskProgress = computed(() => {
@@ -235,17 +327,20 @@ const isAdmin = computed(() => {
 })
 
 const isAllFinished = computed(() => {
-    return taskInfo.every(task => task.done)
+    return taskInfo.length !== 0 && taskInfo.every(task => task.done)
 })
 
-const user = reactive({
-    id: '111',
-    name: '张宏鑫',
-    studentNumber: '211250167',
-    phone: '11111111111',
-    task: { id: 't1', name: '任务1' }
+const invitingCode = computed(() => {
+    // 截取id后6位作为邀请码（转换为大写）
+    return groupInfo.id.slice(-6).toUpperCase()
 })
 
+const organNameLabel = computed(() => {
+    return groupInfo.type === 'course' ? '课程' : '组织'
+})
+
+
+/*
 const groupInfo = reactive({
     id: '6fd3jksdf4vcnc90k3',
     name: "人机交互小组",
@@ -276,27 +371,22 @@ const applicationList = reactive([
     {timestamp: '2023-09-15 13:01:34', id: '534', name: '张维为', status: 'refused'},
     {timestamp: '2023-09-15 13:01:34', id: '4ee', name: '刘钦', status: 'accepted'}
 ])
-
-const organNameLabel = computed(() => {
-    return groupInfo.type === 'course' ? '课程' : '组织'
-})
-
-const invitingCode = computed(() => {
-    // 截取id后6位作为邀请码（转换为大写）
-    return groupInfo.id.slice(-6).toUpperCase()
-})
+*/
 
 function progressColor(percentage) {
     if (percentage < 50) {
         return '#909399'
     } else if (percentage < 80) {
-        return '#E6A23C'
+        return '#409EFF'
     } else {
         return '#00CD66'
     }
 }
 
 function isUrgent(task) {
+    if (task.done) {
+        return false
+    }
     const now = new Date()
     const deadline = new Date(task.deadline)
     return now > deadline || deadline - now < 3 * 24 * 60 * 60 * 1000
@@ -356,18 +446,23 @@ function addTask() {
 }
 
 function assignTaskRandomly() {
-    const unsignedTask = taskInfo.filter(task => task.userId === '')
-    if (unsignedTask.length !== memberInfo.length) {
+    const unassignedTask = taskInfo.filter(task => task.userId === '')
+    if (unassignedTask.length !== memberInfo.length) {
         showRandomWarning.value = true
         return
     }
     showRandomWarning.value = false
     // 随机分配任务
     const memberIds = memberInfo.map(member => member.id)
-    unsignedTask.forEach(task => {
+    unassignedTask.forEach(task => {
         const randomIndex = Math.floor(Math.random() * memberIds.length)
         task.userId = memberIds[randomIndex]
         memberIds.splice(randomIndex, 1)
+        axios.put(`http://localhost:8080/task?id=${task.id}`, task).then(
+            () => {}, err => {
+                console.log('随机分配更新失败', err)
+            }
+        )
     })
     ElMessage.success('任务已随机分配')
 }
@@ -375,9 +470,7 @@ function assignTaskRandomly() {
 function editTask(index) {
     console.log('edit task', index)
     editingTaskIndex.value = index
-    // nextTick(() => {
-        createTask.value = true
-    // })
+    createTask.value = true
 }
 
 function resetIndex(done) {
@@ -398,6 +491,14 @@ function cleanTask() {
 }
 
 function deleteTask(id) {
+    axios.delete(`http://localhost:8080/task?id=${id}`).then(
+        res => {
+            ElMessage.success('删除成功')
+        }, err => {
+            console.log(err)
+            ElMessage.error('删除失败')
+        }
+    )
     taskInfo.forEach((task, index) => {
         if (task.id === id) {
             taskInfo.splice(index, 1)
@@ -407,11 +508,31 @@ function deleteTask(id) {
 }
 
 function urgeLeader() {
-    let lastUrgeTime = localStorage.getItem('lastUrgeTime')
+    let lastUrgeTime = localStorage.getItem('lastUrgeTime-' + groupInfo.id)
+    if (lastUrgeTime && Date.now() - lastUrgeTime < 24 * 60 * 60 * 1000) {
+        ElMessage.warning('今天已经催促过了，明天再试试吧')
+        return
+    }
+    localStorage.setItem('lastUrgeTime-' + groupInfo.id, Date.now())
+    axios.post(`http://localhost:8080/user/message?id=${groupInfo.leaderId}`, {
+        content: `小组 ${groupInfo.name} 的成员催促您布置任务`,
+        type: 'primary',
+        timestamp: Date.now()
+    }).then(
+        res => {
+            ElMessage.success('通知组长成功')
+        }, err => {
+            console.log(err)
+            ElMessage.error('通知组长失败')
+        }
+    )
+}
+
+function sortTask() {
+
 }
 
 function closeForm() {
-    console.log('close form')
     createTask.value = false
 }
 
