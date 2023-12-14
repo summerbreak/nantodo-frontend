@@ -4,7 +4,7 @@
       <el-progress type="dashboard" :percentage="percent" >  
         <template #default="{ percentage }">
           <span class="percentage-value">{{ percentage }}%</span>
-          <span class="percentage-label">Progressing</span>
+          <span class="percentage-label">已完成</span>
         </template>
       </el-progress>
     </div>

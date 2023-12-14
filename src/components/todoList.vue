@@ -4,7 +4,7 @@
       <el-tab-pane name="first"
         ><template #label><span class="my-label">未完成事项</span></template>
         <el-scrollbar class="myscroll" :height="heg">
-          <el-empty description="最近暂无任务" v-if="Undone.length == 0" />
+          <el-empty description="暂无任务" v-if="Undone.length == 0" />
           <el-row v-if="filteredUndone.length != 0">
             <el-col v-for="item in filteredUndone" :key="item.id" :span="12">
               <task-card
@@ -24,7 +24,7 @@
       <el-tab-pane name="second"
         ><template #label><span class="my-label">已完成事项</span></template>
         <el-scrollbar class="myscroll" :height="heg">
-          <el-empty description="最近暂无任务" v-if="Done.length == 0" />
+          <el-empty description="暂无任务" v-if="Done.length == 0" />
           <el-row v-if="filteredDone.length != 0">
             <el-col v-for="item in filteredDone" :key="item" :span="12">
               <finished-card
@@ -83,6 +83,9 @@ import axios from "axios";
 import { ref , reactive } from "vue";
 import { Search } from "@element-plus/icons-vue";
 import { useDonelistStore } from '../stores/donelist.js';
+import { useUserStore } from '../stores/user.js';
+
+const userStore = useUserStore();
 
 const value = ref('根据发布时间排序')
 
@@ -129,7 +132,7 @@ watch(activeName, (newTab, oldTab) => {
 
 function getAllTasks() {
   //获取所有任务
-  let myUserid = "6579963bed537666cbdcaec7";
+  let myUserid = userStore.getUser().id;
   axios.get(`http://localhost:8080/task/all?userId=${myUserid}`).then((res) => {
     tableData.length = 0;
     tableData.splice(0, 0, ...res.data);
@@ -216,7 +219,7 @@ function saveData() {
 
 function filterSTask(){
   //获取所有任务
-  let myUserid = "6579963bed537666cbdcaec7";
+  let myUserid = userStore.getUser().id;
   axios.get(`http://localhost:8080/task/all?userId=${myUserid}`).then((res) => {
     tableData.length = 0;
     tableData.splice(0, 0, ...res.data);

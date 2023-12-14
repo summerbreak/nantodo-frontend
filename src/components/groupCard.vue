@@ -2,7 +2,7 @@
   <div class="recently-viewed">
     <span class="title">最近浏览</span>
     <div class="carousel-container">
-      <el-empty description="最近暂无浏览" v-if="recentlyViewedItems.length==0" :image-size="100"/>
+      <el-empty description="暂无浏览" v-if="recentlyViewedItems.length==0" :image-size="100"/>
       <el-carousel :autoplay="false" height="200px" style="width: 95%" v-if="recentlyViewedItems.length!=0" indicator-position="none"> 
         <el-carousel-item  v-for="item in recentlyViewedItems" :key="item">
           <el-card
@@ -74,7 +74,7 @@ export default {
   setup() {
     const router = useRouter();
     const gotoDetails = () => {
-      router.push({ path: "/course-detail" });
+      router.push({ path: "/course-detail"});
     };
     return {
       gotoDetails,

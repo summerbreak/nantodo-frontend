@@ -1,4 +1,5 @@
 import { defineStore } from "pinia";
+import { ref } from "vue";
 import axios from "axios";
 
 export const useUserStore = defineStore('user', () => {
@@ -12,6 +13,8 @@ export const useUserStore = defineStore('user', () => {
         grade: ''
     }
 
+    let isLogin = ref(false)
+
     function getUser() {
         return user
     }
@@ -19,6 +22,7 @@ export const useUserStore = defineStore('user', () => {
     function setUser(newUser) {
         if (newUser) {
             user = {...newUser}
+            isLogin.value = true
         }
     }
 
@@ -32,5 +36,5 @@ export const useUserStore = defineStore('user', () => {
         )
     }
 
-    return {getUser, setUser, updateUser}
+    return {isLogin, getUser, setUser, updateUser}
 })

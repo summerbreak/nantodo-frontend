@@ -19,6 +19,8 @@ import "v-calendar/style.css";
 import { ref,reactive } from "vue";
 import axios from "axios";
 import { onMounted} from "vue";
+import { useUserStore } from '../stores/user.js'
+const userStore = useUserStore();
 const attrs = reactive([
   {
     key: "v0Day",
@@ -49,7 +51,7 @@ onMounted(() => {
 
 function getAllTasks() {
   //获取所有任务
-  let myUserid = "6579963bed537666cbdcaec7";
+  let myUserid = userStore.getUser().id;
   axios.get(`http://localhost:8080/task/all?userId=${myUserid}`).then((res) => {
     tableData.length = 0;
     tableData.splice(0, 0, ...res.data);

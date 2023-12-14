@@ -34,8 +34,8 @@
     <div class="footer">
       <el-tooltip
         class="box-item"
-        content="Chatgpt描述"
-        placement="top-start"
+        content="AI建议"
+        placement="top"
         effect="light"
       >
         <button @click="handleButtonClick('Button 1')">
@@ -46,7 +46,7 @@
       <el-tooltip
         class="box-item"
         content="更多详情"
-        placement="top-start"
+        placement="top"
         effect="light"
       >
         <button @click="moreDetails">
@@ -55,7 +55,7 @@
       <el-tooltip
         class="box-item"
         content="完成"
-        placement="top-start"
+        placement="top"
         effect="light"
       >
         <button @click="completeTask">
@@ -227,7 +227,6 @@ export default {
   margin: 16px;
   max-width: 80%;
   background-color: white;
-  margin-left: 50px;
 }
 
 .title {

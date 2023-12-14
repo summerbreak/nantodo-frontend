@@ -105,7 +105,7 @@
 
 <script setup>
 import { useRouter } from 'vue-router'
-import { reactive, ref, watch, onMounted } from 'vue'
+import { reactive, ref, computed, watch, onMounted } from 'vue'
 import { ElMessage } from 'element-plus';
 import { useUserStore } from './stores/user';
 import axios from 'axios';
@@ -114,7 +114,7 @@ const router = useRouter()
 const userStore = useUserStore()
 
 const activeIndex = ref('/')
-const isLogin = ref(false)
+const isLogin = computed(() => userStore.isLogin)
 const isRedDot = ref(false)
 const showNotice = ref(false)
 const user = reactive({
@@ -142,7 +142,6 @@ onMounted(() => {
         user.avatarUrl = res.data.avatarUrl
         userStore.setUser(res.data)
         getMessage(res.data.messages)
-        isLogin.value = true
       }, err => {
         console.log(err)
         ElMessage.error('获取用户数据失败')
@@ -165,7 +164,7 @@ function toIndex() {
 }
 
 function toUser() {
-  // router.push("/user")
+  router.push("/user")
 }
 
 function openNotice() {
@@ -174,7 +173,8 @@ function openNotice() {
 }
 
 function handleLogin() {
-  // router.push("/login")
+  router.push("/login")
+  /*
   let id = '657434b0b522ce741d1489bb'
   // let id = '656f21da73a92462abe20a28'
   axios.get(`http://localhost:8080/user?id=${id}`).then(
@@ -192,11 +192,13 @@ function handleLogin() {
       ElMessage.error('登录失败')
     }
   )
+  */
 }
+
 
 function handleLogout() {
   localStorage.removeItem('currentUser')
-  isLogin.value = false
+  userStore.isLogin = false
   location.href = "/"
 }
 
