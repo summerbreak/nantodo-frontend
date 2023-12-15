@@ -36,12 +36,13 @@
 </template>
 
 <script setup>
+import { getCurrentInstance } from 'vue';
 import Register from '../components/Register.vue'
 import { reactive, ref, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router';
 import axios from 'axios'
 import { useUserStore } from '../stores/user.js'
-
+import { ElMessage } from 'element-plus';
 const props = defineProps(['isRegister'])
 watch(() => props.isRegister, () => {
     console.log(props.isRegister)
@@ -64,7 +65,6 @@ const rules = {
         { required: true, message: '请输入密码', trigger: 'blur' }
     ]
 }
-
 async function login() {
     loginFormRef.value.validate(valid => {
         if (valid) {
@@ -91,8 +91,11 @@ function handleLoginResponse(response) {
         console.log('登录成功', response.data)
         userStore.setUser(response.data)
         console.log(userStore.getUser())
+        ElMessage.success('登录成功')
+        // 修改的登录成功消息
         localStorage.setItem('currentUser', JSON.stringify(response.data.id))
         location.href = '/'
+
     } else if (response.status === 401) {
         console.log('密码错误', response.status)
     } else if (response.status === 404) {

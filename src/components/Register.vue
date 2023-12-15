@@ -121,6 +121,7 @@ async function register() {
             console.log(user)
             const response = await axios.post('http://localhost:8080/user', user);
             console.log(response)
+            ElMessage.success('登录成功')
             emit('register-success');
         } else {
             console.log('表单验证失败');
