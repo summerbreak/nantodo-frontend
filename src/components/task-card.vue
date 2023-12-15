@@ -21,7 +21,10 @@
       <p class="content-text">{{ myContent }}</p>
     </div>
     <div class="group-name">
-      <p>来自移动互联网</p>
+      来自
+      <router-link tag="button" to="">
+        移动互联网
+      </router-link>
     </div>
     <p :class="{deadline: urgent}">截止日期 <br/> {{ myDeadline.toLocaleString('af') }}</p>
     <div class="completion-overlay" v-if="isCompleted">
