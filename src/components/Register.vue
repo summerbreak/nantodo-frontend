@@ -55,6 +55,8 @@
 import { ref, reactive } from 'vue'
 import { defineEmits } from 'vue'
 import axios from 'axios'
+import { ElMessage } from 'element-plus';
+
 const options = ref([
     { label: '大一', value: '大一' },
     { label: '大二', value: '大二' },
