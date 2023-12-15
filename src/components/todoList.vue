@@ -8,6 +8,7 @@
           <el-row v-if="filteredUndone.length != 0">
             <el-col v-for="item in filteredUndone" :key="item.id" :span="12">
               <task-card
+                class="mytaskCard"
                 :title="item.title"
                 :content="item.content"
                 :releaseTime="item.releaseTime.toString()"
@@ -52,14 +53,13 @@
         @change="querySearch"
       />
     </div>
-    <div style="position: absolute; right: 450px; top: 5px">
+    <div style="position: absolute; right: 450px; top: 5px" class="box-item">
       <el-tooltip
-        class="box-item"
         content="筛选星标任务"
         placement="top-start"
         effect="light"
       >
-        <el-button :type="filterStar ? 'warning':''" :icon="Star"  @click="filterSTask"/>
+        <el-button :type="filterStar ? 'warning':''" :icon="Star"  @click="filterSTask" />
       </el-tooltip>
 
     </div>
@@ -249,10 +249,10 @@ function filterSTask(){
 </script>
 
 <style>
-.el-button {
+.box-item .el-button {
   height: 40px !important;
 }
-.task-card {
+.mytaskCard .task-card {
   margin-left: 15px !important;
 }
 .my-label {
@@ -260,21 +260,21 @@ function filterSTask(){
   font-weight: bold;
 }
 
-.el-tabs__item {
+.demo-tabs .el-tabs__item {
   display: flex;
   align-items: center;
 }
 
-.el-tabs__item.is-active {
+.demo-tabs .el-tabs__item.is-active {
   opacity: 1; /* 选中时完全不透明 */
 }
 
-.el-tabs__item:not(.is-active) {
+.demo-tabs .el-tabs__item:not(.is-active) {
   opacity: 0.5;
 }
 
 /*去掉tabs底部的下划线*/
-.el-tabs__nav-wrap::after {
+.demo-tabs .el-tabs__nav-wrap::after {
   position: static !important;
 }
 </style>
