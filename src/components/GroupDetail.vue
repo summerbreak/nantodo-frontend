@@ -177,12 +177,13 @@
                     <el-empty v-if="applicationList.length === 0"></el-empty>
                     <el-timeline v-else>
                         <el-timeline-item v-for="app in applicationList" :key="app.id"
-                            :timestamp="app.timestamp" :type="applicationType(app.status)" class="timeline-item">
+                            :timestamp="new Date(app.timestamp).toLocaleString('af')"
+                             :type="applicationType(app.status)" class="timeline-item">
                             <div class="message">
                                 <span style="font-size: 16px;">{{ app.name }} 申请加入小组</span>
                                 <div v-if="app.status === 'pending'" style="display: inline; font-size: 20px;">
-                                    <el-icon class="click-icon" color="green" @click="acceptApp(app)"><Check /></el-icon>
-                                    <el-icon class="click-icon" style="margin-left: 20px;" @click="refuseApp(app)"><Close /></el-icon>
+                                    <el-icon class="click-icon" color="green" @click="decideApp(app, true)"><Check /></el-icon>
+                                    <el-icon class="click-icon" style="margin-left: 20px;" @click="decideApp(app, false)"><Close /></el-icon>
                                 </div>
                                 <el-text v-else-if="app.status === 'accepted'" type="info" style="margin-right: 10px;margin-bottom: 9px;">已同意</el-text>
                                 <el-text v-else type="info" style="margin-right: 10px;margin-bottom: 9px;">已拒绝</el-text>
@@ -528,10 +529,6 @@ function urgeLeader() {
     )
 }
 
-function sortTask() {
-
-}
-
 function closeForm() {
     createTask.value = false
 }
@@ -555,12 +552,21 @@ function applicationType(status) {
     }
 }
 
-function acceptApp(app) {
-    app.status = 'accepted'
-}
-
-function refuseApp(app) {
-    app.status = 'refused'
+function decideApp(app, status) {
+    app.status = status ? 'accepted' : 'refused'
+    axios.put(`http://localhost:8080/group/app?id=${groupInfo.id}`, app).then(
+        res => {
+            axios.post(`http://localhost:8080/user/message?id=${app.userId}`, {
+                content: `您申请加入的小组 ${groupInfo.name} ${status ? '已同意': '拒绝了'}您的申请`,
+                type: status ? 'success' : 'danger',
+                timestamp: Date.now()
+            })
+        }, err => {
+            console.log(err)
+            ElMessage.error('操作失败')
+            app.status = 'pending'
+        }
+    )
 }
 
 </script>
