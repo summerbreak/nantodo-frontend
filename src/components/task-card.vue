@@ -23,7 +23,7 @@
     <div class="group-name">
       来自
       <router-link tag="button" :to="{path: '/group', query: {id: groupId}}">
-        移动互联网
+        {{groupName}}
       </router-link>
     </div>
     <p :class="{deadline: urgent}">截止日期 <br/> {{ myDeadline.toLocaleString('af') }}</p>
@@ -75,7 +75,7 @@
     <p>发布日期 {{ releaseTime }}</p>
     <span>{{ content }}</span>
     <p :class="{deadline: urgent}">截止日期 {{ deadline }}</p>
-    <p>来自移动互联网</p>
+    <p>来自{{groupName}}</p>
     <template #footer>
       <span class="dialog-footer">
         <el-button @click="dialogVisible = false">已知晓</el-button>
@@ -87,6 +87,7 @@
 <script>
 import axios from 'axios';
 import { useDonelistStore } from '../stores/donelist.js';
+
 
 export default {
   props: {
@@ -111,8 +112,13 @@ export default {
       myId: this.id,
       myUserId: this.userId,
       dialogVisible: false,
-      urgent: false                       
+      urgent: false,
+      groupName: ''                       
     };
+  },
+  mounted() {
+    this.setgroupName();
+    this.urgent = this.isUrgent();
   },
   methods: {
     // 处理按钮点击事件
@@ -157,6 +163,7 @@ export default {
           starred: this.isStarred,
           done: this.isCompleted,
           userId: this.myUserId,
+          groupId: this.groupId
         })
         .then((res) => {
           console.log(res);
@@ -166,8 +173,20 @@ export default {
           console.log(err);
         });
     },
+    setgroupName(){
+      console.log("groupid", this.groupId);
+      axios
+        .get(`http://localhost:8080/group?id=${this.groupId}`)
+        .then((res) => {
+          console.log('group',res);
+          this.groupName = res.data.name;
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+    },
     isUrgent() {
-      if (isCompleted) {
+      if (this.isCompleted) {
           return false
       }
       const now = new Date()

@@ -8,7 +8,6 @@
           <el-row v-if="filteredUndone.length != 0">
             <el-col v-for="item in filteredUndone" :key="item.id" :span="12">
               <task-card
-                class="mytaskCard"
                 :title="item.title"
                 :content="item.content"
                 :releaseTime="item.releaseTime.toString()"
@@ -17,6 +16,7 @@
                 :done="item.done"
                 :id="item.id"
                 :userId="item.userId"
+                :groupId="item.groupId"
               />
             </el-col>
           </el-row>
@@ -130,7 +130,7 @@ watch(activeName, (newTab, oldTab) => {
 
 function getAllTasks() {
   //获取所有任务
-  let myUserid = "6579963bed537666cbdcaec7";
+  let myUserid = "657434b0b522ce741d1489bb";
   axios.get(`http://localhost:8080/task/all?userId=${myUserid}`).then((res) => {
     tableData.length = 0;
     tableData.splice(0, 0, ...res.data);
@@ -217,7 +217,7 @@ function saveData() {
 
 function filterSTask(){
   //获取所有任务
-  let myUserid = "6579963bed537666cbdcaec7";
+  let myUserid = "657434b0b522ce741d1489bb";
   axios.get(`http://localhost:8080/task/all?userId=${myUserid}`).then((res) => {
     tableData.length = 0;
     tableData.splice(0, 0, ...res.data);
@@ -252,9 +252,6 @@ function filterSTask(){
 <style>
 .box-item .el-button {
   height: 40px !important;
-}
-.mytaskCard .task-card {
-  margin-left: 15px !important;
 }
 .my-label {
   font-size: 18px;
