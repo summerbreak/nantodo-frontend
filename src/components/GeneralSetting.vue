@@ -115,6 +115,9 @@ onActivated(() => {
     setSettings()
 })
 
+watch(settings, (newVal, oldVal) => {
+    console.log('Settings changed:', newVal);
+}, { deep: true })
 
 async function updateUser(user) {
     const response = await axios.put(`http://localhost:8080/user?id=${user.id}`, user);
