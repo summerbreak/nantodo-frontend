@@ -49,15 +49,19 @@
     <el-col :span="6">
       <el-text tag="ins" class="title">全部课程</el-text>
     </el-col>
-    <el-col :span="12" :offset="6">
-      <course-search/>
+    <el-col :span="4" :offset="8" style="text-align: right">
+      <el-check-tag :checked="ifPossible" @change="choosePossible" class="possibleCourse">仅看可加入的课程
+      </el-check-tag>
+    </el-col>
+    <el-col :span="6">
+      <course-search @search="getCourses"/>
     </el-col>
   </el-row>
   <el-scrollbar max-height="600px" style="margin-bottom: 0;margin-top: 0">
     <div v-loading="isLoading" element-loading-text="加载中..." element-loading-background="transparent">
       <el-row class="outside">
         <el-col
-            v-for="(o, index) in allCourses"
+            v-for="(o, index) in showCourses"
             :key="index"
             :span="6"
             :offset="0"
@@ -81,12 +85,15 @@ const allCourses = ref([])
 const userCourses = ref([])
 const userInfo = ref({})
 const isLoading = ref(true)
+const ifPossible = ref(false)
+const showCourses = ref([])
+const searchText = ref('')
 
 const user = useUserStore().getUser()
 
 onActivated(async () => {
   isLoading.value = true
-  await axios.get('http://localhost:11300/course/allCourse').then(
+  await axios.get('http://localhost:8080/course/allCourse').then(
       res => {
         allCourses.value.length = 0
         for (let i = 0; i < res.data.length; i++) {
@@ -94,13 +101,15 @@ onActivated(async () => {
         }
       }
   )
-  await axios.get(`http://localhost:11300/user?id=${user.id}`).then(
+  await axios.get(`http://localhost:8080/user?id=${user.id}`).then(
       res => {
         userInfo.value = res.data
       }
   ).catch(err => {
     alert(err)
   })
+  showCourses.value.length = 0
+  showCourses.value.splice(0, 0, ...allCourses.value)
 
   userCourses.value.length = 0
   for (let i = 0, len = userInfo.value.courses.length; i < len; i++) {
@@ -110,6 +119,35 @@ onActivated(async () => {
   isLoading.value = false
 })
 
+const getCourses = (text) => {
+  searchText.value = text
+  text = text.split("");
+  let str = "(.*?)";
+  showCourses.value.length = 0;
+  let regStr = str + text.join(str) + str;
+  let reg = RegExp(regStr, "i"); // 以mh为例生成的正则表达式为/(.*?)m(.*?)h(.*?)/i
+  allCourses.value.map(item => {
+    if (reg.test(item.name)) {
+      if (ifPossible.value && item.open) {
+        showCourses.value.push(item);
+      } else if (!ifPossible.value) {
+        showCourses.value.push(item);
+      }
+    }
+  });
+}
+
+const choosePossible = () => {
+  ifPossible.value = !ifPossible.value
+  if (ifPossible.value) {
+    let tmp = showCourses.value.concat()
+    tmp = tmp.filter(item => item.open)
+    showCourses.value.length = 0
+    showCourses.value.splice(0, 0, ...tmp)
+  } else {
+    getCourses(searchText.value)
+  }
+}
 
 </script>
 <style scoped>
@@ -126,5 +164,11 @@ onActivated(async () => {
 .outside {
   margin: 0 140px 5px;
   padding: 0;
+}
+
+.possibleCourse {
+  margin-right: 15px;
+  line-height: 25px;
+  text-align: right;
 }
 </style>

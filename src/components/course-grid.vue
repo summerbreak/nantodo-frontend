@@ -52,7 +52,7 @@ const isSelected = ref(true)
 const user = useUserStore().getUser()
 
 onActivated(() => {
-  axios.get(`http://localhost:11300/user?id=${user.id}`).then(
+  axios.get(`http://localhost:8080/user?id=${user.id}`).then(
       res => {
         isSelected.value = res.data.courses.includes(props.courseInfo.id)
       }

@@ -29,7 +29,7 @@
             </el-card>
             <div style="margin-top: 20px">
               <div v-if="courseInfo.open">
-                <div v-if="selected">
+                <div v-if="selected" :key="ref">
                   <el-button-group size="large" v-if="hasTeam">
                     <el-button :icon="Position" type="warning" plain @click="queryTeam">
                       查看我的小队
@@ -77,7 +77,7 @@
       width="40%"
       :before-close="handleClose"
   >
-    <el-form :model="groupInfo" label-width="auto">
+    <el-form :model="groupInfo" label-width="auto" :key="fresh">
       <el-form-item label="小组名称" required="true">
         <el-input v-model="groupInfo.name" placeholder="请输入不超过十五个字符" :maxlength="15"/>
       </el-form-item>
@@ -107,8 +107,8 @@
   <el-row>
     <el-col :span="20" :offset="2">
       <el-tabs type="border-card" class="tabs" style="border-radius: 10px;min-height: 300px;margin-bottom: 20px">
-        <el-tab-pane label="任务">
-          <homework/>
+        <el-tab-pane label="作业">
+          <homework :info="route.query.id"/>
         </el-tab-pane>
         <el-tab-pane label="通知">
           <el-empty description="暂无通知"/>
@@ -129,13 +129,13 @@
               </el-check-tag>
             </el-col>
           </el-row>
-          <el-row class="outside">
+          <el-row class="outside" :key="fresh">
             <el-col
-                v-for="(o, index) in 5"
-                :key="o"
+                v-for="(o, index) in showTeam"
+                :key="index"
                 :offset="0"
             >
-              <course-team/>
+              <course-team :group-info="o"/>
             </el-col>
           </el-row>
 
@@ -146,18 +146,19 @@
 </template>
 
 <script setup>
-import {ref, onActivated, reactive,onUpdated} from 'vue'
+import {ref, onActivated, reactive, onUpdated} from 'vue'
 import {Connection, DocumentDelete, Lock, Plus, Position, Search, Pointer} from '@element-plus/icons-vue'
 import CourseTeam from "../components/course-team.vue";
 import Homework from "../components/homework.vue";
 import {useRouter, useRoute} from "vue-router";
 import axios from "axios";
 import {useUserStore} from "../stores/user.js";
+import {ElMessage, ElMessageBox} from "element-plus";
 
 const router = useRouter()
 const route = useRoute()
 const user = useUserStore().getUser()
-
+const fresh = ref(0)
 const userInfo = ref({})
 const selected = ref(true)
 const courseInfo = ref({})
@@ -177,10 +178,11 @@ const groupInfo = reactive({
 
 })
 const allTeam = ref([])
+const showTeam = ref([])
 const creatVisible = ref(false)
 const clearTeam = () => {
   groupInfo.name = ''
-  groupInfo.capacity = 0
+  groupInfo.capacity = 4
   groupInfo.description = ''
   creatVisible.value = false
 }
@@ -190,27 +192,48 @@ const handleClose = (done) => {
 }
 
 onActivated(async () => {
-  hasTeam.value=false
+  fresh.value += 1
+  selected.value = false
+  hasTeam.value = false
   document.documentElement.scrollTop = 0;
   let id = route.query.id
   selected.value = route.query.selected == 'true'
-  await axios.get(`http://localhost:11300/course?id=${id}`).then(res => {
+  await axios.get(`http://localhost:8080/course?id=${id}`).then(res => {
     courseInfo.value = res.data
   }).catch(error => {
     alert(error)
   })
-
-  await axios.get(`http://localhost:11300/course/allGroup?courseId=${id}`).then(res => {
+  allTeam.value.length = 0
+  showTeam.value.length = 0
+  await axios.get(`http://localhost:8080/course/allGroup?courseId=${id}`).then(async res => {
     let allGroups = res.data
-    allTeam.value.length = 0
     for (let i = 0, len = allGroups.length; i < len; i++) {
       allTeam.value.push(allGroups[i])
+      allTeam.value[i]["leaderName"] = ''
+      allTeam.value[i]["membersName"] = ''
+      console.log(allGroups[i])
+      await axios.get(`http://localhost:8080/user?id=${allGroups[i].leaderId}`).then(
+          res => {
+            allTeam.value[i].leaderName = res.data.name
+          }
+      )
+      allGroups[i].members.map(async item => {
+        await axios.get(`http://localhost:8080/user?id=${item}`).then(
+            res => {
+              if (allTeam.value[i].membersName.length > 0) {
+                allTeam.value[i].membersName += '，'
+              }
+              allTeam.value[i].membersName += res.data.name
+            }
+        )
+      })
     }
   }).catch(error => {
     alert(error)
   })
-
-  await axios.get(`http://localhost:11300/user?id=${user.id}`).then(
+  showTeam.value.length = 0
+  showTeam.value.splice(0, 0, ...allTeam.value)
+  await axios.get(`http://localhost:8080/user?id=${user.id}`).then(
       res => {
         userInfo.value = res.data
       }
@@ -222,15 +245,14 @@ onActivated(async () => {
 
   for (let i = 0, len = userInfo.value.groups.length; i < len; i++) {
     let tmp = {}
-    await axios.get(`http://localhost:11300/group?id=${userInfo.value.groups[i]}`).then(
+    await axios.get(`http://localhost:8080/group?id=${userInfo.value.groups[i]}`).then(
         res => {
           tmp = res.data
         }
     ).catch(err => {
       alert(err)
     })
-    console.log(tmp.courseId)
-    console.log(courseInfo.value.id)
+
     if (tmp.courseId == courseInfo.value.id) {
       hasTeam.value = true
       teamId.value = tmp.id
@@ -241,16 +263,14 @@ onActivated(async () => {
       groupInfo.description = tmp.description
       groupInfo.leaderId = tmp.leaderId
       break
+    } else {
+      clearTeam()
     }
 
   }
 
 })
 
-
-const queryTeam = () => {
-
-}
 
 const addTeam = async () => {
   groupInfo.organName = courseInfo.value.name
@@ -260,7 +280,7 @@ const addTeam = async () => {
   groupInfo.members.length = 0
   groupInfo.tasks.length = 0
   groupInfo.applications.length = 0
-  await axios.post('http://localhost:11300/group', groupInfo).then(
+  await axios.post('http://localhost:8080/group', groupInfo).then(
       res => {
         hasTeam.value = true
         groupInfo.id = res.data
@@ -271,15 +291,88 @@ const addTeam = async () => {
   })
   creatVisible.value = false
 }
-let dropOut = () => {
+const dropOut = () => {
+  axios.get(`http://localhost:8080/user?id=${user.id}`).then(
+      res => {
+        userInfo.value = res.data
+      }
+  ).catch(err => {
+    alert(err)
+  })
+  if (hasTeam.value) {
+    ElMessageBox.alert('您已参加了小组，暂时无法退课', '提示消息', {
+      confirmButtonText: '好的',
+      callback: (action) => {
+        ElMessage({
+          type: 'warning',
+          message: `退出课程失败`,
+        })
+      },
+    })
+  } else {
+    userInfo.value.courses = userInfo.value.courses.filter(item => item != courseInfo.value.id)
+    console.log(userInfo.value.courses)
+    axios.put(`http://localhost:8080/user?id=${user.id}`, userInfo.value).then(
+        res => {
+          console.log(res)
+          selected.value = false
+          ElMessage({
+            message: `成功退出${courseInfo.value.name}`,
+            type: 'success',
+          })
+        }
+    ).catch(err => {
+      ElMessage({
+        message: `出错了！`,
+        type: 'warning',
+      })
+    })
+  }
+
 
 }
 
 let getTeamId = () => {
 
 }
+
+const queryTeam = async () => {
+  let text = inputText.value.slice(0)
+  text = text.split("");
+  let str = "(.*?)";
+  showTeam.value.length = 0;
+  let regStr = str + text.join(str) + str;
+  let reg = RegExp(regStr, "i"); // 以mh为例生成的正则表达式为/(.*?)m(.*?)h(.*?)/i
+  allTeam.value.map(async item => {
+        let leaderName = ''
+        await axios.get(`http://localhost:8080/user?id=${item.leaderId}`).then(
+            res => {
+              leaderName = res.data.name
+              console.log(leaderName)
+            }
+        ).catch(err => {
+          leaderName = '不存在'
+        })
+        if (reg.test(item.name) || reg.test(leaderName)) {
+          if (!ifPossible) {
+            showTeam.value.push(item);
+          } else if (item.members.length < item.capacity) {
+            showTeam.value.push(item);
+          }
+        }
+      }
+  )
+}
 let choosePossible = () => {
   ifPossible.value = !ifPossible.value
+  if (ifPossible.value) {
+    let tmp = showTeam.value.concat()
+    tmp = tmp.filter(item => item.members.length < item.capacity)
+    showTeam.value.length = 0
+    showTeam.value.splice(0, 0, ...tmp)
+  } else {
+    queryTeam()
+  }
 }
 
 let createTeam = () => {
@@ -291,10 +384,17 @@ const findTeam = () => {
 
 const attendCourse = () => {
   userInfo.value.courses.push(courseInfo.value.id)
-  axios.put(`http://localhost:11300/user?id=${userInfo.value.id}`, userInfo.value).then(res => {
+  axios.put(`http://localhost:8080/user?id=${userInfo.value.id}`, userInfo.value).then(res => {
     selected.value = true
+    ElMessage({
+      message: `成功加入${courseInfo.value.name}`,
+      type: 'success',
+    })
   }).catch(err => {
-    alert(err)
+    ElMessage({
+      message: `出错了！`,
+      type: 'warning',
+    })
   })
 }
 
