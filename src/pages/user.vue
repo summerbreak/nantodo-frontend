@@ -1,38 +1,18 @@
 
 <template>
     <el-container style="display: flex; align-items: center;">
-        <!-- <div class="aside"> -->
-        <!-- <el-aside class="aside">
-            <el-menu default-active="1" class="el-menu" active-text-color="orange" @select="menuSelect">
-                <el-menu-item index="1" style="display: flex; justify-content: flex-end; font-size: 18px;">
-                    <strong>
-                        个人信息
-                    </strong>
-                </el-menu-item>
-
-                <el-menu-item index="2" style="display: flex; justify-content: flex-end;font-size: 18px;">
-                    <strong>
-                        通用设置
-                    </strong>
-                </el-menu-item>
-            </el-menu>
-        </el-aside> -->
-        <!-- </div> -->
         <el-main style="flex-direction:column; display: flex; align-items: center;justify-content:center;">
             <div class="box">
-                <el-text type="warning" style="display: flex;justify-content: center ;font-size:15px;margin-right: 10%; ">
-                    <h1>个人信息</h1>
+                <el-text class="box-top" type="warning">
+                    <h1 style="line-height: 0.8;">个人中心</h1>
                 </el-text>
+                <!-- <keep-alive>
+                    <UserInfoComponent />
+                </keep-alive> -->
                 <keep-alive>
-                    <UserInfoComponent style="width: 50vh; margin: 0 auto;margin-left: 25%;" />
+                    <UserCenter />
                 </keep-alive>
-            </div>
 
-            <div class="box">
-                <el-text type="warning" style="display: flex;justify-content: center ;font-size:15px;margin-right: 10%; ">
-                    <h1>通用设置</h1>
-                </el-text>
-                <GeneralSetting style="width: 50vh; margin: 0 auto;margin-left: 25%;" />
             </div>
         </el-main>
     </el-container>
@@ -49,6 +29,16 @@
     align-items: center;
     border-radius: 20px;
     margin-bottom: 20px;
+}
+
+.box-top {
+    width: 80%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-bottom: 1px solid #db8916;
+    margin-bottom: 10px;
+
 }
 </style>
 
