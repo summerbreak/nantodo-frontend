@@ -22,7 +22,7 @@
     </div>
     <div class="group-name">
       来自
-      <router-link tag="button" to="">
+      <router-link tag="button" :to="{path: '/group', query: {id: groupId}}">
         移动互联网
       </router-link>
     </div>
@@ -97,7 +97,8 @@ export default {
     starred: Boolean,
     done:Boolean,
     id:String,
-    userId:String
+    userId:String,
+    groupId:String
   },
   data() {
     return {
@@ -110,7 +111,7 @@ export default {
       myId: this.id,
       myUserId: this.userId,
       dialogVisible: false,
-      urgent: false
+      urgent: false                       
     };
   },
   methods: {

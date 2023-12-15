@@ -37,6 +37,7 @@
                 :done="item.done"
                 :id="item.id"
                 :userId="item.userId"
+                :groupId="item.groupId"
               />
             </el-col>
           </el-row>
