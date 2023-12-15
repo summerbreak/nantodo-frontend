@@ -21,7 +21,10 @@
       <p class="content-text">{{ myContent }}</p>
     </div>
     <div class="group-name">
-      <p>来自移动互联网</p>
+      来自
+      <router-link tag="button" :to="{path: '/group', query: {id: groupId}}">
+        {{groupName}}
+      </router-link>
     </div>
     <p :class="{deadline: urgent}">截止日期 <br/> {{ myDeadline.toLocaleString('af') }}</p>
     <div class="completion-overlay" v-if="isCompleted">
@@ -76,7 +79,7 @@
     <p>发布日期 {{ releaseTime }}</p>
     <span>{{ content }}</span>
     <p :class="{deadline: urgent}">截止日期 {{ deadline }}</p>
-    <p>来自移动互联网</p>
+    <p>来自{{groupName}}</p>
     <template #footer>
       <span class="dialog-footer">
         <el-button @click="dialogVisible = false">已知晓</el-button>
@@ -90,6 +93,7 @@ import axios from 'axios';
 import { useDonelistStore } from '../stores/donelist.js';
 import { ElMessage } from 'element-plus';
 
+
 export default {
   props: {
     title: String,
@@ -99,7 +103,8 @@ export default {
     starred: Boolean,
     done:Boolean,
     id:String,
-    userId:String
+    userId:String,
+    groupId:String
   },
   data() {
     return {
@@ -113,8 +118,13 @@ export default {
       myUserId: this.userId,
       dialogVisible: false,
       urgent: false,
-      aiSuggestion: ''
+      aiSuggestion: '',
+      groupName: ''                       
     };
+  },
+  mounted() {
+    this.setgroupName();
+    this.urgent = this.isUrgent();
   },
   methods: {
     // 处理按钮点击事件
@@ -178,6 +188,7 @@ export default {
           starred: this.isStarred,
           done: this.isCompleted,
           userId: this.myUserId,
+          groupId: this.groupId
         })
         .then((res) => {
           console.log(res);
@@ -187,8 +198,20 @@ export default {
           console.log(err);
         });
     },
+    setgroupName(){
+      console.log("groupid", this.groupId);
+      axios
+        .get(`http://localhost:8080/group?id=${this.groupId}`)
+        .then((res) => {
+          console.log('group',res);
+          this.groupName = res.data.name;
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+    },
     isUrgent() {
-      if (isCompleted) {
+      if (this.isCompleted) {
           return false
       }
       const now = new Date()

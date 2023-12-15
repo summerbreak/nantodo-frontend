@@ -7,7 +7,6 @@
           <el-row v-if="filteredUndone.length != 0">
             <el-col v-for="item in filteredUndone" :key="item.id" :span="12">
               <task-card
-                class="mytaskCard"
                 :title="item.title"
                 :content="item.content"
                 :releaseTime="item.releaseTime.toString()"
@@ -16,6 +15,7 @@
                 :done="item.done"
                 :id="item.id"
                 :userId="item.userId"
+                :groupId="item.groupId"
               />
             </el-col>
           </el-row>
@@ -26,9 +26,17 @@
           <el-empty description="暂无任务" v-if="Done.length == 0" />
           <el-row v-if="filteredDone.length != 0">
             <el-col v-for="item in filteredDone" :key="item" :span="12">
-              <finished-card :title="item.title" :content="item.content" :releaseTime="item.releaseTime.toString()"
-                :deadline="item.deadline.toString()" :starred="item.starred" :done="item.done" :id="item.id"
-                :userId="item.userId" />
+              <finished-card
+                :title="item.title"
+                :content="item.content"
+                :releaseTime="item.releaseTime.toString()"
+                :deadline="item.deadline.toString()"
+                :starred="item.starred"
+                :done="item.done"
+                :id="item.id"
+                :userId="item.userId"
+                :groupId="item.groupId"
+              />
             </el-col>
           </el-row>
         </el-scrollbar>
@@ -71,12 +79,12 @@ const value = ref('根据发布时间排序')
 
 const options = [
   {
-    value: '根据截止日期排序',
-    label: '根据截止日期排序',
-  },
-  {
     value: '根据发布时间排序',
     label: '根据发布时间排序',
+  },
+  {
+    value: '根据截止日期排序',
+    label: '根据截止日期排序',
   },
 ]
 
@@ -235,10 +243,6 @@ function filterSTask() {
 .box-item .el-button {
   height: 40px !important;
 }
-.mytaskCard .task-card {
-  margin-left: 15px !important;
-}
-
 .my-label {
   font-size: 18px;
   font-weight: bold;

@@ -21,8 +21,11 @@
         <p class="content-text">{{ myContent }}</p>
       </div>
       <div class="group-name">
-        <p>来自移动互联网</p>
-      </div>
+      来自
+      <router-link tag="button" :to="{path: '/group', query: {id: groupId}}">
+        {{groupName}}
+      </router-link>
+    </div>
       <p class="deadline">截止日期 <br/> {{ myDeadline.toLocaleString('af') }}</p>
       <div class="completion-overlay" v-if="!isCompleted">
         <i
@@ -83,8 +86,12 @@
       starred: Boolean,
       done:Boolean,
       id:String,
-      userId:String
+      userId:String,
+      groupId:String
     },
+  mounted() {
+    this.setgroupName();
+  },
     data() {
       return {
         isStarred: this.starred,
@@ -96,6 +103,7 @@
         myId: this.id,
         myUserId: this.userId,
         dialogVisible: false,
+        groupName:''
       };
     },
     methods: {
@@ -140,6 +148,7 @@
             starred: this.isStarred,
             done: this.isCompleted,
             userId: this.myUserId,
+            groupId: this.groupId
           })
           .then((res) => {
             console.log(res);
@@ -148,6 +157,18 @@
             console.log(err);
           });
       },
+    setgroupName(){
+      console.log("groupid", this.groupId);
+      axios
+        .get(`http://localhost:8080/group?id=${this.groupId}`)
+        .then((res) => {
+          console.log('group',res);
+          this.groupName = res.data.name;
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+    },
     }
   };
   </script>
