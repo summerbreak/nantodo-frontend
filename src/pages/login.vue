@@ -60,6 +60,7 @@ const router = useRouter();
 const rules = {
     account: [
         { required: true, message: '请输入账号', trigger: 'blur' }
+
     ],
     password: [
         { required: true, message: '请输入密码', trigger: 'blur' }
@@ -98,9 +99,11 @@ function handleLoginResponse(response) {
 
     } else if (response.status === 401) {
         console.log('密码错误', response.status)
+        ElMessage.error('密码错误')
     } else if (response.status === 404) {
         console.log('账号不存在', response.status)
         console.log(response.data)
+        ElMessage.error('账号不存在')
     }
 }
 
