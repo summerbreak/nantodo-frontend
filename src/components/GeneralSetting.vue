@@ -18,7 +18,7 @@
                     }}点</el-text>
                 </el-form-item>
                 <el-form-item label="静默模式结束时间" prop="quietModeEnd" style="font-weight: bold;">
-                    <el-text style="width: 25vh; font-size: 18px;font-weight: normal;">从{{ settings.quietModeEnd
+                    <el-text style="width: 25vh; font-size: 18px;font-weight: normal;">到{{ settings.quietModeEnd
                     }}点</el-text>
                 </el-form-item>
             </el-form>
@@ -115,6 +115,9 @@ onActivated(() => {
     setSettings()
 })
 
+watch(settings, (newVal, oldVal) => {
+    console.log('Settings changed:', newVal);
+}, { deep: true })
 
 async function updateUser(user) {
     const response = await axios.put(`http://localhost:8080/user?id=${user.id}`, user);

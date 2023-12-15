@@ -4,31 +4,30 @@
 
         <div class="login-box" v-if="!isRegistering">
             <div class="t-tab-top">欢迎您使用南土豆</div>
-            <div class="container-fluid" style="padding-bottom: 24px;">
-                <div class="form">
-                    <div style="padding:15px 5px;">
-                        <el-form :model="loginForm" :rules="rules" ref="loginFormRef" label-position="top">
-                            <el-form-item prop="account">
-                                <el-input v-model="loginForm.account" placeholder="请输入手机号" size="large" />
-                            </el-form-item>
-                            <el-form-item prop="password">
-                                <el-input v-model="loginForm.password" type="password" placeholder="请输入密码" size="large"
-                                    show-password />
-                            </el-form-item>
-                        </el-form>
-                        <div class="form-group" style=" margin-bottom: 22px; display: flex; justify-content: center;">
+            <div class="container-fluid" style="padding-bottom: 15px;">
+                <div class="form" style="padding:15px 5px 0px 5px;">
+                    <el-form :model="loginForm" :rules="rules" ref="loginFormRef" label-position="top">
+                        <el-form-item prop="account" style="margin-bottom: 25px;front-size:18px">
+                            <el-input v-model="loginForm.account" placeholder="请输入手机号" size="large" style="height: 50px;" />
+                        </el-form-item>
+                        <el-form-item prop="password" style="margin-bottom: 25px;front-size:18px">
+                            <el-input v-model="loginForm.password" type="password" placeholder="请输入密码" size="large"
+                                style="height: 50px;" show-password />
+                        </el-form-item>
+                        <el-form-item>
                             <el-button type="warning" style="width: 100%; height: 42px;font-size: 18px;" @click="login">登
                                 录</el-button>
-                        </div>
-                        <div class="links">
-                            <a class="link" target="_blank" @click="showRegister">
-                                立即注册
-                            </a>
-                            <a class="link" target="_blank">
-                                忘记密码
-                            </a>
-                        </div>
+                        </el-form-item>
+                    </el-form>
+                    <div class="links">
+                        <a class="link" target="_blank" @click="showRegister">
+                            立即注册
+                        </a>
+                        <a class="link" target="_blank">
+                            忘记密码
+                        </a>
                     </div>
+
                 </div>
             </div>
         </div>
@@ -37,11 +36,18 @@
 </template>
 
 <script setup>
+import { getCurrentInstance } from 'vue';
 import Register from '../components/Register.vue'
-import { reactive, ref, onMounted } from 'vue'
+import { reactive, ref, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router';
 import axios from 'axios'
 import { useUserStore } from '../stores/user.js'
+import { ElMessage } from 'element-plus';
+const props = defineProps(['isRegister'])
+watch(() => props.isRegister, () => {
+    console.log(props.isRegister)
+    isRegistering.value = false
+})
 
 const loginFormRef = ref(null);
 const isRegistering = ref(false)
@@ -54,12 +60,12 @@ const router = useRouter();
 const rules = {
     account: [
         { required: true, message: '请输入账号', trigger: 'blur' }
+
     ],
     password: [
         { required: true, message: '请输入密码', trigger: 'blur' }
     ]
 }
-
 async function login() {
     loginFormRef.value.validate(valid => {
         if (valid) {
@@ -86,13 +92,18 @@ function handleLoginResponse(response) {
         console.log('登录成功', response.data)
         userStore.setUser(response.data)
         console.log(userStore.getUser())
+        ElMessage.success('登录成功')
+        // 修改的登录成功消息
         localStorage.setItem('currentUser', JSON.stringify(response.data.id))
         location.href = '/'
+
     } else if (response.status === 401) {
         console.log('密码错误', response.status)
+        ElMessage.error('密码错误')
     } else if (response.status === 404) {
         console.log('账号不存在', response.status)
         console.log(response.data)
+        ElMessage.error('账号不存在')
     }
 }
 
@@ -105,17 +116,7 @@ const showRegister = () => {
 
 <style scoped>
 :deep(.el-input__inner) {
-    height: 48px;
-    border-radius: 8px;
-    /* border: 1px solid #db8916; */
-    background-color: #ffffff;
-    color: #db8916;
     font-size: 16px;
-    font-weight: 400;
-    font-style: normal;
-    font-stretch: normal;
-    letter-spacing: normal;
-    padding: 0 10px;
 }
 
 .login-container {
@@ -139,7 +140,7 @@ const showRegister = () => {
     border-radius: 8px;
     /* 圆角 */
     position: absolute;
-    top: 43%;
+    top: 48%;
     left: 75%;
     transform: translate(-50%, -50%);
     width: 325px;

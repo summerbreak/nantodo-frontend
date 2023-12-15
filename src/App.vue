@@ -1,12 +1,7 @@
 <template>
   <div class="container">
     <div class="header">
-      <el-menu ref="menu"
-        :default-active="activeIndex"
-        class="menu"
-        mode="horizontal"
-        router
-      >
+      <el-menu ref="menu" :default-active="activeIndex" class="menu" mode="horizontal" router>
         <el-menu-item index="/" class="menu-item">首页</el-menu-item>
         <el-menu-item index="/group" class="menu-item">小组</el-menu-item>
         <el-menu-item index="/course" class="menu-item">课程</el-menu-item>
@@ -20,7 +15,7 @@
         <div v-else class="user">
           <el-badge is-dot :hidden="!isRedDot" class="red-dot">
             <div class="notice" @click="openNotice">
-                <i class="bi bi-bell"></i>
+              <i class="bi bi-bell"></i>
             </div>
           </el-badge>
           <el-dropdown>
@@ -48,7 +43,7 @@
       <!-- 如有需要，在自定义组件内可以继续写el-container/aside/main... -->
       <router-view v-slot="{ Component }">
         <keep-alive>
-          <component :is="Component" />
+          <component :is="Component" :is-register="isRegister" />
         </keep-alive>
       </router-view>
     </div>
@@ -87,13 +82,8 @@
     </template>
     <el-empty v-show="!messageList.length" description="还没有消息哦" image=" "></el-empty>
     <el-timeline v-show="messageList.length">
-      <el-timeline-item
-      v-for="message in messageList"
-      :key="message.timestamp"
-      :type="message.type"
-      :timestamp="message.timestamp"
-      class="timeline-item"
-      >
+      <el-timeline-item v-for="message in messageList" :key="message.timestamp" :type="message.type"
+        :timestamp="message.timestamp" class="timeline-item">
         <div class="message">
           <span>{{ message.content }}</span>
           <i class="bi bi-x-lg delete-message" @click="deleteMessage(message.timestamp)"></i>
@@ -115,6 +105,7 @@ const userStore = useUserStore()
 
 const activeIndex = ref('/')
 const isLogin = computed(() => userStore.isLogin)
+const isRegister = ref(false)
 const isRedDot = ref(false)
 const showNotice = ref(false)
 const user = reactive({
@@ -151,7 +142,7 @@ watch(() => router.currentRoute.value.path, (newValue, oldValue) => {
   }
   console.log(newValue)
   activeIndex.value = newValue
-}, {immediate: true})
+}, { immediate: true })
 
 function toIndex() {
   location.href = "/"
@@ -167,6 +158,8 @@ function openNotice() {
 }
 
 function handleLogin() {
+  console.log(isRegister.value)
+  isRegister.value = !isRegister.value
   router.push("/login")
 }
 
@@ -180,7 +173,7 @@ function handleLogout() {
 
 function getMessage(messages) {
   messages.forEach(message => {
-    let m = {...message}
+    let m = { ...message }
     m.timestamp = new Date(message.timestamp).toLocaleString('af')
     messageList.push(m)
   })
@@ -189,7 +182,7 @@ function getMessage(messages) {
   }
 }
 
-function deleteMessage(timestamp, isAll=false) {
+function deleteMessage(timestamp, isAll = false) {
   let user = userStore.getUser()
   if (isAll) {
     messageList.length = 0
@@ -234,7 +227,7 @@ function deleteMessage(timestamp, isAll=false) {
   /* opacity: 1; */
   background-image: radial-gradient(#FFDAB9 0.6px, oldlace 0.6px);
   background-size: 12px 12px;
-  
+
   overflow: hidden;
 }
 
@@ -282,9 +275,10 @@ function deleteMessage(timestamp, isAll=false) {
   align-items: center;
   padding-left: 10px;
   padding-right: 10px;
+
   &:hover {
     cursor: pointer;
-    background-color:	wheat;
+    background-color: wheat;
     border-radius: 10px;
   }
 }
@@ -300,9 +294,10 @@ function deleteMessage(timestamp, isAll=false) {
   font-size: 24px;
   text-align: center;
   line-height: 40px;
+
   &:hover {
     cursor: pointer;
-    background-color:	wheat;
+    background-color: wheat;
     border-radius: 10px;
   }
 }
@@ -314,6 +309,7 @@ function deleteMessage(timestamp, isAll=false) {
   margin-left: 20px;
   width: 100px;
   outline: none;
+
   &:hover {
     cursor: pointer;
     border-radius: 10px;
@@ -326,6 +322,7 @@ function deleteMessage(timestamp, isAll=false) {
   z-index: 20;
   top: 0;
   left: 10%;
+
   &:hover {
     cursor: pointer;
   }
@@ -358,12 +355,15 @@ function deleteMessage(timestamp, isAll=false) {
 
 .timeline-item {
   min-height: 80px;
+
   .delete-message {
     display: none;
   }
+
   &:hover {
     .delete-message {
       display: block;
+
       &:hover {
         cursor: pointer;
       }
@@ -377,5 +377,4 @@ function deleteMessage(timestamp, isAll=false) {
     color: var(--el-color-primary);
   }
 }
-
 </style>

@@ -110,7 +110,6 @@ const setForm = () => {
   form.grade = User.grade
 
 }
-setForm
 
 onActivated(() => {
   const User = userStore.getUser()
