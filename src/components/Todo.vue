@@ -9,9 +9,9 @@
         <!--最近浏览-->
         <groupCard />
       </div>
-       <!-- 图表统计完成事务 -->
-      <StaChart class="sta"/>
-        
+      <!-- 图表统计完成事务 -->
+      <StaChart class="sta" />
+
       <div class="calender">
         <!--日历-->
         <MyCalendar />
@@ -41,10 +41,12 @@ export default {
   border-radius: 8px;
   margin-top: 10px;
   height: 500px;
-  --vc-text-sm:18px;
+  --vc-text-sm: 18px;
 }
+
 .top-box {
-  display: grid;;
+  display: grid;
+  ;
   box-sizing: border-box;
   box-shadow: var(--el-box-shadow-light);
   background-color: #fffffa;
@@ -52,12 +54,14 @@ export default {
   padding: 20px;
   flex: 3;
 }
+
 .mainPage {
   display: flex;
   padding: 10px;
   margin-left: 7%;
   margin-right: 7%;
 }
+
 .calender {
   flex: 4;
   box-sizing: border-box;
@@ -66,8 +70,10 @@ export default {
   border-radius: 8px;
   margin-top: 10px;
   height: 500px;
-  --vc-text-sm:18px;
+  --vc-text-sm: 18px;
+  padding: 10px;
 }
+
 .left-column {
   flex: 6.5;
   display: flex;
@@ -78,10 +84,12 @@ export default {
   border-radius: 8px;
   margin-right: 10px;
 }
+
 .welcome {
   font-size: 40px;
   font-family: "Dengxian", sans-serif;
 }
+
 .right-column {
   display: flex;
   flex-direction: column;

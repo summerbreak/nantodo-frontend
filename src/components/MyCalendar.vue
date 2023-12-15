@@ -2,10 +2,7 @@
   <Calendar ref="calendar" :attributes="attrs" expanded transparent borderless>
     <template #footer>
       <div>
-        <button
-          class="mybutton"
-          @click="moveToday"
-        >
+        <button class="mybutton" @click="moveToday">
           Today
         </button>
       </div>
@@ -16,9 +13,9 @@
 <script setup>
 import { Calendar } from "v-calendar";
 import "v-calendar/style.css";
-import { ref,reactive } from "vue";
+import { ref, reactive } from "vue";
 import axios from "axios";
-import { onMounted} from "vue";
+import { onMounted } from "vue";
 import { useUserStore } from '../stores/user.js'
 const userStore = useUserStore();
 const attrs = reactive([
@@ -58,24 +55,24 @@ function getAllTasks() {
     console.log(tableData);
     editTask();
   }),
-  (err) => {
-    console.log(err);
-  };
+    (err) => {
+      console.log(err);
+    };
 }
 
-function editTask(){
+function editTask() {
   for (let i = 0; i < tableData.length; i++) {
     let date = new Date(tableData[i].deadline);
     let year = date.getFullYear();
     let month = date.getMonth();
     let day = date.getDate();
-    let key = "v" + i+2 + "Day";
+    let key = "v" + i + 2 + "Day";
     attrs.push({
       key: key,
       dates: new Date(year, month, day),
       highlight: {
-      color: 'orange',
-      fillMode: 'light',
+        color: 'orange',
+        fillMode: 'light',
       },
       popover: {
         label: tableData[i].title,
@@ -92,10 +89,10 @@ function moveToday() {
 </script>
 
 <style scoped>
-.mybutton{
+.mybutton {
   display: grid;
   margin: auto;
-  background-color: #3498db; 
+  background-color: #3498db;
   color: #ffffff;
   font-weight: bold;
   border: none;
@@ -104,12 +101,13 @@ function moveToday() {
 }
 
 .mybutton:hover {
-  background-color: #2980b9; /* 鼠标悬停时的背景颜色 */
+  background-color: #2980b9;
+  /* 鼠标悬停时的背景颜色 */
 }
 </style>
 
 <style>
-.vc-day{
+.vc-day {
   min-height: 22px;
 }
 </style>

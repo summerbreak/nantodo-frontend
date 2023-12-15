@@ -3,39 +3,49 @@
         <el-container>
             <el-main style="width: 375px;">
                 <div class="t-tab-top">欢迎您注册南土豆账号</div>
-                <el-form :model="registerForm" :rules="rules" ref="registerFormRef" label-width="auto">
-                    <el-form-item label="账号：" prop="phone">
-                        <el-input v-model="registerForm.phone" placeholder="请输入手机号" />
+                <el-form :model="registerForm" :rules="rules" ref="registerFormRef" label-width="35%"
+                    style="padding-top:20px">
+                    <el-form-item label="账号：" prop="phone" style="margin-bottom:25px">
+                        <el-input class="register-input" v-model="registerForm.phone" placeholder="请输入手机号" />
                     </el-form-item>
-                    <el-form-item label="密码：" prop="password">
-                        <el-input v-model="registerForm.password" type="password" placeholder="请输入密码" show-password />
+                    <el-form-item label="密码：" prop="password" style="margin-bottom:25px">
+                        <el-input class="register-input" v-model="registerForm.password" type="password" placeholder="请输入密码"
+                            show-password />
                     </el-form-item>
-                    <el-form-item label="确认密码：" prop="passwordConfirm">
-                        <el-input v-model="registerForm.passwordConfirm" placeholder="请确认密码" show-password />
+                    <el-form-item label="确认密码：" prop="passwordConfirm" style="margin-bottom:25px">
+                        <el-input class="register-input" v-model="registerForm.passwordConfirm" placeholder="请确认密码"
+                            show-password />
                     </el-form-item>
-                    <el-form-item label="姓名：" prop="name">
-                        <el-input v-model="registerForm.name" placeholder="您的姓名" />
+                    <el-form-item label="姓名：" prop="name" style="margin-bottom:25px">
+                        <el-input class="register-input" v-model="registerForm.name" placeholder="您的姓名" />
                     </el-form-item>
-                    <el-form-item label="学号：" prop="studentNumber">
-                        <el-input v-model="registerForm.studentNumber" placeholder="您的学号" />
+                    <el-form-item label="学号：" prop="studentNumber" style="margin-bottom:25px">
+                        <el-input class="register-input" v-model="registerForm.studentNumber" placeholder="您的学号" />
                     </el-form-item>
-                    <el-form-item label="年级：" prop="selectedGrade">
-                        <el-select v-model="registerForm.selectedGrade" placeholder="选择您的年级">
+                    <el-form-item label="年级：" prop="selectedGrade" style="margin-bottom:25px">
+                        <el-select class="register-input custom-select" v-model="registerForm.selectedGrade"
+                            placeholder="选择您的年级">
                             <el-option v-for="item in options" :key="item.value" :label="item.label" :value="item.value" />
                         </el-select>
                     </el-form-item>
                     <el-form-item label="邮箱：" prop="email">
-                        <el-input v-model="registerForm.email" placeholder="您的邮箱" />
+                        <el-input class="register-input" v-model="registerForm.email" placeholder="您的邮箱" />
                     </el-form-item>
-                    <el-form-item prop="agree">
+                    <el-form-item prop="agree" label-width="83px">
+
                         <el-checkbox v-model="registerForm.agree">同意</el-checkbox>
                         <a class="regulation" style="color:#db8916">《南土豆使用条例》</a>
+
                     </el-form-item>
-                    <el-form-item>
-                        <el-button type="warning" style="width: 75%; height: 42px;font-size: 20px;" @click="register">注
-                            册</el-button>
-                    </el-form-item>
+
                 </el-form>
+                <div style="display: flex; justify-content: center;"><el-button type="warning"
+                        style="width: 50%; height: 42px;font-size: 20px; margin-top:-8px" @click="register">注
+                        册</el-button></div>
+                <div class="return-login" @click="returnLogin">
+                    已有帐号？立即登录
+                </div>
+
             </el-main>
         </el-container>
     </div>
@@ -128,12 +138,17 @@ function validatePasswordConfirm(rule, value, callback) {
     }
 }
 const emit = defineEmits(['register-success'])
+
 function validateAgree(rule, value, callback) {
     if (!value) {
         callback(new Error('你必须同意条款!'));
     } else {
         callback();
     }
+}
+
+const returnLogin = () => {
+    emit('register-success');
 }
 </script>
   
@@ -150,6 +165,7 @@ function validateAgree(rule, value, callback) {
     width: 500px;
     height: 100vh;
     padding: 30px;
+    margin-top: 8px;
     background: rgba(242, 234, 222, 0.97);
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.6);
 }
@@ -165,6 +181,16 @@ function validateAgree(rule, value, callback) {
     margin-bottom: 5px;
 }
 
+.register-input {
+    width: 80%;
+    height: 40px;
+    font-size: 16px;
+    margin-top: -4px;
+
+}
+
+
+
 .form-group {
     display: flex;
     justify-content: center;
@@ -177,5 +203,25 @@ function validateAgree(rule, value, callback) {
 .regulation:hover {
     cursor: pointer;
 
+}
+
+.return-login {
+    display: flex;
+    justify-content: center;
+    font-size: 12px;
+    color: gray;
+    margin-top: 8px;
+
+    &:hover {
+        cursor: pointer;
+        color: #db8916;
+    }
+
+}
+</style>
+
+<style>
+.custom-select>.select-trigger>.el-input {
+    height: 40px;
 }
 </style>
