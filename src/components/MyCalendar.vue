@@ -1,5 +1,5 @@
 <template>
-  <Calendar ref="calendar" :attributes="attrs" expanded transparent borderless>
+  <Calendar ref="calendar" :attributes="attrs" expanded transparent borderless class="myCalender"> 
     <template #footer>
       <div>
         <button
@@ -108,8 +108,8 @@ function moveToday() {
 }
 </style>
 
-<style>
-.vc-day{
+<style scoped>
+.myCalender.vc-day{
   min-height: 22px;
 }
 </style>
