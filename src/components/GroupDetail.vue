@@ -390,7 +390,7 @@ function isUrgent(task) {
     }
     const now = new Date()
     const deadline = new Date(task.deadline)
-    return now > deadline || deadline - now < 3 * 24 * 60 * 60 * 1000
+    return now > deadline || deadline - now < userStore.getUser().settings.emergencyDays * 24 * 60 * 60 * 1000
 }
 
 function taskStatus(task) {

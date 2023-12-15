@@ -92,6 +92,7 @@ async function submitForm() {
     console.log('editing', editing.value)
     await formRef.value.validate((valid) => {
         if (valid) {
+            console.log('task', task)
             task.releaseTime = new Date()
             if (editing.value) {
                 axios.put(`http://localhost:8080/task?id=${task.id}`, task).then(

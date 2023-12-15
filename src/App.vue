@@ -125,13 +125,6 @@ const user = reactive({
 
 const messageList = reactive([])
 
-// const messageList = reactive([
-//   {id: 'qwee', content: '您收到来自“人机交互小组”布置的任务', type: 'primary', timestamp: '2023-09-16 18:38'},
-//   {id: 'dzfs', content: '您申请加入小组“操作系统小组”被拒绝', type: 'danger', timestamp: '2023-09-16 14:43'},
-//   {id: 'xsdf', content: '您已成功加入小组“人机交互小组”', type: 'success', timestamp: '2023-09-15 20:02'},
-//   {id: 'dsfs', content: '您已成功加入课程“人机交互系统”', type: 'success', timestamp: '2023-09-15 10:46'}
-// ])
-
 onMounted(() => {
   let currentUser = JSON.parse(localStorage.getItem('currentUser'))
   if (currentUser) {
@@ -140,6 +133,7 @@ onMounted(() => {
         user.id = res.data.id
         user.name = res.data.name
         user.avatarUrl = res.data.avatarUrl
+        console.log('user', res.data)
         userStore.setUser(res.data)
         getMessage(res.data.messages)
       }, err => {
@@ -174,30 +168,12 @@ function openNotice() {
 
 function handleLogin() {
   router.push("/login")
-  /*
-  let id = '657434b0b522ce741d1489bb'
-  // let id = '656f21da73a92462abe20a28'
-  axios.get(`http://localhost:8080/user?id=${id}`).then(
-    res => {
-      ElMessage.success('登录成功')
-      console.log(res.data)
-      user.id = res.data.id
-      user.name = res.data.name
-      user.avatarUrl = res.data.avatarUrl
-      userStore.setUser(res.data)
-      getMessage(res.data.messages)
-      localStorage.setItem('currentUser', JSON.stringify(res.data.id))
-      isLogin.value = true
-    }, err => {
-      ElMessage.error('登录失败')
-    }
-  )
-  */
 }
 
 
 function handleLogout() {
   localStorage.removeItem('currentUser')
+  localStorage.removeItem('recentGroup')
   userStore.isLogin = false
   location.href = "/"
 }
