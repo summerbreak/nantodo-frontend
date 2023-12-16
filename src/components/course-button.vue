@@ -18,6 +18,9 @@
       <el-form-item label="课程封面">
         <el-input v-model="courseInfo.url"/>
       </el-form-item>
+      <el-form-item label="开课时间">
+        <el-input v-model="courseInfo.semester"/>
+      </el-form-item>
       <el-form-item label="年级">
         <el-input v-model="courseInfo.grade" type="number" maxlength="4" minlength="4"/>
       </el-form-item>
@@ -56,6 +59,7 @@ const courseInfo = reactive({
   description: '',
   grade: 2021,
   open:true,
+  semester:'',
   groups: [],
   homeworks: [],
 })

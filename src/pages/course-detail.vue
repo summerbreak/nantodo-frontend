@@ -18,17 +18,17 @@
               <el-text size="large">教师：{{ courseInfo.teacher }}</el-text>
               <br/>
               <el-row>
-                <el-col :span="5">
-                  <el-text size="large">学期：2023秋</el-text>
+                <el-col>
+                  <el-text size="large">学期：{{courseInfo.semester}}</el-text>
                 </el-col>
-                <el-col :span="8">
+                <el-col>
                   <el-text size="large">授课年级：{{ courseInfo.grade }}</el-text>
                 </el-col>
               </el-row>
               <el-text size="large">小队数目：{{ teamNumber }}</el-text>
             </el-card>
             <div style="margin-top: 20px">
-              <div v-if="courseInfo.open">
+              <div v-if="courseInfo.open" :key="ref">
                 <div v-if="selected" :key="ref">
                   <el-button-group size="large" v-if="hasTeam">
                     <el-button :icon="Position" type="warning" plain @click="queryTeam">
@@ -495,7 +495,8 @@ const attendCourse = () => {
 
 .image {
   border-radius: 10px;
-  height: 230px;
+  height: 250px;
+  width: 95%;
 }
 
 .text {
