@@ -31,14 +31,8 @@
               <div v-if="courseInfo.open" :key="ref">
                 <div v-if="selected" :key="ref">
                   <el-button-group size="large" v-if="hasTeam">
-                    <el-button :icon="Position" type="warning" plain @click="queryTeam">
+                    <el-button :icon="Position" type="warning" plain @click="router.push({path: '/group', query: {id: groupInfo.id}})">
                       查看我的小组
-                    </el-button>
-                    <el-button type="warning" plain @click="getTeamId">
-                      复制邀请码
-                      <el-icon class="el-icon--right">
-                        <Connection/>
-                      </el-icon>
                     </el-button>
                   </el-button-group>
                   <el-button-group size="large" v-else>
@@ -197,7 +191,7 @@
                     当前状态
                   </div>
                 </template>
-                <el-text>申请中，点击这里取消申请</el-text>
+                <el-text>申请中</el-text>
               </el-descriptions-item>
             </el-descriptions>
           </div>
@@ -598,11 +592,15 @@ const applyTeamFunc = async (teamId) => {
           }
       )
     })
+    axios.post(`http://localhost:8080/user/message?id=${applyTeam.value.leaderId}`, {
+      timestamp: Date.now(),
+      type: 'primary',
+      content: `您的小组 ${applyTeam.value.name} 收到新的加入申请`
+    })
     applyNow.value = true
   }).catch(err => {
     console.log(err)
   })
-  console.log(applyNow.value)
 }
 
 
@@ -610,7 +608,33 @@ let createTeam = () => {
   creatVisible.value = true
 }
 const findTeam = () => {
-
+  ElMessageBox.prompt('请输入邀请码', '加入小组', {
+    confirmButtonText: '确定',
+    cancelButtonText: '取消',
+    // 限制输入为6位数字或大写字母
+    inputPattern: /^[A-Z0-9]{6}$/,
+    inputErrorMessage: '邀请码格式错误'
+  }).then(({value}) => {
+    console.log(value)
+    axios({
+      method: 'put',
+      url: 'http://localhost:8080/group/invite',
+      params: {
+        code: value,
+        userId: user.id
+      }
+    }).then(res => {
+      ElMessage.success('加入小组成功')
+    }).catch(err => {
+      console.log(err)
+      if (err.response.status === 400) {
+        ElMessage.error('小组已满员')
+        return
+      } else {
+        ElMessage.error('邀请码错误，找不到该小组')
+      }
+    })
+  })
 }
 
 const attendCourse = () => {
