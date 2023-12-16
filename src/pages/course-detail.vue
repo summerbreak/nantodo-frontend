@@ -114,31 +114,94 @@
           <el-empty description="暂无通知"/>
         </el-tab-pane>
         <el-tab-pane label="队伍">
-          <el-row class="filter-team">
-            <el-col :span="8">
-              <el-input
-                  v-model="inputText"
-                  size="large"
-                  placeholder="搜索小队名称"
-                  :suffix-icon="Search"
-                  @change="queryTeam"
-              />
-            </el-col>
-            <el-col :span="4">
-              <el-check-tag :checked="ifPossible" @change="choosePossible" class="possible">仅看可加入的队伍
-              </el-check-tag>
-            </el-col>
-          </el-row>
-          <el-row class="outside" :key="fresh">
-            <el-col
-                v-for="(o, index) in showTeam"
-                :key="index"
-                :offset="0"
+          <div v-if="allTeam.length===0">
+            <el-empty description="暂时还没有小队"/>
+          </div>
+          <div v-else-if="allTeam.length>0 && !hasTeam">
+            <el-row class="filter-team">
+              <el-col :span="8">
+                <el-input
+                    v-model="inputText"
+                    size="large"
+                    placeholder="搜索小队名称"
+                    :suffix-icon="Search"
+                    @change="queryTeam"
+                />
+              </el-col>
+              <el-col :span="4">
+                <el-check-tag :checked="ifPossible" @change="choosePossible" class="possible">仅看可加入的队伍
+                </el-check-tag>
+              </el-col>
+            </el-row>
+            <el-row class="outside" :key="fresh" style="margin: 5px 20px">
+              <el-col
+                  v-for="(o, index) in showTeam"
+                  :key="index"
+                  :offset="0"
+              >
+                <course-team :group-info="o"/>
+              </el-col>
+            </el-row>
+          </div>
+          <div v-else>
+            <el-descriptions
+                title="我的小队"
+                direction="vertical"
+                :column="3"
+                :size="'default'"
+                border
             >
-              <course-team :group-info="o"/>
-            </el-col>
-          </el-row>
-
+              <el-descriptions-item min-width="20%" width="20%">
+                <template #label>
+                  <div class="cell-item">
+                    小队名称
+                  </div>
+                </template>
+                <el-text>{{ groupInfo.name }}</el-text>
+              </el-descriptions-item>
+              <el-descriptions-item min-width="35%" width="35%">
+                <template #label>
+                  <div class="cell-item">
+                    队长
+                  </div>
+                </template>
+                <el-text>{{ myLeaderName }}</el-text>
+              </el-descriptions-item>
+              <el-descriptions-item>
+                <template #label>
+                  <div class="cell-item">
+                    简介
+                  </div>
+                </template>
+                <el-text>{{ groupInfo.description }}</el-text>
+              </el-descriptions-item>
+              <el-descriptions-item>
+                <template #label>
+                  <div class="cell-item">
+                    小队人数
+                  </div>
+                </template>
+                <el-text>{{ groupInfo.members.length }} / {{ groupInfo.capacity }}</el-text>
+              </el-descriptions-item>
+              <el-descriptions-item>
+                <template #label>
+                  <div class="cell-item">
+                    小队成员
+                  </div>
+                </template>
+                <el-text>{{ myMembers }}</el-text>
+              </el-descriptions-item>
+              <el-descriptions-item>
+                <template #label>
+                  <div class="cell-item">
+                    当前状态
+                  </div>
+                </template>
+                <el-text v-if="isLeader">组长</el-text>
+                <el-text v-else>组员</el-text>
+              </el-descriptions-item>
+            </el-descriptions>
+          </div>
         </el-tab-pane>
       </el-tabs>
     </el-col>
@@ -173,13 +236,17 @@ const groupInfo = reactive({
   organName: '',
   description: '',
   type: '',
-  capacity: 0,
+  capacity: 4,
   courseId: '',
-
 })
+const myLeaderName = ref('')
+const myMembers = ref('')
 const allTeam = ref([])
 const showTeam = ref([])
 const creatVisible = ref(false)
+const isLeader = ref(false)
+
+
 const clearTeam = () => {
   groupInfo.name = ''
   groupInfo.capacity = 4
@@ -211,7 +278,6 @@ onActivated(async () => {
       allTeam.value.push(allGroups[i])
       allTeam.value[i]["leaderName"] = ''
       allTeam.value[i]["membersName"] = ''
-      console.log(allGroups[i])
       await axios.get(`http://localhost:8080/user?id=${allGroups[i].leaderId}`).then(
           res => {
             allTeam.value[i].leaderName = res.data.name
@@ -252,7 +318,7 @@ onActivated(async () => {
     ).catch(err => {
       alert(err)
     })
-
+    isLeader.value = false
     if (tmp.courseId == courseInfo.value.id) {
       hasTeam.value = true
       teamId.value = tmp.id
@@ -262,13 +328,30 @@ onActivated(async () => {
       groupInfo.id = tmp.id
       groupInfo.description = tmp.description
       groupInfo.leaderId = tmp.leaderId
+      if (groupInfo.leaderId == userInfo.value.id) {
+        isLeader.value = true
+      }
+      await axios.get(`http://localhost:8080/user?id=${groupInfo.leaderId}`).then(
+          res => {
+            myLeaderName.value = res.data.name
+          }
+      )
+      groupInfo.members.map(async item => {
+        await axios.get(`http://localhost:8080/user?id=${item}`).then(
+            res => {
+              if (myMembers.value.length > 0) {
+                myMembers.value += '，'
+              }
+              myMembers.value += res.data.name
+            }
+        )
+      })
       break
     } else {
       clearTeam()
     }
 
   }
-
 })
 
 
@@ -285,11 +368,15 @@ const addTeam = async () => {
         hasTeam.value = true
         groupInfo.id = res.data
         courseInfo.value.groups.push(groupInfo.id)
+        creatVisible.value = false
+        myLeaderName.value = userInfo.value.name
+        myMembers.value = userInfo.value.name
+        isLeader.value = true
       }
   ).catch(err => {
     alert(err)
   })
-  creatVisible.value = false
+
 }
 const dropOut = () => {
   axios.get(`http://localhost:8080/user?id=${user.id}`).then(
@@ -311,10 +398,8 @@ const dropOut = () => {
     })
   } else {
     userInfo.value.courses = userInfo.value.courses.filter(item => item != courseInfo.value.id)
-    console.log(userInfo.value.courses)
     axios.put(`http://localhost:8080/user?id=${user.id}`, userInfo.value).then(
         res => {
-          console.log(res)
           selected.value = false
           ElMessage({
             message: `成功退出${courseInfo.value.name}`,
@@ -348,7 +433,6 @@ const queryTeam = async () => {
         await axios.get(`http://localhost:8080/user?id=${item.leaderId}`).then(
             res => {
               leaderName = res.data.name
-              console.log(leaderName)
             }
         ).catch(err => {
           leaderName = '不存在'
@@ -430,6 +514,10 @@ const attendCourse = () => {
   border-style: none;
   border-radius: 10px;
   color: #2C3639
+}
+
+.cell-item {
+  font-weight: bolder;
 }
 
 .possible {
