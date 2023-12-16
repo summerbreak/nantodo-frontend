@@ -1,5 +1,5 @@
 <template>
-  <div class="task-card" :class="{ completed: isCompleted }">
+  <div class="task-card" :class="{ completed: isCompleted || isOvertime}">
     <div class="header">
       <div class="icon-and-title">
         <div class="star">
@@ -119,7 +119,8 @@ export default {
       dialogVisible: false,
       urgent: false,
       aiSuggestion: '',
-      groupName: ''                       
+      groupName: '',
+      isOvertime: false                    
     };
   },
   mounted() {
@@ -216,7 +217,11 @@ export default {
       }
       const now = new Date()
       const deadline = new Date(this.myDeadline)
-      return now > deadline || deadline - now < 3 * 24 * 60 * 60 * 1000
+      if (now>deadline) {
+        this.isOvertime = true
+        return true
+      }
+      return deadline - now < 3 * 24 * 60 * 60 * 1000
     }
   }
 };

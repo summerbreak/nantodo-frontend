@@ -22,8 +22,11 @@
                 <el-input v-model="form.email" style="width: 25vh ;font-size: 18px" />
             </el-form-item>
             <h1 style="font-size: 30px; font-weight: bold; margin-bottom: 20px;margin-left: 5%;">通用设置</h1>
-            <h3 style="font-size: 20px; font-weight: bold; margin-bottom: 20px;margin-left: 5%;"> 紧急模式</h3>
-
+            <h3 style="font-size: 20px; font-weight: bold; margin-bottom: 20px;margin-left: 5%;"> 紧急状态
+                <el-tooltip content="紧急状态下的任务会突出显示" placement="top">
+                    <span style="font-size: 16px; color: gray;"><i class="bi bi-question-circle"></i></span>
+                </el-tooltip>
+            </h3>
             <el-form-item label="开始时间" prop="emergencyDays" style="font-weight: bold;margin-left: 10%">
                 <span class="font">距离DDL&nbsp;&nbsp;</span>
                 <el-input-number v-model="form.settings.emergencyDays"
@@ -37,7 +40,7 @@
                 <span class="font">&nbsp;&nbsp;小时提醒</span>
             </el-form-item>
             <div style="display: flex; align-items: center;margin-top: -15px;margin-bottom: 5px;">
-                <h3 style="font-size: 20px; font-weight: bold;margin-left:5%;"> 静默模式</h3>
+                <h3 style="font-size: 20px; font-weight: bold;margin-left:5%;"> 勿扰模式</h3>
                 <el-switch v-model="form.settings.quietMode" active-color="#db8916" style="margin-left: 1%;"></el-switch>
             </div>
             <el-form-item label="开始时间" prop="quietModeStart" style="font-weight: bold;margin-left: 10%;"

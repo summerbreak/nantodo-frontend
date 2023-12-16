@@ -5,8 +5,8 @@
         size="large"
         placeholder="课程搜索"
         :suffix-icon="Search"
-        style="width: 50%"
-        @change="querySearch"
+        style="width: 100%"
+        @change="$emit('search',inputText)"
     />
   </div>
 </template>
@@ -29,24 +29,5 @@ onMounted(() => {
 .search {
   text-align: right;
   width: 100%;
-}
-
-.my-autocomplete li {
-  line-height: normal;
-  padding: 7px;
-}
-
-.my-autocomplete li .name {
-  text-overflow: ellipsis;
-  overflow: hidden;
-}
-
-.my-autocomplete li .addr {
-  font-size: 12px;
-  color: #b4b4b4;
-}
-
-.my-autocomplete li .highlighted .addr {
-  color: #ddd;
 }
 </style>

@@ -1,5 +1,5 @@
 <template>
-  <Calendar ref="calendar" :attributes="attrs" expanded transparent borderless class="myCalender"> 
+  <Calendar ref="calendar" :attributes="attrs" expanded transparent borderless class="myCalendar">
     <template #footer>
       <div>
         <button class="mybutton" @click="moveToday">
@@ -16,32 +16,12 @@ import "v-calendar/style.css";
 import { ref, reactive } from "vue";
 import axios from "axios";
 import { onMounted } from "vue";
-import { useUserStore } from '../stores/user.js'
-const userStore = useUserStore();
+import { useUserStore } from "../stores/user.js";
 const attrs = reactive([
-  {
-    key: "v0Day",
-    dates: new Date(),
-    highlight: true,
-    popover: {
-      label: "美好的一天！要开心呦！",
-    },
-  },
-  {
-    key: "V1Day",
-    popover: {
-      label: "完成task",
-    },
-    highlight: {
-      color: 'orange',
-      fillMode: 'light',
-    },
-    backgroundColor: "#FFA500",
-    dates: new Date(2023, 11, 13),
-  },
 ]);
 const tableData = reactive([]);
 const calendar = ref(null);
+const userStore = useUserStore();
 onMounted(() => {
   getAllTasks();
 });
@@ -61,26 +41,50 @@ function getAllTasks() {
 }
 
 function editTask() {
-  for (let i = 0; i < tableData.length; i++) {
-    let date = new Date(tableData[i].deadline);
-    let year = date.getFullYear();
-    let month = date.getMonth();
-    let day = date.getDate();
-    let key = "v" + i + 2 + "Day";
-    attrs.push({
-      key: key,
-      dates: new Date(year, month, day),
-      highlight: {
-        color: 'orange',
-        fillMode: 'light',
-      },
-      popover: {
-        label: tableData[i].title,
-      },
-    });
-  }
-  console.log(attrs);
+  for (let i = 0; i < tableData.length + 1; i++) {
+    if (i == 0) {
+      attrs.push(
+        {
+          key: "v0Day",
+          dates: new Date(),
+          highlight: true,
+          popover: {
+            label: "美好的一天！要开心呦！",
+          },
+        })
+    } else {
+      let date = new Date(tableData[i - 1].deadline);
+      let year = date.getFullYear();
+      let month = date.getMonth();
+      let day = date.getDate();
+      let key = "v" + i + "Day";
+      if (year == new Date().getFullYear() && month == new Date().getMonth() && day == new Date().getDate()) {
+        attrs.push({
+          key: key,
+          dates: new Date(year, month, day),
+          highlight: true,
+          popover: {
+            label: tableData[i - 1].title,
+          },
+        });
+      } else {
+        attrs.push({
+          key: key,
+          dates: new Date(year, month, day),
+          highlight: {
+            color: 'orange',
+            fillMode: 'light',
+          },
+          popover: {
+            label: tableData[i - 1].title,
+          },
+        });
+      }
+    }
 
+
+  }
+  console.log('my', attrs);
 }
 
 function moveToday() {
@@ -106,8 +110,8 @@ function moveToday() {
 }
 </style>
 
-<style scoped>
-.myCalender.vc-day{
-  min-height: 22px;
+<style>
+.vc-day {
+  min-height: 40px;
 }
 </style>

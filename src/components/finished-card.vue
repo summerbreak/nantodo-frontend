@@ -223,7 +223,6 @@
     margin: 16px;
     max-width: 80%;
     background-color: white;
-    margin-left: 50px;
   }
   
   .title {

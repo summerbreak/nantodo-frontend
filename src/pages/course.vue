@@ -15,11 +15,11 @@
             :span="6"
             :offset="0"
         >
-          <course-grid :courseInfo="o" :selected="true"/>
+          <course-grid :courseInfo="o"/>
         </el-col>
       </el-row>
     </div>
-    <el-empty v-else>
+    <el-empty v-else-if="!isLoading">
       <template #image>
         <svg t="1702088362166" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg"
              p-id="2084" data-spm-anchor-id="a313x.search_index.0.i9.34973a81NrY7xU" width="200" height="200">
@@ -49,22 +49,26 @@
     <el-col :span="6">
       <el-text tag="ins" class="title">全部课程</el-text>
     </el-col>
-    <el-col :span="12" :offset="6">
-      <course-search/>
+    <el-col :span="4" :offset="8" style="text-align: right">
+      <el-check-tag :checked="ifPossible" @change="choosePossible" class="possibleCourse">仅看可加入的课程
+      </el-check-tag>
+    </el-col>
+    <el-col :span="6">
+      <course-search @search="getCourses"/>
     </el-col>
   </el-row>
   <el-scrollbar max-height="600px" style="margin-bottom: 0;margin-top: 0">
     <div v-loading="isLoading" element-loading-text="加载中..." element-loading-background="transparent">
-    <el-row class="outside">
-      <el-col
-          v-for="(o, index) in allCourses"
-          :key="index"
-          :span="6"
-          :offset="0"
-      >
-        <course-grid :courseInfo="o" :selected="false"/>
-      </el-col>
-    </el-row>
+      <el-row class="outside">
+        <el-col
+            v-for="(o, index) in showCourses"
+            :key="index"
+            :span="6"
+            :offset="0"
+        >
+          <course-grid :courseInfo="o"/>
+        </el-col>
+      </el-row>
     </div>
   </el-scrollbar>
   <!--  </el-scrollbar>-->
@@ -75,12 +79,15 @@ import {useUserStore} from "../stores/user.js";
 import CourseSearch from "../components/course-search.vue";
 import CourseGrid from "../components/course-grid.vue";
 import axios from "axios";
-import InvitationButton from "../components/invitation-button.vue";
+import InvitationButton from "../components/course-button.vue";
 
 const allCourses = ref([])
 const userCourses = ref([])
 const userInfo = ref({})
 const isLoading = ref(true)
+const ifPossible = ref(false)
+const showCourses = ref([])
+const searchText = ref('')
 
 const user = useUserStore().getUser()
 
@@ -88,35 +95,60 @@ onActivated(async () => {
   isLoading.value = true
   await axios.get('http://localhost:8080/course/allCourse').then(
       res => {
-        allCourses.value = []
+        allCourses.value.length = 0
         for (let i = 0; i < res.data.length; i++) {
-          console.log(res.data[i])
           allCourses.value.push(res.data[i])
         }
       }
   )
   await axios.get(`http://localhost:8080/user?id=${user.id}`).then(
       res => {
-        console.log(res)
         userInfo.value = res.data
       }
   ).catch(err => {
     alert(err)
   })
-  console.log(allCourses.value)
-  console.log(userInfo.value)
-  userCourses.value = []
+  showCourses.value.length = 0
+  showCourses.value.splice(0, 0, ...allCourses.value)
+
+  userCourses.value.length = 0
   for (let i = 0, len = userInfo.value.courses.length; i < len; i++) {
     const result = allCourses.value.find(({id}) => id === userInfo.value.courses[i])
     userCourses.value.push(result)
   }
-  console.log(userCourses.value)
   isLoading.value = false
 })
 
-const emptyCourse = () => {
-  return userInfo.value.courses.length !== 0;
+const getCourses = (text) => {
+  searchText.value = text
+  text = text.split("");
+  let str = "(.*?)";
+  showCourses.value.length = 0;
+  let regStr = str + text.join(str) + str;
+  let reg = RegExp(regStr, "i"); // 以mh为例生成的正则表达式为/(.*?)m(.*?)h(.*?)/i
+  allCourses.value.map(item => {
+    if (reg.test(item.name)) {
+      if (ifPossible.value && item.open) {
+        showCourses.value.push(item);
+      } else if (!ifPossible.value) {
+        showCourses.value.push(item);
+      }
+    }
+  });
 }
+
+const choosePossible = () => {
+  ifPossible.value = !ifPossible.value
+  if (ifPossible.value) {
+    let tmp = showCourses.value.concat()
+    tmp = tmp.filter(item => item.open)
+    showCourses.value.length = 0
+    showCourses.value.splice(0, 0, ...tmp)
+  } else {
+    getCourses(searchText.value)
+  }
+}
+
 </script>
 <style scoped>
 .title {
@@ -132,5 +164,11 @@ const emptyCourse = () => {
 .outside {
   margin: 0 140px 5px;
   padding: 0;
+}
+
+.possibleCourse {
+  margin-right: 15px;
+  line-height: 25px;
+  text-align: right;
 }
 </style>
