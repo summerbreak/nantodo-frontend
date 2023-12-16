@@ -1,6 +1,6 @@
 <template>
   <div class="recently-viewed">
-    <span class="title">最近浏览</span>
+    <span class="title">推荐课程</span>
     <div class="carousel-container">
       <el-empty description="暂无浏览" v-if="recentlyViewedItems.length==0" :image-size="100"/>
       <el-carousel :autoplay="false" height="200px" style="width: 95%" v-if="recentlyViewedItems.length!=0" indicator-position="none"> 
@@ -8,9 +8,9 @@
           <el-card
             shadow="hover"
             :body-style="{ padding: '0px' }"
-            @click="gotoDetails"
+            @click="gotoDetails(item.id)"
           >
-            <el-image :src="url" class="image" :fit="'cover'" />
+            <el-image :src="item.url" class="image" :fit="'cover'" />
             <div class="text">
               <el-text
                 tag="b"
@@ -45,36 +45,45 @@ export default {
     return {
       recentlyViewedItems: [
         {
-          name:"软件工程",
-          teacher:"张三",
+          name:"计算机网络",
+          teacher:"刘峰",        
+          url: "https://p5.itc.cn/images01/20220715/371189fc8148416db6f2430b2f1ce0f4.jpeg",
+          id:"6570935c3d2fda67348df83c"
         },
         {
-          name:"数学",
-          teacher:"李四",
+          name:"软件工程与计算-I",
+          teacher:"刘钦",        
+          url: "https://seec-portal.oss-cn-hangzhou.aliyuncs.com/%E8%BD%AF%E4%BB%B6%E5%B7%A5%E7%A8%8B%E4%B8%8E%E8%AE%A1%E7%AE%97%E4%B8%80%EF%BC%88%E6%99%BA%E8%BD%AF%E9%99%A2%EF%BC%89.jpg",
+          id:"657098cf3d2fda67348df83e"
         },
         {
-          name:"英语",
-          teacher:"王五",
+          name:"数据管理基础",
+          teacher:"贝佳",        
+          url: "https://th.bing.com/th/id/R.9a3caa3ce82edf2eee34d091aa165dbe?rik=U0IBGZrLnTEXTA&riu=http%3a%2f%2f3.bp.blogspot.com%2f-AKo900dON3o%2fTjYq3MxEv9I%2fAAAAAAAAACA%2fqWocOFb77iM%2fs1600%2fmysql_logo.png&ehk=ZqfIZ%2f8moolXZxveplNHSzn5I25DwY5jMBDSDZTi1Fo%3d&risl=&pid=ImgRaw&r=0",
+          id:"657d19ee850a9a6ce03c4d73"
         },
         {
-          name:"物理",
-          teacher:"赵六",
+          name:"商业模式设计",
+          teacher:"匡宏宇",        
+          url: "https://epiprodux.com/blog/wp-content/uploads/2021/12/unnamed.jpg",
+          id:"657d1c5e850a9a6ce03c4d74"
         },
         {
-          name:"化学",
-          teacher:"孙七",
+          name:"人机交互",
+          teacher:"冯桂焕",        
+          url: "https://picss.sunbangyan.cn/2023/12/16/70b5e85a1db920d05261a196459b4eed.jpeg",
+          id:"65717ab92e5f087258a68948"
         },
       ],
       maxItems: 5,
-      url: "src/assets/pic/OIP.png",
     };
   },
   methods: {
   },
   setup() {
     const router = useRouter();
-    const gotoDetails = () => {
-      router.push({ path: "/course-detail"});
+    function gotoDetails(groupid){
+      router.push({ path: "/course-detail", query: { id:  groupid} });
     };
     return {
       gotoDetails,
