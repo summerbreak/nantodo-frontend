@@ -67,7 +67,7 @@ export default {
   setup() {
     const router = useRouter();
     function gotoDetails(groupid){
-      router.push({ path: "/course-detail", query: { id:  groupid} });
+      router.push({ path: "/course-detail", query: { id:  groupid,selected:true} });
     };
     return {
       gotoDetails,

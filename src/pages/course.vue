@@ -45,18 +45,34 @@
       </template>
     </el-empty>
   </div>
-  <el-row style="margin-right: 100px;margin-bottom: 10px">
-    <el-col :span="6">
-      <el-text tag="ins" class="title">全部课程</el-text>
-    </el-col>
-    <el-col :span="4" :offset="8" style="text-align: right">
-      <el-check-tag :checked="ifPossible" @change="choosePossible" class="possibleCourse">仅看可加入的课程
-      </el-check-tag>
-    </el-col>
-    <el-col :span="6">
-      <course-search @search="getCourses"/>
-    </el-col>
-  </el-row>
+  <div class="all-courses">
+    <el-text tag="ins" class="title">全部课程</el-text>
+    <span>
+      <el-row>
+        <el-col :span="6" style="height: 100%;margin-right: 10px">
+          <el-select v-model="value" clearable placeholder="选择开课年级" size="large">
+      <el-option
+          v-for="item in options"
+          :key="item.value"
+          :label="item.label"
+          :value="item.value"
+      />
+      </el-select>
+        </el-col>
+        <el-col :span="6">
+        <el-check-tag :checked="ifPossible" @change="choosePossible" class="possibleCourse">仅看可加入的课程
+        </el-check-tag>
+      </el-col>
+        <el-col :span="10">
+          <course-search @search="getCourses"/>
+        </el-col>
+      </el-row>
+
+
+
+    </span>
+
+  </div>
   <el-scrollbar max-height="600px" style="margin-bottom: 0;margin-top: 0">
     <div v-loading="isLoading" element-loading-text="加载中..." element-loading-background="transparent">
       <el-row class="outside">
@@ -166,8 +182,14 @@ const choosePossible = () => {
   padding: 0;
 }
 
+.all-courses {
+  display: flex;
+  padding: 0;
+  margin-outside: 0;
+  justify-content: space-between;
+}
+
 .possibleCourse {
-  margin-right: 15px;
   line-height: 25px;
   text-align: right;
 }

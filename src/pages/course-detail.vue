@@ -19,7 +19,7 @@
               <br/>
               <el-row>
                 <el-col>
-                  <el-text size="large">学期：{{courseInfo.semester}}</el-text>
+                  <el-text size="large">学期：{{ courseInfo.semester }}</el-text>
                 </el-col>
                 <el-col>
                   <el-text size="large">授课年级：{{ courseInfo.grade }}</el-text>
@@ -108,7 +108,7 @@
     <el-col :span="20" :offset="2">
       <el-tabs type="border-card" class="tabs" style="border-radius: 10px;min-height: 300px;margin-bottom: 20px">
         <el-tab-pane label="作业">
-          <homework :info="route.query.id"/>
+          <homework :info="route.query.id" :key="teamUp"/>
         </el-tab-pane>
         <el-tab-pane label="通知">
           <el-empty description="暂无通知"/>
@@ -117,7 +117,7 @@
           <div v-if="allTeam.length===0">
             <el-empty description="暂时还没有小组"/>
           </div>
-          <div v-else-if="allTeam.length>0 && !hasTeam">
+          <div v-else-if="allTeam.length>0 && !hasTeam && !applyNow">
             <el-row class="filter-team">
               <el-col :span="8">
                 <el-input
@@ -139,11 +139,11 @@
                   :key="index"
                   :offset="0"
               >
-                <course-team :group-info="o"/>
+                <course-team :group-info="o" @applyIt="applyTeamFunc"/>
               </el-col>
             </el-row>
           </div>
-          <div v-else>
+          <div v-else-if="applyNow">
             <el-descriptions
                 title="我的小组"
                 direction="vertical"
@@ -157,7 +157,23 @@
                     小组名称
                   </div>
                 </template>
-                <el-text>{{ groupInfo.name }}</el-text>
+                <el-text>{{ applyTeam.name }}</el-text>
+              </el-descriptions-item>
+              <el-descriptions-item>
+                <template #label>
+                  <div class="cell-item">
+                    简介
+                  </div>
+                </template>
+                <el-text>{{ applyTeam.description }}</el-text>
+              </el-descriptions-item>
+              <el-descriptions-item>
+                <template #label>
+                  <div class="cell-item">
+                    小队人数
+                  </div>
+                </template>
+                <el-text>{{ applyTeam.members.length }} / {{ applyTeam.capacity }}</el-text>
               </el-descriptions-item>
               <el-descriptions-item min-width="35%" width="35%">
                 <template #label>
@@ -165,7 +181,41 @@
                     组长
                   </div>
                 </template>
-                <el-text>{{ myLeaderName }}</el-text>
+                <el-text>{{ applyTeam.leaderName }}</el-text>
+              </el-descriptions-item>
+              <el-descriptions-item>
+                <template #label>
+                  <div class="cell-item">
+                    小队成员
+                  </div>
+                </template>
+                <el-text>{{ applyTeam.membersName }}</el-text>
+              </el-descriptions-item>
+              <el-descriptions-item>
+                <template #label>
+                  <div class="cell-item">
+                    当前状态
+                  </div>
+                </template>
+                <el-text>申请中，点击这里取消申请</el-text>
+              </el-descriptions-item>
+            </el-descriptions>
+          </div>
+          <div v-else>
+            <el-descriptions
+                title="我的小队"
+                direction="vertical"
+                :column="3"
+                :size="'default'"
+                border
+            >
+              <el-descriptions-item min-width="20%" width="20%">
+                <template #label>
+                  <div class="cell-item">
+                    小队名称
+                  </div>
+                </template>
+                <el-text>{{ groupInfo.name }}</el-text>
               </el-descriptions-item>
               <el-descriptions-item>
                 <template #label>
@@ -174,6 +224,14 @@
                   </div>
                 </template>
                 <el-text>{{ groupInfo.description }}</el-text>
+              </el-descriptions-item>
+              <el-descriptions-item min-width="25%" width="25%">
+                <template #label>
+                  <div class="cell-item">
+                    队长
+                  </div>
+                </template>
+                <el-text>{{ myLeaderName }}</el-text>
               </el-descriptions-item>
               <el-descriptions-item>
                 <template #label>
@@ -230,27 +288,20 @@ const hasTeam = ref(false)
 const teamNumber = ref(-1)
 const teamId = ref("")
 const ifPossible = ref(false)
-const groupInfo = reactive({
-  name: '',
-  leaderId: '',
-  organName: '',
-  description: '',
-  type: '',
-  capacity: 4,
-  courseId: '',
-})
+const groupInfo = ref({})
 const myLeaderName = ref('')
 const myMembers = ref('')
 const allTeam = ref([])
 const showTeam = ref([])
 const creatVisible = ref(false)
 const isLeader = ref(false)
-
-
+const teamUp = ref(0)
+const applyNow = ref(false)
+const applyTeam = ref({})
 const clearTeam = () => {
-  groupInfo.name = ''
-  groupInfo.capacity = 4
-  groupInfo.description = ''
+  groupInfo.value.name = ''
+  groupInfo.value.capacity = 4
+  groupInfo.value.description = ''
   creatVisible.value = false
 }
 const handleClose = (done) => {
@@ -262,13 +313,14 @@ onActivated(async () => {
   fresh.value += 1
   selected.value = false
   hasTeam.value = false
+  applyNow.value = false
   document.documentElement.scrollTop = 0;
   let id = route.query.id
   selected.value = route.query.selected == 'true'
   await axios.get(`http://localhost:8080/course?id=${id}`).then(res => {
     courseInfo.value = res.data
   }).catch(error => {
-    alert(error)
+    console.log(error)
   })
   allTeam.value.length = 0
   showTeam.value.length = 0
@@ -295,7 +347,7 @@ onActivated(async () => {
       })
     }
   }).catch(error => {
-    alert(error)
+    console.log(error)
   })
   showTeam.value.length = 0
   showTeam.value.splice(0, 0, ...allTeam.value)
@@ -304,7 +356,7 @@ onActivated(async () => {
         userInfo.value = res.data
       }
   ).catch(err => {
-    alert(err)
+    console.log(err)
   })
 
   teamNumber.value = allTeam.value.length
@@ -314,29 +366,31 @@ onActivated(async () => {
     await axios.get(`http://localhost:8080/group?id=${userInfo.value.groups[i]}`).then(
         res => {
           tmp = res.data
+          console.log(res.data)
         }
     ).catch(err => {
-      alert(err)
+      console.log(err)
     })
     isLeader.value = false
     if (tmp.courseId == courseInfo.value.id) {
       hasTeam.value = true
       teamId.value = tmp.id
-      groupInfo.members = tmp.members
-      groupInfo.name = tmp.name
-      groupInfo.capacity = tmp.capacity
-      groupInfo.id = tmp.id
-      groupInfo.description = tmp.description
-      groupInfo.leaderId = tmp.leaderId
-      if (groupInfo.leaderId == userInfo.value.id) {
+      groupInfo.value.members = tmp.members
+      groupInfo.value.name = tmp.name
+      groupInfo.value.capacity = tmp.capacity
+      groupInfo.value.id = tmp.id
+      groupInfo.value.description = tmp.description
+      groupInfo.value.leaderId = tmp.leaderId
+      if (groupInfo.value.leaderId == userInfo.value.id) {
         isLeader.value = true
       }
-      await axios.get(`http://localhost:8080/user?id=${groupInfo.leaderId}`).then(
+      await axios.get(`http://localhost:8080/user?id=${groupInfo.value.leaderId}`).then(
           res => {
             myLeaderName.value = res.data.name
           }
       )
-      groupInfo.members.map(async item => {
+      myMembers.value = ''
+      groupInfo.value.members.map(async item => {
         await axios.get(`http://localhost:8080/user?id=${item}`).then(
             res => {
               if (myMembers.value.length > 0) {
@@ -350,31 +404,80 @@ onActivated(async () => {
     } else {
       clearTeam()
     }
-
   }
+
+
+  if (!hasTeam.value && allTeam.value.length > 0 && userInfo.value.pendingGroups.length > 0) {
+    userInfo.value.pendingGroups.map(
+        async item => {
+          await axios.get(`http://localhost:8080/group?id=${item}`).then(
+              async res => {
+                if (res.data.courseId == courseInfo.value.id) {
+                  applyNow.value = true
+                  applyTeam.value = res.data
+                  applyTeam.value["leaderName"] = ''
+                  applyTeam.value["membersName"] = ''
+                  await axios.get(`http://localhost:8080/user?id=${applyTeam.value.leaderId}`).then(
+                      res => {
+                        applyTeam.value.leaderName = res.data.name
+                      }
+                  )
+                  applyTeam.value.members.map(async item => {
+                    await axios.get(`http://localhost:8080/user?id=${item}`).then(
+                        res => {
+                          if (applyTeam.value.membersName.length > 0) {
+                            applyTeam.value.membersName += '，'
+                          }
+                          applyTeam.value.membersName += res.data.name
+                        }
+                    )
+                  })
+                }
+              }
+          )
+        }
+    )
+  }
+  console.log(applyNow.value)
+  console.log(userInfo.value.pendingGroups)
 })
 
 
 const addTeam = async () => {
-  groupInfo.organName = courseInfo.value.name
-  groupInfo.leaderId = user.id
-  groupInfo.type = 'course'
-  groupInfo.courseId = courseInfo.value.id
-  groupInfo.members.length = 0
-  groupInfo.tasks.length = 0
-  groupInfo.applications.length = 0
-  await axios.post('http://localhost:8080/group', groupInfo).then(
+  teamUp.value += 1
+  groupInfo.value.organName = courseInfo.value.name
+  groupInfo.value.leaderId = user.id
+  groupInfo.value.type = 'course'
+  groupInfo.value.courseId = courseInfo.value.id
+  groupInfo.value.members = []
+  groupInfo.value.tasks = []
+  groupInfo.value.capacity = 4
+  delete groupInfo.value.id
+  console.log(groupInfo.value)
+  myMembers.value = ''
+  await axios.post('http://localhost:8080/group', groupInfo.value).then(
       res => {
         hasTeam.value = true
-        groupInfo.id = res.data
-        courseInfo.value.groups.push(groupInfo.id)
+        console.log(groupInfo.value)
+        groupInfo.value.id = res.data
+        courseInfo.value.groups.push(groupInfo.value.id)
         creatVisible.value = false
         myLeaderName.value = userInfo.value.name
+        groupInfo.value.members.push(userInfo.value.id)
+
+        groupInfo.value["leaderName"] = myLeaderName.value
+        groupInfo.value["membersName"] = myLeaderName.value
         myMembers.value = userInfo.value.name
         isLeader.value = true
+        allTeam.value.push(groupInfo)
+        ElMessage({
+          showClose: true,
+          message: '创建小队成功',
+          type: 'success',
+        })
       }
   ).catch(err => {
-    alert(err)
+    console.log(err)
   })
 
 }
@@ -384,7 +487,7 @@ const dropOut = () => {
         userInfo.value = res.data
       }
   ).catch(err => {
-    alert(err)
+    console.log(err)
   })
   if (hasTeam.value) {
     ElMessageBox.alert('您已参加了小组，暂时无法退课', '提示消息', {
@@ -458,6 +561,50 @@ let choosePossible = () => {
     queryTeam()
   }
 }
+
+const applyTeamFunc = async (teamId) => {
+  console.log(teamId)
+  const applicationMessage = {
+    timestamp: new Date(),
+    userId: user.id,
+    name: user.name,
+    status: 'pending'
+  }
+  await axios.post(`http://localhost:8080/group/app?id=${teamId}`, applicationMessage).then(async res => {
+    await axios.get(`http://localhost:8080/group?id=${teamId}`).then(res => {
+      applyTeam.value = res.data
+    })
+    await axios.get(`http://localhost:8080/user?id=${user.id}`).then(res => {
+      userInfo.value = res.data
+    })
+    userInfo.value.pendingGroups.push(teamId)
+    await axios.put(`http://localhost:8080/user?id=${user.id}`, userInfo.value).then(res => {
+      userInfo.value = res.data
+    })
+    applyTeam.value["leaderName"] = ''
+    applyTeam.value["membersName"] = ''
+    await axios.get(`http://localhost:8080/user?id=${applyTeam.value.leaderId}`).then(
+        res => {
+          applyTeam.value.leaderName = res.data.name
+        }
+    )
+    applyTeam.value.members.map(async item => {
+      await axios.get(`http://localhost:8080/user?id=${item}`).then(
+          res => {
+            if (applyTeam.value.membersName.length > 0) {
+              applyTeam.value.membersName += '，'
+            }
+            applyTeam.value.membersName += res.data.name
+          }
+      )
+    })
+    applyNow.value = true
+  }).catch(err => {
+    console.log(err)
+  })
+  console.log(applyNow.value)
+}
+
 
 let createTeam = () => {
   creatVisible.value = true

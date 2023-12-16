@@ -6,7 +6,7 @@
       :size="'default'"
       border
   >
-    <el-descriptions-item min-width="20%" width="20%">
+    <el-descriptions-item min-width="25%" width="25%">
       <template #label>
         <div class="cell-item">
           小组名称
@@ -14,7 +14,15 @@
       </template>
       <el-text>{{ props.groupInfo.name }}</el-text>
     </el-descriptions-item>
-    <el-descriptions-item min-width="30%" width="30%">
+    <el-descriptions-item>
+        <template #label>
+          <div class="cell-item">
+            简介
+          </div>
+        </template>
+        <el-text truncated>{{ props.groupInfo.description }}</el-text>
+      </el-descriptions-item>
+    <el-descriptions-item min-width="35%" width="35%">
       <template #label>
         <div class="cell-item">
           组长
@@ -22,14 +30,7 @@
       </template>
       <el-text>{{ props.groupInfo.leaderName }}</el-text>
     </el-descriptions-item>
-    <el-descriptions-item>
-      <template #label>
-        <div class="cell-item">
-          简介
-        </div>
-      </template>
-      <el-text truncated>{{ props.groupInfo.description }}</el-text>
-    </el-descriptions-item>
+    
     <el-descriptions-item>
       <template #label>
         <div class="cell-item">
@@ -52,7 +53,7 @@
           小组状态
         </div>
       </template>
-      <div @click="joinTeam">点击申请加入</div>
+      <div @click="$emit('applyIt',props.groupInfo.id)">点击申请加入</div>
     </el-descriptions-item>
     <el-descriptions-item class-name="disable-join-team" v-else>
       <template #label>
@@ -73,8 +74,6 @@ import axios from "axios";
 const props = defineProps(['groupInfo'])
 const size = ref('')
 const join = ref(true)
-let joinTeam = () => {
-}
 onActivated(() => {
   join.value = props.groupInfo.members.length < props.groupInfo.capacity;
   console.log(join.value)
