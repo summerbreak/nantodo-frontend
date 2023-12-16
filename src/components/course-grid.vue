@@ -63,7 +63,7 @@ onActivated(() => {
 })
 
 function gotoDetails() {
-  router.push({path: "/course-detail", query: {id: props.courseInfo.id}})
+  router.push({path: "/course-detail", query: {id: props.courseInfo.id, selected: isSelected.value}})
 }
 </script>
 

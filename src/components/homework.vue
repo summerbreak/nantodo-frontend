@@ -161,7 +161,6 @@ const release = ref('')
 const ddl = ref('')
 const dialogVisible = ref(false)
 
-// 小组后端待实现
 const isLeader = ref(false)
 const hasTeam = ref(false)
 const hasCommit = ref(false)
@@ -172,7 +171,7 @@ const noTeamInfo = ref('请先加入小组')
 const teamPromptInfo = ref('')
 onActivated(async () => {
   content.value = ''
-  await axios.get(`http://localhost:8080/course?id=${props.info}`).then(res => {
+  await axios.get(`http://localhost:8080/course?id=${props.info}`).then(async res => {
     teamPromptInfo.value = noTeamInfo.value.slice(0)
     if (res.data.homeworks.length > 0) {
       nothing.value = false
@@ -189,8 +188,8 @@ onActivated(async () => {
     } else {
       nothing.value = true
     }
-    axios.get(`http://localhost:8080/user?id=${user.id}`).then(
-        res3 => {
+    await axios.get(`http://localhost:8080/user?id=${user.id}`).then(
+        async res3 => {
           let tmp = []
           let teamId = ''
           tmp.splice(0, 0, ...res3.data.groups)
@@ -203,7 +202,7 @@ onActivated(async () => {
             }
           })
           if (hasTeam.value) {
-            axios.get(`http://localhost:8080/group?id=${teamId}`).then(
+            await axios.get(`http://localhost:8080/group?id=${teamId}`).then(
                 res4 => {
                   teamInfo.value = res4.data
                   if (teamInfo.value.leaderId == user.id) {
@@ -229,7 +228,7 @@ onActivated(async () => {
       })
     }
   }).catch(error => {
-    alert(error)
+    console.log(error)
   })
 })
 
@@ -253,7 +252,9 @@ function getNowFormatDate(date) {
 
 const updateHomework = async () => {
   dialogVisible.value = false
-  if (!hasCommit) {
+  console.log(teamInfo.value)
+  console.log(hasCommit.value)
+  if (!hasCommit.value) {
     homeworkInfo.value.doneGroups.push(teamInfo.value.id)
     await axios.put(`http://localhost:8080/homework?id=${homeworkInfo.value.id}`, homeworkInfo.value).then(res => {
       hasCommit.value = true
