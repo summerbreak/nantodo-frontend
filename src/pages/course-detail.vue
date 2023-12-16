@@ -25,28 +25,22 @@
                   <el-text size="large">授课年级：{{ courseInfo.grade }}</el-text>
                 </el-col>
               </el-row>
-              <el-text size="large">小队数目：{{ teamNumber }}</el-text>
+              <el-text size="large">小组数目：{{ teamNumber }}</el-text>
             </el-card>
             <div style="margin-top: 20px">
               <div v-if="courseInfo.open" :key="ref">
                 <div v-if="selected" :key="ref">
                   <el-button-group size="large" v-if="hasTeam">
-                    <el-button :icon="Position" type="warning" plain @click="queryTeam">
-                      查看我的小队
-                    </el-button>
-                    <el-button type="warning" plain @click="getTeamId">
-                      复制邀请码
-                      <el-icon class="el-icon--right">
-                        <Connection/>
-                      </el-icon>
+                    <el-button :icon="Position" type="warning" plain @click="router.push({path: '/group', query: {id: groupInfo.id}})">
+                      查看我的小组
                     </el-button>
                   </el-button-group>
                   <el-button-group size="large" v-else>
                     <el-button :icon="Plus" type="warning" plain @click="createTeam">
-                      创建我的小队
+                      创建我的小组
                     </el-button>
                     <el-button type="warning" plain @click="findTeam">
-                      通过邀请码加入小队
+                      通过邀请码加入小组
                       <el-icon class="el-icon--right">
                         <Connection/>
                       </el-icon>
@@ -113,9 +107,9 @@
         <el-tab-pane label="通知">
           <el-empty description="暂无通知"/>
         </el-tab-pane>
-        <el-tab-pane label="队伍">
+        <el-tab-pane label="组队">
           <div v-if="allTeam.length===0">
-            <el-empty description="暂时还没有小队"/>
+            <el-empty description="暂时还没有小组"/>
           </div>
           <div v-else-if="allTeam.length>0 && !hasTeam && !applyNow">
             <el-row class="filter-team">
@@ -123,7 +117,7 @@
                 <el-input
                     v-model="inputText"
                     size="large"
-                    placeholder="搜索小队名称"
+                    placeholder="搜索小组名称"
                     :suffix-icon="Search"
                     @change="queryTeam"
                 />
@@ -145,7 +139,7 @@
           </div>
           <div v-else-if="applyNow">
             <el-descriptions
-                title="我申请的小队"
+                title="我的小组"
                 direction="vertical"
                 :column="3"
                 :size="'default'"
@@ -154,7 +148,7 @@
               <el-descriptions-item min-width="20%" width="20%">
                 <template #label>
                   <div class="cell-item">
-                    小队名称
+                    小组名称
                   </div>
                 </template>
                 <el-text>{{ applyTeam.name }}</el-text>
@@ -167,14 +161,6 @@
                 </template>
                 <el-text>{{ applyTeam.description }}</el-text>
               </el-descriptions-item>
-              <el-descriptions-item min-width="35%" width="35%">
-                <template #label>
-                  <div class="cell-item">
-                    队长
-                  </div>
-                </template>
-                <el-text>{{ applyTeam.leaderName }}</el-text>
-              </el-descriptions-item>
               <el-descriptions-item>
                 <template #label>
                   <div class="cell-item">
@@ -182,6 +168,14 @@
                   </div>
                 </template>
                 <el-text>{{ applyTeam.members.length }} / {{ applyTeam.capacity }}</el-text>
+              </el-descriptions-item>
+              <el-descriptions-item min-width="35%" width="35%">
+                <template #label>
+                  <div class="cell-item">
+                    组长
+                  </div>
+                </template>
+                <el-text>{{ applyTeam.leaderName }}</el-text>
               </el-descriptions-item>
               <el-descriptions-item>
                 <template #label>
@@ -197,7 +191,7 @@
                     当前状态
                   </div>
                 </template>
-                <el-text>申请中，点击这里取消申请</el-text>
+                <el-text>申请中</el-text>
               </el-descriptions-item>
             </el-descriptions>
           </div>
@@ -236,7 +230,7 @@
               <el-descriptions-item>
                 <template #label>
                   <div class="cell-item">
-                    小队人数
+                    小组人数
                   </div>
                 </template>
                 <el-text>{{ groupInfo.members.length }} / {{ groupInfo.capacity }}</el-text>
@@ -244,7 +238,7 @@
               <el-descriptions-item>
                 <template #label>
                   <div class="cell-item">
-                    小队成员
+                    小组成员
                   </div>
                 </template>
                 <el-text>{{ myMembers }}</el-text>
@@ -598,11 +592,15 @@ const applyTeamFunc = async (teamId) => {
           }
       )
     })
+    axios.post(`http://localhost:8080/user/message?id=${applyTeam.value.leaderId}`, {
+      timestamp: Date.now(),
+      type: 'primary',
+      content: `您的小组 ${applyTeam.value.name} 收到新的加入申请`
+    })
     applyNow.value = true
   }).catch(err => {
     console.log(err)
   })
-  console.log(applyNow.value)
 }
 
 
@@ -610,7 +608,33 @@ let createTeam = () => {
   creatVisible.value = true
 }
 const findTeam = () => {
-
+  ElMessageBox.prompt('请输入邀请码', '加入小组', {
+    confirmButtonText: '确定',
+    cancelButtonText: '取消',
+    // 限制输入为6位数字或大写字母
+    inputPattern: /^[A-Z0-9]{6}$/,
+    inputErrorMessage: '邀请码格式错误'
+  }).then(({value}) => {
+    console.log(value)
+    axios({
+      method: 'put',
+      url: 'http://localhost:8080/group/invite',
+      params: {
+        code: value,
+        userId: user.id
+      }
+    }).then(res => {
+      ElMessage.success('加入小组成功')
+    }).catch(err => {
+      console.log(err)
+      if (err.response.status === 400) {
+        ElMessage.error('小组已满员')
+        return
+      } else {
+        ElMessage.error('邀请码错误，找不到该小组')
+      }
+    })
+  })
 }
 
 const attendCourse = () => {

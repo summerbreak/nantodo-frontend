@@ -127,7 +127,7 @@ function handleLogin() {
 
 .button {
     width: 100px;
-    height: 60px;
+    height: 60px !important;
     font-size: 26px;
     opacity: 0.9;
     background-color: lightyellow;

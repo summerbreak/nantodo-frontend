@@ -50,11 +50,10 @@
     <span>
       <el-row>
         <el-col :span="6" style="height: 100%;margin-right: 10px">
-          <el-select v-model="value" clearable placeholder="选择开课年级" size="large">
+          <el-select v-model="gradeValue" placeholder="选择开课年级" size="large">
       <el-option
           v-for="item in options"
           :key="item.value"
-          :label="item.label"
           :value="item.value"
       />
       </el-select>
@@ -90,7 +89,7 @@
   <!--  </el-scrollbar>-->
 </template>
 <script setup>
-import {ref, onActivated} from "vue";
+import {ref, onActivated, watch} from "vue";
 import {useUserStore} from "../stores/user.js";
 import CourseSearch from "../components/course-search.vue";
 import CourseGrid from "../components/course-grid.vue";
@@ -104,8 +103,19 @@ const isLoading = ref(true)
 const ifPossible = ref(false)
 const showCourses = ref([])
 const searchText = ref('')
-
+const gradeValue = ref('全部年级')
 const user = useUserStore().getUser()
+
+const options = [{value: '全部年级'}, {value: '2020'}, {value: '2021'}, {value: '2022'}, {value: '2023'}]
+
+watch(gradeValue, (newValue, oldValue) => {
+  getCourses(searchText.value)
+  if (newValue === '' || newValue === '全部年级') {
+
+  } else {
+    showCourses.value = showCourses.value.filter(({grade}) => grade == newValue)
+  }
+})
 
 onActivated(async () => {
   isLoading.value = true
@@ -122,7 +132,7 @@ onActivated(async () => {
         userInfo.value = res.data
       }
   ).catch(err => {
-    alert(err)
+    console.log(err)
   })
   showCourses.value.length = 0
   showCourses.value.splice(0, 0, ...allCourses.value)

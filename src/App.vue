@@ -1,12 +1,7 @@
 <template>
   <div class="container">
     <div class="header">
-      <el-menu ref="menu"
-        :default-active="activeIndex"
-        class="menu"
-        mode="horizontal"
-        router
-      >
+      <el-menu ref="menu" :default-active="activeIndex" class="menu" mode="horizontal" router>
         <el-menu-item index="/" class="menu-item">首页</el-menu-item>
         <el-menu-item index="/group" class="menu-item">小组</el-menu-item>
         <el-menu-item index="/course" class="menu-item">课程</el-menu-item>
@@ -20,14 +15,15 @@
         <div v-else class="user">
           <el-badge is-dot :hidden="!isRedDot" class="red-dot">
             <div class="notice" @click="openNotice">
-                <i class="bi bi-bell"></i>
+              <i class="bi bi-bell"></i>
             </div>
           </el-badge>
           <el-dropdown>
             <div class="personal-center" @click="toUser">
-              <el-avatar :size="32" style="--el-avatar-bg-color: gold;margin-top: 4px;">
+              <el-avatar v-if="user.avatarUrl === ''" :size="32" style="--el-avatar-bg-color: gold;margin-top: 4px;">
                 <i class="bi bi-person-fill" style="font-size: 22px;"></i>
               </el-avatar>
+              <el-avatar v-else :size="32" :src="user.avatarUrl" style="margin-top: 4px;"></el-avatar>
               <span style="line-height: 40px;margin-left: 10px; color: black; font-size: 16px;">{{ user.name }}</span>
             </div>
             <template #dropdown>
@@ -47,7 +43,7 @@
       <!-- 如有需要，在自定义组件内可以继续写el-container/aside/main... -->
       <router-view v-slot="{ Component }">
         <keep-alive>
-          <component :is="Component" />
+          <component :is="Component" :is-register="isRegister" />
         </keep-alive>
       </router-view>
     </div>
@@ -78,6 +74,7 @@
       ©2023-2033 NANTODO 苏ICP备19073881号-1
     </div>
   </div>
+  <el-backtop :right="100" :bottom="100" style="color: coral;" />
   <el-drawer v-model="showNotice">
     <template #header>
       <h3>消息列表</h3>
@@ -85,16 +82,11 @@
     </template>
     <el-empty v-show="!messageList.length" description="还没有消息哦" image=" "></el-empty>
     <el-timeline v-show="messageList.length">
-      <el-timeline-item
-      v-for="message in messageList"
-      :key="message.id"
-      :type="message.type"
-      :timestamp="message.timestamp"
-      class="timeline-item"
-      >
+      <el-timeline-item v-for="message in messageList" :key="message.timestamp" :type="message.type"
+        :timestamp="message.timestamp" class="timeline-item">
         <div class="message">
           <span>{{ message.content }}</span>
-          <i class="bi bi-x-lg delete-message" @click="deleteMessage(message.id)"></i>
+          <i class="bi bi-x-lg delete-message" @click="deleteMessage(message.timestamp)"></i>
         </div>
       </el-timeline-item>
     </el-timeline>
@@ -103,23 +95,45 @@
 
 <script setup>
 import { useRouter } from 'vue-router'
-import { reactive, ref, watch } from 'vue'
+import { reactive, ref, computed, watch, onMounted } from 'vue'
+import { ElMessage } from 'element-plus';
+import { useUserStore } from './stores/user';
+import axios from 'axios';
 
 const router = useRouter()
+const userStore = useUserStore()
+
 const activeIndex = ref('/')
-const isLogin = ref(true)
-const isRedDot = ref(true)
+const isLogin = computed(() => userStore.isLogin)
+const isRegister = ref(false)
+const isRedDot = ref(false)
 const showNotice = ref(false)
 const user = reactive({
-  name: '匡宏宇'
+  id: '',
+  name: '',
+  avatarUrl: ''
 })
 
-const messageList = reactive([
-  {id: 'qwee', content: '您收到来自“人机交互小组”布置的任务', type: 'primary', timestamp: '2023-09-16 18:38'},
-  {id: 'dzfs', content: '您申请加入小组“操作系统小组”被拒绝', type: 'danger', timestamp: '2023-09-16 14:43'},
-  {id: 'xsdf', content: '您已成功加入小组“人机交互小组”', type: 'success', timestamp: '2023-09-15 20:02'},
-  {id: 'dsfs', content: '您已成功加入课程“人机交互系统”', type: 'success', timestamp: '2023-09-15 10:46'}
-])
+const messageList = reactive([])
+
+onMounted(() => {
+  let currentUser = JSON.parse(localStorage.getItem('currentUser'))
+  if (currentUser) {
+    axios.get(`http://localhost:8080/user?id=${currentUser}`).then(
+      res => {
+        user.id = res.data.id
+        user.name = res.data.name
+        user.avatarUrl = res.data.avatarUrl
+        console.log('user', res.data)
+        userStore.setUser(res.data)
+        getMessage(res.data.messages)
+      }, err => {
+        console.log(err)
+        ElMessage.error('获取用户数据失败')
+      }
+    )
+  }
+})
 
 watch(() => router.currentRoute.value.path, (newValue, oldValue) => {
   let secondIndex = newValue.indexOf('/', 1)
@@ -128,14 +142,14 @@ watch(() => router.currentRoute.value.path, (newValue, oldValue) => {
   }
   console.log(newValue)
   activeIndex.value = newValue
-}, {immediate: true})
+}, { immediate: true })
 
 function toIndex() {
   location.href = "/"
 }
 
 function toUser() {
-  // router.push("/user")
+  router.push("/user")
 }
 
 function openNotice() {
@@ -143,26 +157,44 @@ function openNotice() {
   showNotice.value = true
 }
 
-function closeNotice() {
-  // showNotice.value = false
+function handleLogin() {
+  console.log(isRegister.value)
+  isRegister.value = !isRegister.value
+  router.push("/login")
 }
 
-function handleLogin() {
-  // router.push("/login")
-  isLogin.value = true
-}
 
 function handleLogout() {
-  isLogin.value = false
+  localStorage.removeItem('currentUser')
+  localStorage.removeItem('recentGroup')
+  userStore.isLogin = false
+  location.href = "/"
 }
 
-function deleteMessage(id, isAll=false) {
+function getMessage(messages) {
+  messages.forEach(message => {
+    let m = { ...message }
+    m.timestamp = new Date(message.timestamp).toLocaleString('af')
+    messageList.push(m)
+  })
+  if (messages.length) {
+    isRedDot.value = true
+  }
+}
+
+function deleteMessage(timestamp, isAll = false) {
+  let user = userStore.getUser()
   if (isAll) {
     messageList.length = 0
+    user.messages.length = 0
   } else {
-    let index = messageList.findIndex(message => message.id == id)
+    let index = messageList.findIndex(message => message.timestamp == timestamp)
     messageList.splice(index, 1)
+    user.messages.splice(index, 1)
   }
+  console.log(user)
+  userStore.setUser(user)
+  userStore.updateUser()
 }
 
 </script>
@@ -195,7 +227,7 @@ function deleteMessage(id, isAll=false) {
   /* opacity: 1; */
   background-image: radial-gradient(#FFDAB9 0.6px, oldlace 0.6px);
   background-size: 12px 12px;
-  
+
   overflow: hidden;
 }
 
@@ -243,9 +275,10 @@ function deleteMessage(id, isAll=false) {
   align-items: center;
   padding-left: 10px;
   padding-right: 10px;
+
   &:hover {
     cursor: pointer;
-    background-color:	wheat;
+    background-color: wheat;
     border-radius: 10px;
   }
 }
@@ -261,9 +294,10 @@ function deleteMessage(id, isAll=false) {
   font-size: 24px;
   text-align: center;
   line-height: 40px;
+
   &:hover {
     cursor: pointer;
-    background-color:	wheat;
+    background-color: wheat;
     border-radius: 10px;
   }
 }
@@ -275,6 +309,7 @@ function deleteMessage(id, isAll=false) {
   margin-left: 20px;
   width: 100px;
   outline: none;
+
   &:hover {
     cursor: pointer;
     border-radius: 10px;
@@ -287,6 +322,7 @@ function deleteMessage(id, isAll=false) {
   z-index: 20;
   top: 0;
   left: 10%;
+
   &:hover {
     cursor: pointer;
   }
@@ -319,12 +355,15 @@ function deleteMessage(id, isAll=false) {
 
 .timeline-item {
   min-height: 80px;
+
   .delete-message {
     display: none;
   }
+
   &:hover {
     .delete-message {
       display: block;
+
       &:hover {
         cursor: pointer;
       }
@@ -338,5 +377,4 @@ function deleteMessage(id, isAll=false) {
     color: var(--el-color-primary);
   }
 }
-
 </style>

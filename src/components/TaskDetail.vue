@@ -17,8 +17,10 @@
             </el-select>
         </el-form-item>
         <el-form-item>
-            <el-button type="primary" @click="submitForm">提交</el-button>
-            <el-button @click="closeForm">取消</el-button>
+            <div style="width: 100%;text-align: right;">
+                <el-button @click="closeForm">取消</el-button>
+                <el-button type="primary" @click="submitForm">提交</el-button>
+            </div>
         </el-form-item>
     </el-form>
 </template>
@@ -26,9 +28,10 @@
 <script setup>
 import { ref, reactive, onMounted, watch } from 'vue'
 import axios from 'axios';
+import { ElMessage } from 'element-plus';
 
-const props = defineProps(['users', 'task'])
-const emit = defineEmits(['closeForm'])
+const props = defineProps(['users', 'task', 'groupId'])
+const emit = defineEmits(['closeForm', 'updateTask'])
 
 
 const formRef = ref()
@@ -36,11 +39,12 @@ const editing = ref(false)
 const task = reactive({
     title: '',
     content: '',
-    deadline: '',
-    userId: '',
+    releaseTime: '',
     done: false,
     starred: false,
-    releaseTime: ''
+    deadline: '',
+    userId: '',
+    groupId: props.groupId
 })
 
 const rules = {
@@ -58,20 +62,18 @@ const rules = {
 
 onMounted(() => {
     if (props.task) {
-        task.title = props.task.title
-        task.content = props.task.content
-        task.deadline = props.task.deadline
-        task.userId = props.task.userId
+        Object.keys(props.task).forEach(key => {
+            task[key] = props.task[key]
+        })
         editing.value = true
     }
 })
 
 watch(() => props.task, (newVal) => {
     if (newVal) {
-        task.title = newVal.title
-        task.content = newVal.content
-        task.deadline = newVal.deadline
-        task.userId = newVal.userId
+        Object.keys(newVal).forEach(key => {
+            task[key] = newVal[key]
+        })
         editing.value = true
     } else {
         task.title = ''
@@ -90,15 +92,28 @@ async function submitForm() {
     console.log('editing', editing.value)
     await formRef.value.validate((valid) => {
         if (valid) {
+            console.log('task', task)
+            task.releaseTime = new Date()
             if (editing.value) {
-                task.releaseTime = new Date()
-                axios.post('http://localhost:8080/task', task)
-                    .then(res => {
-                        console.log(res)
+                axios.put(`http://localhost:8080/task?id=${task.id}`, task).then(
+                    res => {
+                        ElMessage.success('修改成功')
+                        emit('updateTask')
                     }, err => {
                         console.log(err)
-                    })
+                        ElMessage.error('修改失败')
+                })
+            } else {
+                axios.post('http://localhost:8080/task', task).then(
+                    res => {
+                        ElMessage.success('添加成功')
+                        emit('updateTask')
+                    }, err => {
+                        console.log(err)
+                        ElMessage.error('添加失败')
+                })
             }
+            closeForm()
         }
     })
 }

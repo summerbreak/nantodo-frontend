@@ -9,7 +9,7 @@
     <el-descriptions-item min-width="20%" width="20%">
       <template #label>
         <div class="cell-item">
-          小队名称
+          小组名称
         </div>
       </template>
       <el-text>{{ props.groupInfo.name }}</el-text>
@@ -17,7 +17,7 @@
     <el-descriptions-item min-width="30%" width="30%">
       <template #label>
         <div class="cell-item">
-          队长
+          组长
         </div>
       </template>
       <el-text>{{ props.groupInfo.leaderName }}</el-text>
@@ -33,7 +33,7 @@
     <el-descriptions-item>
       <template #label>
         <div class="cell-item">
-          小队人数
+          小组人数
         </div>
       </template>
       <el-text>{{ props.groupInfo.members.length }} / {{ props.groupInfo.capacity }}</el-text>
@@ -41,7 +41,7 @@
     <el-descriptions-item>
       <template #label>
         <div class="cell-item">
-          小队成员
+          小组成员
         </div>
       </template>
       <el-text>{{ props.groupInfo.membersName }}</el-text>
@@ -49,7 +49,7 @@
     <el-descriptions-item class-name="join-team" v-if="join">
       <template #label>
         <div class="cell-item">
-          小队状态
+          小组状态
         </div>
       </template>
       <div @click="$emit('applyIt',props.groupInfo.id)">点击申请加入</div>
@@ -57,10 +57,10 @@
     <el-descriptions-item class-name="disable-join-team" v-else>
       <template #label>
         <div class="cell-item">
-          小队状态
+          小组状态
         </div>
       </template>
-      <div>小队成员已满</div>
+      <div >小组成员已满</div>
     </el-descriptions-item>
   </el-descriptions>
   <el-divider border-style="dashed"/>
@@ -95,8 +95,8 @@ onActivated(() => {
 
 :deep(.join-team:hover) {
   cursor: pointer;
-  background-color: #82CD47;
-  color: #FFFAF0;
+  background-color: #FFFAF0;
+  color: #82CD47;
 }
 
 :deep(.disable-join-team:hover) {
