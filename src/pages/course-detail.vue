@@ -117,7 +117,7 @@
           <div v-if="allTeam.length===0">
             <el-empty description="暂时还没有小队"/>
           </div>
-          <div v-else-if="allTeam.length>0 && !hasTeam">
+          <div v-else-if="allTeam.length>0 && !hasTeam && !applyNow">
             <el-row class="filter-team">
               <el-col :span="8">
                 <el-input
@@ -139,9 +139,67 @@
                   :key="index"
                   :offset="0"
               >
-                <course-team :group-info="o"/>
+                <course-team :group-info="o" @applyIt="applyTeamFunc"/>
               </el-col>
             </el-row>
+          </div>
+          <div v-else-if="applyNow">
+            <el-descriptions
+                title="我申请的小队"
+                direction="vertical"
+                :column="3"
+                :size="'default'"
+                border
+            >
+              <el-descriptions-item min-width="20%" width="20%">
+                <template #label>
+                  <div class="cell-item">
+                    小队名称
+                  </div>
+                </template>
+                <el-text>{{ applyTeam.name }}</el-text>
+              </el-descriptions-item>
+              <el-descriptions-item>
+                <template #label>
+                  <div class="cell-item">
+                    简介
+                  </div>
+                </template>
+                <el-text>{{ applyTeam.description }}</el-text>
+              </el-descriptions-item>
+              <el-descriptions-item min-width="35%" width="35%">
+                <template #label>
+                  <div class="cell-item">
+                    队长
+                  </div>
+                </template>
+                <el-text>{{ applyTeam.leaderName }}</el-text>
+              </el-descriptions-item>
+              <el-descriptions-item>
+                <template #label>
+                  <div class="cell-item">
+                    小队人数
+                  </div>
+                </template>
+                <el-text>{{ applyTeam.members.length }} / {{ applyTeam.capacity }}</el-text>
+              </el-descriptions-item>
+              <el-descriptions-item>
+                <template #label>
+                  <div class="cell-item">
+                    小队成员
+                  </div>
+                </template>
+                <el-text>{{ applyTeam.membersName }}</el-text>
+              </el-descriptions-item>
+              <el-descriptions-item>
+                <template #label>
+                  <div class="cell-item">
+                    当前状态
+                  </div>
+                </template>
+                <el-text>申请中，点击这里取消申请</el-text>
+              </el-descriptions-item>
+            </el-descriptions>
           </div>
           <div v-else>
             <el-descriptions
@@ -159,14 +217,6 @@
                 </template>
                 <el-text>{{ groupInfo.name }}</el-text>
               </el-descriptions-item>
-              <el-descriptions-item min-width="35%" width="35%">
-                <template #label>
-                  <div class="cell-item">
-                    队长
-                  </div>
-                </template>
-                <el-text>{{ myLeaderName }}</el-text>
-              </el-descriptions-item>
               <el-descriptions-item>
                 <template #label>
                   <div class="cell-item">
@@ -174,6 +224,14 @@
                   </div>
                 </template>
                 <el-text>{{ groupInfo.description }}</el-text>
+              </el-descriptions-item>
+              <el-descriptions-item min-width="25%" width="25%">
+                <template #label>
+                  <div class="cell-item">
+                    队长
+                  </div>
+                </template>
+                <el-text>{{ myLeaderName }}</el-text>
               </el-descriptions-item>
               <el-descriptions-item>
                 <template #label>
@@ -237,8 +295,9 @@ const allTeam = ref([])
 const showTeam = ref([])
 const creatVisible = ref(false)
 const isLeader = ref(false)
-const teamUp=ref(0)
-
+const teamUp = ref(0)
+const applyNow = ref(false)
+const applyTeam = ref({})
 const clearTeam = () => {
   groupInfo.value.name = ''
   groupInfo.value.capacity = 4
@@ -254,6 +313,7 @@ onActivated(async () => {
   fresh.value += 1
   selected.value = false
   hasTeam.value = false
+  applyNow.value = false
   document.documentElement.scrollTop = 0;
   let id = route.query.id
   selected.value = route.query.selected == 'true'
@@ -344,13 +404,47 @@ onActivated(async () => {
     } else {
       clearTeam()
     }
-
   }
+
+
+  if (!hasTeam.value && allTeam.value.length > 0 && userInfo.value.pendingGroups.length > 0) {
+    userInfo.value.pendingGroups.map(
+        async item => {
+          await axios.get(`http://localhost:8080/group?id=${item}`).then(
+              async res => {
+                if (res.data.courseId == courseInfo.value.id) {
+                  applyNow.value = true
+                  applyTeam.value = res.data
+                  applyTeam.value["leaderName"] = ''
+                  applyTeam.value["membersName"] = ''
+                  await axios.get(`http://localhost:8080/user?id=${applyTeam.value.leaderId}`).then(
+                      res => {
+                        applyTeam.value.leaderName = res.data.name
+                      }
+                  )
+                  applyTeam.value.members.map(async item => {
+                    await axios.get(`http://localhost:8080/user?id=${item}`).then(
+                        res => {
+                          if (applyTeam.value.membersName.length > 0) {
+                            applyTeam.value.membersName += '，'
+                          }
+                          applyTeam.value.membersName += res.data.name
+                        }
+                    )
+                  })
+                }
+              }
+          )
+        }
+    )
+  }
+  console.log(applyNow.value)
+  console.log(userInfo.value.pendingGroups)
 })
 
 
 const addTeam = async () => {
-  teamUp.value+=1
+  teamUp.value += 1
   groupInfo.value.organName = courseInfo.value.name
   groupInfo.value.leaderId = user.id
   groupInfo.value.type = 'course'
@@ -467,6 +561,50 @@ let choosePossible = () => {
     queryTeam()
   }
 }
+
+const applyTeamFunc = async (teamId) => {
+  console.log(teamId)
+  const applicationMessage = {
+    timestamp: new Date(),
+    userId: user.id,
+    name: user.name,
+    status: 'pending'
+  }
+  await axios.post(`http://localhost:8080/group/app?id=${teamId}`, applicationMessage).then(async res => {
+    await axios.get(`http://localhost:8080/group?id=${teamId}`).then(res => {
+      applyTeam.value = res.data
+    })
+    await axios.get(`http://localhost:8080/user?id=${user.id}`).then(res => {
+      userInfo.value = res.data
+    })
+    userInfo.value.pendingGroups.push(teamId)
+    await axios.put(`http://localhost:8080/user?id=${user.id}`, userInfo.value).then(res => {
+      userInfo.value = res.data
+    })
+    applyTeam.value["leaderName"] = ''
+    applyTeam.value["membersName"] = ''
+    await axios.get(`http://localhost:8080/user?id=${applyTeam.value.leaderId}`).then(
+        res => {
+          applyTeam.value.leaderName = res.data.name
+        }
+    )
+    applyTeam.value.members.map(async item => {
+      await axios.get(`http://localhost:8080/user?id=${item}`).then(
+          res => {
+            if (applyTeam.value.membersName.length > 0) {
+              applyTeam.value.membersName += '，'
+            }
+            applyTeam.value.membersName += res.data.name
+          }
+      )
+    })
+    applyNow.value = true
+  }).catch(err => {
+    console.log(err)
+  })
+  console.log(applyNow.value)
+}
+
 
 let createTeam = () => {
   creatVisible.value = true

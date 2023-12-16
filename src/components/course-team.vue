@@ -52,7 +52,7 @@
           小队状态
         </div>
       </template>
-      <div @click="joinTeam">点击申请加入</div>
+      <div @click="$emit('applyIt',props.groupInfo.id)">点击申请加入</div>
     </el-descriptions-item>
     <el-descriptions-item class-name="disable-join-team" v-else>
       <template #label>
@@ -60,7 +60,7 @@
           小队状态
         </div>
       </template>
-      <div >小队成员已满</div>
+      <div>小队成员已满</div>
     </el-descriptions-item>
   </el-descriptions>
   <el-divider border-style="dashed"/>
@@ -73,8 +73,6 @@ import axios from "axios";
 const props = defineProps(['groupInfo'])
 const size = ref('')
 const join = ref(true)
-let joinTeam = () => {
-}
 onActivated(() => {
   join.value = props.groupInfo.members.length < props.groupInfo.capacity;
   console.log(join.value)
