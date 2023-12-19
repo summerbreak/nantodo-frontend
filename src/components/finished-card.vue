@@ -217,7 +217,7 @@
     max-height: 3em; 
   }
   .task-card {
-    border: 1px solid #ccc;
+    box-shadow: var(--el-box-shadow-light);
     border-radius: 8px;
     padding: 16px;
     margin: 16px;

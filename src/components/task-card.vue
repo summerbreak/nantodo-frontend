@@ -15,10 +15,7 @@
         <h2 class="title">{{ myTitle }}</h2>
       </div>
 
-      <p class="date">发布日期 <br/>{{ myReleaseTime.toLocaleString('af') }}</p>
-    </div>
-    <div class="content">
-      <p class="content-text">{{ myContent }}</p>
+      <p class="date">发布时间: {{ myReleaseTime.toLocaleString('af') }}</p>
     </div>
     <div class="group-name">
       来自
@@ -26,7 +23,9 @@
         {{groupName}}
       </router-link>
     </div>
-    <p :class="{deadline: urgent}">截止日期 <br/> {{ myDeadline.toLocaleString('af') }}</p>
+    <div class="content">
+      <p class="content-text">{{ myContent }}</p>
+    </div>
     <div class="completion-overlay" v-if="isCompleted">
       <i
         class="bi bi-check-lg"
@@ -240,17 +239,17 @@ export default {
   display: -webkit-box;
   -webkit-box-orient: vertical;
   overflow: hidden;
-  -webkit-line-clamp: 1;
-  max-height: 3em; 
+  -webkit-line-clamp: 2;
+  line-height: 2em; /* 行高，根据需要调整 */
 }
 .task-card {
-  border: 1px solid #ccc;
   border-radius: 8px;
   padding: 16px;
   margin: 16px;
   max-width: 80%;
   background-color: white;
   margin-left: 50px;
+  box-shadow: var(--el-box-shadow-light);
 }
 
 .title {
@@ -265,8 +264,6 @@ export default {
 .date {
   color: #666;
   font-size: 15px;
-  margin-left: 3%;
-  margin-top: 0%;
 }
 
 .footer {
@@ -289,4 +286,12 @@ export default {
 .footer button:not(:last-child) {
   margin-right: 8px; 
 }
+</style>
+
+<style>
+.group-name a  {
+
+color: orange;
+font-weight: 400;
+} 
 </style>
