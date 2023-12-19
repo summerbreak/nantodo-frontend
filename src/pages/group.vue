@@ -43,6 +43,12 @@ onBeforeRouteUpdate(to => {
     if ("id" in to.query) {
         groupId.value = to.query.id
         showDetail.value = true
+        pageIndex.value = 0
+    } else {
+        showDetail.value = false
+        if (pageIndex.value === 0) {
+            pageIndex.value = 1
+        }
     }
 })
 
@@ -50,17 +56,24 @@ onActivated(() => {
     if ("id" in route.query) {
         groupId.value = route.query.id
         showDetail.value = true
+        pageIndex.value = 0
+    } else {
+        showDetail.value = false
+        pageIndex.value = 1
     }
+    console.log("activated", showDetail.value)
 })
 
 function toJoin() {
     pageIndex.value = 1
     showDetail.value = false
+    router.push({ query: {} })
 }
 
 function toManage() {
     pageIndex.value = 2
     showDetail.value = false
+    router.push({ query: {} })
 }
 
 function toGroup(id) {
@@ -80,7 +93,7 @@ function toGroup(id) {
 <style scoped>
 .container {
     height: 100%;
-    width: 1100px;
+    width: 1200px;
     /* background-color: #555; */
     margin: auto;
     display: flex;
@@ -134,7 +147,7 @@ function toGroup(id) {
     width: calc(100% - 20px);
     border-radius: 3px;
     margin: 10px;
-    margin-top: 50px;
+    margin-top: 10px;
     padding-top: 15px;
     background-color: #fffffa;
     box-shadow: var(--el-box-shadow-light);
@@ -158,7 +171,7 @@ function toGroup(id) {
     height: calc(85vh);
     margin-top: 30px;
     /* margin-bottom: 30px; */
-    width: 850px;
+    width: 950px;
     border-radius: 3px;
 }
 </style>

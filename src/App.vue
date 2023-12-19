@@ -65,15 +65,13 @@
       </div>
       <div style="text-align: center; margin-top: 10px; width: 10%;">
         <h3>关注我们</h3>
-        <div style="color: gray;">常见问题</div>
-        <div style="color: gray;">意见反馈</div>
-        <div style="color: gray;">联系我们</div>
-        <div style="color: gray;">法律条款</div>
+        <i class="bi bi-wechat" style="font-size: 24px; margin-right: 5px;"></i>
+        <i class="bi bi-sina-weibo" style="font-size: 24px; margin-left: 5px;"></i>
       </div>
       <div style="text-align: center; margin-top: 10px; width: 10%;">
         <h3>友情链接</h3>
-        <div style="color: gray;">南京大学</div>
-        <div style="color: gray;">教学立方</div>
+        <div style="color: gray;"><a href="https://www.nju.edu.cn" style="color: gray;">南京大学</a></div>
+        <div style="color: gray;"><a href="https://teaching.applysquare.com" style="color: gray;">教学立方</a></div>
       </div>
     </div>
     <div class="bottom">
@@ -118,7 +116,7 @@ const user = reactive({
 
 const messageList = reactive([
   {id: 'qwee', content: '您收到来自“人机交互小组”布置的任务', type: 'primary', timestamp: '2023-09-16 18:38'},
-  {id: 'dzfs', content: '您申请加入小组“操作系统小组”被拒绝', type: 'warning', timestamp: '2023-09-16 14:43'},
+  {id: 'dzfs', content: '您申请加入小组“操作系统小组”被拒绝', type: 'danger', timestamp: '2023-09-16 14:43'},
   {id: 'xsdf', content: '您已成功加入小组“人机交互小组”', type: 'success', timestamp: '2023-09-15 20:02'},
   {id: 'dsfs', content: '您已成功加入课程“人机交互系统”', type: 'success', timestamp: '2023-09-15 10:46'}
 ])
@@ -187,6 +185,7 @@ function deleteMessage(id, isAll=false) {
   right: 0;
   z-index: 10;
   padding: 0;
+  box-shadow: var(--el-box-shadow-light);
 }
 
 .main {
@@ -196,6 +195,8 @@ function deleteMessage(id, isAll=false) {
   /* opacity: 1; */
   background-image: radial-gradient(#FFDAB9 0.6px, oldlace 0.6px);
   background-size: 12px 12px;
+  
+  overflow: hidden;
 }
 
 .footer {

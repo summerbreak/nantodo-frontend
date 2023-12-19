@@ -2,8 +2,8 @@
     <div class="login-container">
         <div class="background-image"></div>
 
-        <div class="login-box">
-            <div class="t-tab-top">登 录</div>
+        <div class="login-box" v-if="!isRegistering">
+            <div class="t-tab-top">欢迎您使用南土豆</div>
             <div class="container-fluid" style="padding-bottom: 24px;">
                 <div class="form">
                     <div style="padding:15px 5px;">
@@ -17,39 +17,71 @@
                             <el-button type="warning" style="width: 100%; height: 42px;font-size: 18px;" @click="login">登
                                 录</el-button>
                         </div>
-                        <div class="form-group margin-bottom-15 margin-top-35">
-                            <a target="_blank" style="color:#3fb5df;float:left;margin-left: 20px;">
-                                <span style="color: black;" @click="register">立即注册</span>
+                        <div class="links">
+                            <a class="link" target="_blank" @click="showRegister">
+                                立即注册
                             </a>
-                            <a target="_blank" style="color:#3fb5df;float:right;margin-right:29px;">
-                                <span style="color: black;">忘记密码</span>
+                            <a class="link" target="_blank">
+                                忘记密码
                             </a>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-
+        <Register v-else />
     </div>
 </template>
 
 <script>
+import Register from '../components/Register.vue'
 import { ref } from 'vue'
+import axios from 'axios'
+import { useUserStore } from '../stores/user.js'
 export default {
     setup() {
+        const isRegistering = ref(false)
         const account = ref('')
         const password = ref('')
+        const userStore = useUserStore()
+
+        const login = async () => {
+            try {
+                const response = await axios.get('/login', {
+                    params: {
+                        phone: account.value,
+                        password: password.value
+                    }
+                })
+
+                if (response.status === 200) {
+                    console.log('登录成功', response.data)
+                    userStore.setUser(response.data)
+                } else if (response.status === 401) {
+                    console.log('密码错误', response.status)
+                } else {
+                    console.log('账号不存在', response.status)
+                }
+            } catch (error) {
+                console.error('请求失败', error)
+            }
+        }
+
+        const showRegister = () => {
+            isRegistering.value = true
+        }
+
         return {
+            isRegistering,
             account,
             password,
+            login,
+            showRegister
         }
     },
-    methods: {
-        login() {
-            // 在这里处理登录逻辑
-            console.log('Logging in...', this.account, this.password);
-        },
-    },
+    components: {
+        Register
+    }
 };
 </script> 
 
@@ -80,7 +112,7 @@ export default {
     left: 0;
     width: 100%;
     height: calc(100% - 80px);
-    background: url('../assets/pic/autumn.jpg') center/cover no-repeat;
+    background: url('../assets/pic/Autumn.jpg') center/cover no-repeat;
     z-index: 0;
     /* 将背景图片放到最底层 */
 }
@@ -94,7 +126,7 @@ export default {
     transform: translate(-50%, -50%);
     width: 325px;
     padding: 30px;
-    background: rgba(255, 255, 255, 0.8);
+    background: rgba(255, 255, 255, 0.9);
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.6);
 }
 
@@ -112,4 +144,24 @@ export default {
     display: flex;
     flex-direction: column;
 }
+
+.links {
+    display: flex;
+    justify-content: space-evenly;
+    align-items: center;
+    margin-top: 10px;
+}
+
+.link {
+    font-size: 16px;
+    font-weight: 400;
+    color: gray;
+
+    &:hover {
+        cursor: pointer;
+        color: #db8916;
+    }
+
+}
 </style>
+
