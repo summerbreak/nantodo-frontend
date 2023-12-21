@@ -11,17 +11,17 @@
                     <span style="font-size: 28px;font-weight: bold;">{{ groupInfo.name }}</span>
                 </div>
                 <div class="desc-item" style="display: flex; flex-direction: row;">
-                    <div style="width: 50%;">组长: {{ leaderName }}</div>
-                    <span>邀请码: {{ invitingCode }}
+                    <div style="width: 50%;"><span class="label">组长</span>: {{ leaderName }}</div>
+                    <span><span class="label">邀请码</span>: {{ invitingCode }}
                         <div class="colored-icon" @click="copyCode"><i class="bi bi-copy"></i></div>
                     </span>
                 </div>
-                <div class="desc-item">所属{{ organNameLabel }}: {{ groupInfo.organName }}
+                <div class="desc-item"><span class="label">所属{{ organNameLabel }}</span>: {{ groupInfo.organName }}
                     <div v-show="groupInfo.type === 'course'" class="colored-icon" @click="toCourse">
                         <i class="bi bi-box-arrow-up-right"></i>
                     </div>
                 </div>
-                <div class="desc-item">简介: {{ groupInfo.description }}</div>
+                <div class="desc-item"><span class="label">简介</span>: {{ groupInfo.description }}</div>
             </div>
             <div class="group-info-chart">
                 <el-progress type="dashboard" :percentage="taskProgress" :color="progressColor">
@@ -108,12 +108,12 @@
                                 <div
                                     style="display: flex; justify-content: space-evenly;padding-left: 20px;padding-right: 20px;">
                                     <el-tooltip placement="top" content="编辑任务">
-                                        <el-icon v-show="isAdmin" size="24" class="click-icon" @click="editTask($index)">
+                                        <el-icon color="#aaa" v-show="isAdmin" size="24" class="click-icon" @click="editTask($index)">
                                             <Edit />
                                         </el-icon>
                                     </el-tooltip>
                                     <el-tooltip placement="top" :content="row.done ? '取消完成' : '强制完成'">
-                                        <el-icon v-show="isAdmin" size="24" class="click-icon" @click="changeStatus(row.id)">
+                                        <el-icon  :color="row.done?'red':'green'" v-show="isAdmin" size="24" class="click-icon" @click="changeStatus(row.id)">
                                             <CircleCheck v-show="!row.done" />
                                             <CircleClose v-show="row.done" />
                                         </el-icon>
@@ -122,7 +122,7 @@
                                         <template #reference>
                                             <div>
                                                 <el-tooltip placement="top" content="删除任务">
-                                                    <el-icon v-show="isAdmin" size="24" class="click-icon">
+                                                    <el-icon color="black" v-show="isAdmin" size="24" class="click-icon">
                                                         <Delete />
                                                     </el-icon>
                                                 </el-tooltip>
@@ -340,40 +340,6 @@ const organNameLabel = computed(() => {
     return groupInfo.type === 'course' ? '课程' : '组织'
 })
 
-
-/*
-const groupInfo = reactive({
-    id: '6fd3jksdf4vcnc90k3',
-    name: "人机交互小组",
-    leaderId: '111',
-    organName: '人机交互设计',
-    type: 'course',
-    description: '欢迎大家加入我们小组，QQ群坚持中国特色社会主义道路，坚持马克思列宁主义，坚持人民民主专政',
-    courseId: '1141514'
-})
-
-const memberInfo = reactive([
-    { id: '111', name: '张宏鑫', studentNumber: '211250167', phone: '11111111111', email: '123@321.com', grade: '大四', avatarUrl: 'https://picsum.photos/seed/111/100/100' },
-    { id: '222', name: '周豪', studentNumber: '211250167', phone: '11111111111', email: '123@321.com', grade: '大四' , avatarUrl: 'https://picsum.photos/seed/222/100/100' },
-    { id: '333', name: '胡书毓', studentNumber: '211250167', phone: '11111111111', email: '123@321.com', grade: '大四' , avatarUrl: 'https://picsum.photos/seed/333/100/100' },
-    { id: '444', name: '唐扬', studentNumber: '211250167', phone: '11111111111', email: '123@321.com', grade: '大四' , avatarUrl: 'https://picsum.photos/seed/444/100/100' },
-])
-
-const taskInfo = reactive([
-    { id: 't1', title: '做画布', content: '绘制discord商业模式画布', done: false, userId: '', deadline: '2023-12-31 23:59:59' },
-    { id: 't2', title: '商业模式评估', content: '对discord进行商业模式评估', done: true, userId: '', deadline: '2023-12-31 23:59:59' },
-    { id: 't3', title: '任务1', content: '控制ros中小乌龟的移动', done: false, userId: '', deadline: '2023-12-01 23:59:59' },
-    { id: 't4', title: '任务任务任务任务任务', content: '对某一小组的项目完成启发式评估，模仿示例完成相应文档', done: false, userId: '', deadline: '2023-12-31 23:59:59' },
-])
-
-const applicationList = reactive([
-    {timestamp: '2023-09-15 13:01:34', id: '123', name: '匡宏宇', status: 'pending'},
-    {timestamp: '2023-09-15 13:01:34', id: '313', name: '小仙女', status: 'pending'},
-    {timestamp: '2023-09-15 13:01:34', id: '534', name: '张维为', status: 'refused'},
-    {timestamp: '2023-09-15 13:01:34', id: '4ee', name: '刘钦', status: 'accepted'}
-])
-*/
-
 function progressColor(percentage) {
     if (percentage < 50) {
         return '#909399'
@@ -586,6 +552,11 @@ function decideApp(app, status) {
     display: flex;
     flex-direction: row;
     box-shadow: var(--el-box-shadow-light);
+}
+
+.label {
+    font-weight: 700;
+    color: #666;
 }
 
 .group-desc {

@@ -5,7 +5,7 @@
       <el-text tag="ins" class="title">我的课程</el-text>
     </el-col>
   </el-row>
-  <invitation-button/>
+  <!-- <invitation-button /> -->
   <div v-loading="isLoading" element-loading-text="加载中..." element-loading-background="transparent">
     <div v-if="userCourses.length!==0">
       <el-row class="outside">

@@ -44,8 +44,6 @@
 
 <script setup>
 import { ref, onMounted } from 'vue';
-import GeneralSetting from '../components/GeneralSetting.vue';
-import UserInfoComponent from '../components/UserInfoComponent.vue';
 import { useUserStore } from '../stores/user.js'
 
 const index = ref(1)

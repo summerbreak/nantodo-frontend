@@ -274,12 +274,13 @@ export default {
   max-height: 3em; 
 }
 .task-card {
-  border: 1px solid #ccc;
+  /* border: 1px solid #ccc; */
   border-radius: 8px;
   padding: 16px;
   margin: 16px;
   max-width: 80%;
   background-color: white;
+  box-shadow: var(--el-box-shadow-light);
 }
 
 .title {
