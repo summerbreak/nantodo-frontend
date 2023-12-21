@@ -27,23 +27,23 @@
           <el-text>{{ release }} →</el-text>
           <el-text>{{ ddl }}</el-text>
         </div>
-        <el-tooltip
-            class="box-item"
-            effect="dark"
-            :content="teamPromptInfo"
-            placement="top"
-            v-if="!isLeader"
-        >
-          <el-button :disabled="!isLeader" style="width: 100px" v-if="hasCommit">修改作业</el-button>
-          <el-button :disabled="!isLeader" style="width: 100px" v-else>交作业</el-button>
-        </el-tooltip>
-        <div v-else>
-          <el-button :disabled="!isLeader" style="width: 100px" v-if="hasCommit"
-                     @click="dialogVisible=true">修改作业
-          </el-button>
-          <el-button :disabled="!isLeader" style="width: 100px" v-else @click="dialogVisible=true">交作业
-          </el-button>
-        </div>
+<!--        <el-tooltip-->
+<!--            class="box-item"-->
+<!--            effect="dark"-->
+<!--            :content="teamPromptInfo"-->
+<!--            placement="top"-->
+<!--            v-if="!isLeader"-->
+<!--        >-->
+<!--          <el-button :disabled="!isLeader" style="width: 100px" v-if="hasCommit">修改作业</el-button>-->
+<!--          <el-button :disabled="!isLeader" style="width: 100px" v-else>交作业</el-button>-->
+<!--        </el-tooltip>-->
+<!--        <div v-else>-->
+<!--          <el-button :disabled="!isLeader" style="width: 100px" v-if="hasCommit"-->
+<!--                     @click="dialogVisible=true">修改作业-->
+<!--          </el-button>-->
+<!--          <el-button :disabled="!isLeader" style="width: 100px" v-else @click="dialogVisible=true">交作业-->
+<!--          </el-button>-->
+<!--        </div>-->
       </div>
     </template>
   </el-card>
