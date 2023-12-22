@@ -68,7 +68,7 @@
       </el-row>
     </span>
   </div>
-  <div style="margin-bottom: 0;margin-top: 0">
+  <div style="margin-bottom: 15px;margin-top: 0">
     <div v-loading="isLoading" element-loading-text="加载中..." element-loading-background="transparent" >
       <el-row class="outside">
         <el-col
@@ -83,7 +83,7 @@
     </div>
       <el-pagination v-model:current-page="page" :page-size="8" background layout="prev, pager, next" :total="showCourses.length" />
 
-  </div>>
+  </div>
   <!--  </el-scrollbar>-->
 </template>
 <script setup>
