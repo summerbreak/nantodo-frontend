@@ -66,17 +66,13 @@
           <course-search @search="getCourses"/>
         </el-col>
       </el-row>
-
-
-
     </span>
-
   </div>
-  <el-scrollbar max-height="600px" style="margin-bottom: 0;margin-top: 0">
-    <div v-loading="isLoading" element-loading-text="加载中..." element-loading-background="transparent">
+  <div style="margin-bottom: 0;margin-top: 0">
+    <div v-loading="isLoading" element-loading-text="加载中..." element-loading-background="transparent" >
       <el-row class="outside">
         <el-col
-            v-for="(o, index) in showCourses"
+            v-for="(o, index) in showCourses.slice((page-1)*8,page*8)"
             :key="index"
             :span="6"
             :offset="0"
@@ -85,7 +81,9 @@
         </el-col>
       </el-row>
     </div>
-  </el-scrollbar>
+      <el-pagination v-model:current-page="page" :page-size="8" background layout="prev, pager, next" :total="showCourses.length" />
+
+  </div>>
   <!--  </el-scrollbar>-->
 </template>
 <script setup>
@@ -95,7 +93,7 @@ import CourseSearch from "../components/course-search.vue";
 import CourseGrid from "../components/course-grid.vue";
 import axios from "axios";
 import InvitationButton from "../components/course-button.vue";
-
+const page=ref(1)
 const allCourses = ref([])
 const userCourses = ref([])
 const userInfo = ref({})
@@ -185,6 +183,45 @@ const choosePossible = () => {
   font-size: 25px;
   font-weight: bolder;
   color: #884A39;
+}
+
+.el-pagination {
+  justify-content: center;
+  text-align: center;
+  margin-top: 5px;
+  margin-bottom: 10px;
+}
+
+.el-pagination.is-background :deep(.el-pager li) {
+  /*对页数的样式进行修改*/
+  background-color: #ffffff;
+  color: #1a1a1a;
+  margin: 5px;
+  height: 40px;
+  width: 40px;
+}
+
+.el-pagination.is-background :deep(.btn-next) {
+  /*对下一页的按钮样式进行修改*/
+  background-color: #ffffff;
+  color: #1a1a1a;
+  height: 40px;
+  width: 40px;
+}
+
+
+.el-pagination.is-background :deep(.btn-prev) {
+  /*对上一页的按钮样式进行修改*/
+  background-color: #ffffff;
+  color: #1a1a1a;
+  height: 40px;
+  width: 40px;
+}
+
+.el-pagination.is-background :deep(.el-pager :not(.is-disabled).is-active) {
+  background-color: #ffffff;
+  color: #3498ff;
+  font-weight: bolder;
 }
 
 .outside {

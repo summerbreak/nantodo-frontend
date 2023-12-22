@@ -15,26 +15,29 @@
             <el-text line-clamp="1" class="text">{{ courseInfo.name }}</el-text>
             <el-card shadow="never"
                      class="description">
-              <el-text size="large">教师：{{ courseInfo.teacher }}</el-text>
+              <el-text size="large" tag="b">教师：</el-text>
+              <el-text size="large">{{ courseInfo.teacher }}</el-text>
               <br/>
               <el-row>
                 <el-col>
-                  <el-text size="large">学期：{{ courseInfo.semester }}</el-text>
+                  <el-text size="large" tag="b">学期：</el-text>
+                  <el-text size="large">{{ courseInfo.semester }}</el-text>
                 </el-col>
                 <el-col>
-                  <el-text size="large">授课年级：{{ courseInfo.grade }}</el-text>
+                  <el-text size="large" tag="b">授课年级：</el-text>
+                  <el-text size="large">{{ courseInfo.grade }}级</el-text>
                 </el-col>
               </el-row>
-              <el-text size="large">小组数目：{{ teamNumber }}</el-text>
+              <el-text size="large" tag="b">小组数目：</el-text>
+              <el-text size="large">{{ teamNumber }}</el-text>
             </el-card>
             <div style="margin-top: 20px">
               <div v-if="courseInfo.open" :key="ref">
                 <div v-if="selected" :key="ref">
-                  <el-button-group size="large" v-if="hasTeam">
-                    <el-button :icon="Position" type="warning" plain @click="router.push({path: '/group', query: {id: groupInfo.id}})">
-                      查看我的小组
-                    </el-button>
-                  </el-button-group>
+                  <el-button size="large" v-if="hasTeam" :icon="Position" type="warning" plain
+                             @click="router.push({path: '/group', query: {id: groupInfo.id}})">
+                    查看我的小组
+                  </el-button>
                   <el-button-group size="large" v-else>
                     <el-button :icon="Plus" type="warning" plain @click="createTeam">
                       创建我的小组
@@ -47,7 +50,7 @@
                     </el-button>
                   </el-button-group>
                   <el-button :icon="DocumentDelete" type="danger" plain @click="dropOut" size="large"
-                             style="margin-left: 20px">
+                             style="margin-left: 20px" v-if="!hasTeam">
                     退出课程
                   </el-button>
                 </div>
@@ -685,6 +688,7 @@ const attendCourse = () => {
   background-color: #FAF6F0;
   border-style: none;
   border-radius: 10px;
+  width: 95%;
   color: #2C3639
 }
 
