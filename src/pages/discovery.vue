@@ -21,12 +21,12 @@
           </template>
         </el-input>
         <div class="search-button">
-            <el-button :icon="CirclePlus" type="primary" @click="addGroup">创建小组</el-button>
-            <el-button :icon="Share" type="success" @click="joinByCode">通过邀请码加入</el-button>
+            <el-button :icon="CirclePlus" type="primary" @click="addGroup">发起组队</el-button>
+            <el-button :icon="Link" type="success" @click="joinByCode">通过邀请码加入</el-button>
         </div>
     </div>
-    <el-empty v-if="currentGroups.length === 0" description="没有找到小组哦"></el-empty>
-    <div v-else class="group-list">
+    <el-empty v-loading="isLoading" v-if="currentGroups.length === 0" description="没有找到小组哦"></el-empty>
+    <div v-loading="isLoading" v-else class="group-list">
         <el-row v-for="i in rowRange" :key="i" :gutter="40" style="height: 250px;margin-top: 10px;margin-bottom: 10px;">
             <el-col v-for="j in 3" :key="(i-1) * 3 + j" :span="24 / colNum" class="col">
                 <el-card v-if="calcIndex(i, j) < currentGroups.length" class="group-card">
@@ -34,12 +34,12 @@
                         <div style="font-size: 20px;">
                             <i style="margin-right: 10px;" :class="`bi bi-${iconMap[thisGroup(i, j).type]}`"></i>
                             <span>{{ thisGroup(i, j).name }}</span>
-                            <span style="font-size: 16px;color: gray;float: right;">{{ '3 / 4' }}</span>
+                            <span style="font-size: 16px;color: gray;float: right;">{{ `${thisGroup(i, j).members.length} / ${thisGroup(i, j).capacity}` }}</span>
                             <div style="color: gray;font-size: 16px;margin-top: 10px;">{{ thisGroup(i,j).organName }}</div>
                         </div>
                         <div class="group-desc">{{ thisGroup(i,j).description }}</div>
                         <div style="display: flex;">
-                            <el-button :icon="Link" style="margin-left: auto;" @click="shareGroup(thisGroup(i, j).id)">分享给朋友</el-button>
+                            <el-button :icon="Share" style="margin-left: auto;" @click="shareGroup(thisGroup(i, j).id)">分享给朋友</el-button>
                             <el-button type="success" :icon="Message" @click="joinGroup(thisGroup(i, j).id)">申请加入</el-button>
                         </div>
                     </div>
@@ -83,7 +83,7 @@
                 <el-input v-model="group.organName" placeholder="默认为自由组队" :maxlength="15"></el-input>
             </el-form-item>
             <el-form-item label="小组描述" prop="description">
-                <el-input type="textarea" v-model="group.description" placeholder="不超过50个字" :maxlength="50"
+                <el-input type="textarea" v-model="group.description" placeholder="不超过60个字" :maxlength="60"
                     resize="none" :rows="3"></el-input>
             </el-form-item>
         </el-form>
@@ -108,6 +108,7 @@ const userStore = useUserStore()
 const searchValue = ref('')
 const searchType = ref('')
 const colNum = ref(3)
+const isLoading = ref(false)
 const iconMap = {course: 'book course-color', contest: 'trophy contest-color', ent: 'controller ent-color',
                  outdoor: 'flag outdoor-color', other: 'lightbulb other-color'}
 
@@ -136,22 +137,36 @@ const group = reactive({
 })
 const createGroup = ref(false)
 
-const groupInfo = [
-    {id: 'g111', name: '周六江心洲骑行', organName: '自由组队',description: '快来加入我们吧绝代风华打卡粉色的回复收到就粉色的尽快发货多少分发动机凤凰大街客服发的是尽快发货是的尽快发货时可救基地车都会算法大喊大叫你才找小姐的地方打算妲己', leader: '111', type: 'outdoor'},
-    {id: 'g222', name: '锟斤拷烫烫烫小队', organName: '2023EL程序竞赛交互组',description: '快来加入我们吧绝代风华打卡基地车都会算法大喊大叫你才找小姐的地方打算妲己', leader: '111', type: 'contest'},
-    {id: 'g333', name: '书院联谊活动', organName: '开甲书院',description: '快来加入我们吧绝代风华打卡基地车都会算法大喊大叫你才找小姐的地方打算妲己', leader: '111', type: 'other'},
-    {id: 'g444', name: '狼人杀时间', organName: '桌游社',description: '快来加入我们吧绝代风华打卡基地车都会算法大喊大叫你才找小姐的地方打算妲己', leader: '111', type: 'ent'},
-    {id: 'g555', name: '栖霞山赏枫', organName: '自由组队',description: '快来加入我们吧绝代风华打卡基地车都会算法大喊大叫你才找小姐的地方打算妲己', leader: '111', type: 'outdoor'},
-    {id: 'g666', name: '麻将四缺二', organName: '自由组队',description: '快来加入我们吧绝代风华打卡基地车都会算法大喊大叫你才找小姐的地方打算妲己', leader: '111', type: 'ent'},
-    {id: 'g777', name: '北欧文化研讨会', organName: '文学社',description: '快来加入我们吧绝代风华打卡基地车都会算法大喊大叫你才找小姐的地方打算妲己', leader: '111', type: 'other'},
-    {id: 'g888', name: '\"last one\"项目', organName: '网易雷火makers游戏开发大赛',description: '快来加入我们吧绝代风华打卡基地车都会算法大喊大叫你才找小姐的地方打算妲己', leader: '111', type: 'contest'},
-    {id: 'g999', name: '拥抱分你一半志愿者招募', organName: '软件学院心晴工作站',description: '快来加入我们吧绝代风华打卡基地车都会算法大喊大叫你才找小姐的地方打算妲己', leader: '111', type: 'other'},
-]
+const groupInfo = []
+
+// const groupInfo = [
+//     {id: 'g111', name: '周六江心洲骑行', organName: '自由组队',description: '快来加入我们吧绝代风华打卡粉色的回复收到就粉色的尽快发货多少分发动机凤凰大街客服发的是尽快发货是的尽快发货时可救基地车都会算法大喊大叫你才找小姐的地方打算妲己', leader: '111', type: 'outdoor'},
+//     {id: 'g222', name: '锟斤拷烫烫烫小队', organName: '2023EL程序竞赛交互组',description: '快来加入我们吧绝代风华打卡基地车都会算法大喊大叫你才找小姐的地方打算妲己', leader: '111', type: 'contest'},
+//     {id: 'g333', name: '书院联谊活动', organName: '开甲书院',description: '快来加入我们吧绝代风华打卡基地车都会算法大喊大叫你才找小姐的地方打算妲己', leader: '111', type: 'other'},
+//     {id: 'g444', name: '狼人杀时间', organName: '桌游社',description: '快来加入我们吧绝代风华打卡基地车都会算法大喊大叫你才找小姐的地方打算妲己', leader: '111', type: 'ent'},
+//     {id: 'g555', name: '栖霞山赏枫', organName: '自由组队',description: '快来加入我们吧绝代风华打卡基地车都会算法大喊大叫你才找小姐的地方打算妲己', leader: '111', type: 'outdoor'},
+//     {id: 'g666', name: '麻将四缺二', organName: '自由组队',description: '快来加入我们吧绝代风华打卡基地车都会算法大喊大叫你才找小姐的地方打算妲己', leader: '111', type: 'ent'},
+//     {id: 'g777', name: '北欧文化研讨会', organName: '文学社',description: '快来加入我们吧绝代风华打卡基地车都会算法大喊大叫你才找小姐的地方打算妲己', leader: '111', type: 'other'},
+//     {id: 'g888', name: '\"last one\"项目', organName: '网易雷火makers游戏开发大赛',description: '快来加入我们吧绝代风华打卡基地车都会算法大喊大叫你才找小姐的地方打算妲己', leader: '111', type: 'contest'},
+//     {id: 'g999', name: '拥抱分你一半志愿者招募', organName: '软件学院心晴工作站',description: '快来加入我们吧绝代风华打卡基地车都会算法大喊大叫你才找小姐的地方打算妲己', leader: '111', type: 'other'},
+// ]
 
 const currentGroups = reactive([])
 
 const rowRange = computed(() => {
     return Math.ceil(currentGroups.length / colNum.value)
+})
+
+onMounted(async () => {
+    isLoading.value = true
+    await axios.get('http://localhost:8080/group/free').then(res => {
+        groupInfo.push(...res.data)
+        currentGroups.push(...res.data)
+        isLoading.value = false
+    }, err => {
+        console.log(err)
+        isLoading.value = false
+    })
 })
 
 onActivated(() => {

@@ -73,6 +73,11 @@
       </span>
     </template>
   </el-dialog>
+
+  <el-dialog v-model="showCollaborate" :title="`多人协作 - ${groupName}`" width="40%"
+      :close-on-click-modal="false" :close-on-press-escape="false">
+      <CollabTools :tools="groupInfo.tools" :is-admin="false"></CollabTools>
+  </el-dialog>
 </template>
   
 <script>
@@ -107,7 +112,9 @@ export default {
       urgent: false,
       aiSuggestion: '',
       groupName: '',
-      isOvertime: false                    
+      groupInfo: {tools: []},
+      isOvertime: false,
+      showCollaborate: false            
     };
   },
   mounted() {
@@ -141,6 +148,9 @@ export default {
     toggleStar() {
       this.isStarred = !this.isStarred;
       this.updateTask();
+    },
+    doHomework() {
+      this.showCollaborate = true;
     },
     completeTask() {
       this.isCompleted = true;
@@ -193,6 +203,7 @@ export default {
         .then((res) => {
           console.log('group', res);
           this.groupName = res.data.name;
+          this.groupInfo = res.data;
         })
         .catch((err) => {
           console.log(err);

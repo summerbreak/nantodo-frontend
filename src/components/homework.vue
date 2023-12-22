@@ -171,6 +171,7 @@ const noTeamInfo = ref('请先加入小组')
 const teamPromptInfo = ref('')
 onActivated(async () => {
   content.value = ''
+  console.log('props', props.info)
   await axios.get(`http://localhost:8080/course?id=${props.info}`).then(async res => {
     teamPromptInfo.value = noTeamInfo.value.slice(0)
     if (res.data.homeworks.length > 0) {

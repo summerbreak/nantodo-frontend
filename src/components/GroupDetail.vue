@@ -422,9 +422,10 @@ function copyCode() {
 
 function toCourse() {
     router.push({
-        path: '/course',
+        path: '/course-detail',
         query: {
-            id: groupInfo.courseId
+            id: groupInfo.courseId,
+            selected: true
         }
     })
 }
