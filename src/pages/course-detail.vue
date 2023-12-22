@@ -148,7 +148,7 @@
                 :size="'default'"
                 border
             >
-              <el-descriptions-item min-width="20%" width="20%">
+              <el-descriptions-item min-width="25%" width="25%">
                 <template #label>
                   <div class="cell-item">
                     小组名称
@@ -164,7 +164,7 @@
                 </template>
                 <el-text>{{ applyTeam.description }}</el-text>
               </el-descriptions-item>
-              <el-descriptions-item>
+              <el-descriptions-item min-width="25%" width="25%">
                 <template #label>
                   <div class="cell-item">
                     小队人数
@@ -172,7 +172,7 @@
                 </template>
                 <el-text>{{ applyTeam.members.length }} / {{ applyTeam.capacity }}</el-text>
               </el-descriptions-item>
-              <el-descriptions-item min-width="35%" width="35%">
+              <el-descriptions-item>
                 <template #label>
                   <div class="cell-item">
                     组长
@@ -206,7 +206,7 @@
                 :size="'default'"
                 border
             >
-              <el-descriptions-item min-width="20%" width="20%">
+              <el-descriptions-item min-width="25%" width="25%">
                 <template #label>
                   <div class="cell-item">
                     小队名称
@@ -222,21 +222,22 @@
                 </template>
                 <el-text>{{ groupInfo.description }}</el-text>
               </el-descriptions-item>
+
               <el-descriptions-item min-width="25%" width="25%">
-                <template #label>
-                  <div class="cell-item">
-                    队长
-                  </div>
-                </template>
-                <el-text>{{ myLeaderName }}</el-text>
-              </el-descriptions-item>
-              <el-descriptions-item>
                 <template #label>
                   <div class="cell-item">
                     小组人数
                   </div>
                 </template>
                 <el-text>{{ groupInfo.members.length }} / {{ groupInfo.capacity }}</el-text>
+              </el-descriptions-item>
+              <el-descriptions-item>
+                <template #label>
+                  <div class="cell-item">
+                    队长
+                  </div>
+                </template>
+                <el-text>{{ myLeaderName }}</el-text>
               </el-descriptions-item>
               <el-descriptions-item>
                 <template #label>
@@ -275,7 +276,7 @@ import {ElMessage, ElMessageBox} from "element-plus";
 
 const router = useRouter()
 const route = useRoute()
-const user = useUserStore().getUser()
+let user = useUserStore().getUser()
 const fresh = ref(0)
 const userInfo = ref({})
 const selected = ref(true)
@@ -311,13 +312,19 @@ onActivated(async () => {
   selected.value = false
   hasTeam.value = false
   applyNow.value = false
+  user = useUserStore().getUser()
   document.documentElement.scrollTop = 0;
   let id = route.query.id
-  selected.value = route.query.selected == 'true'
   await axios.get(`http://localhost:8080/course?id=${id}`).then(res => {
     courseInfo.value = res.data
   }).catch(error => {
     console.log(error)
+  })
+  user.courses.map(item => {
+    if (item == id) {
+      selected.value = true
+      console.log("isTrue")
+    }
   })
   allTeam.value.length = 0
   showTeam.value.length = 0
@@ -332,16 +339,14 @@ onActivated(async () => {
             allTeam.value[i].leaderName = res.data.name
           }
       )
-      allGroups[i].members.map(async item => {
-        await axios.get(`http://localhost:8080/user?id=${item}`).then(
-            res => {
-              if (allTeam.value[i].membersName.length > 0) {
-                allTeam.value[i].membersName += '，'
-              }
-              allTeam.value[i].membersName += res.data.name
-            }
-        )
+      await axios.get(`http://localhost:8080/group/allMember?groupId=${allGroups[i].id}`).then(res => {
+        allTeam.value[i].membersName = res.data.map((obj, index) => {
+          return obj.name
+        }).join("，")
+      }).catch(err => {
+        console.log("error in allMember reason: " + err)
       })
+
     }
   }).catch(error => {
     console.log(error)
@@ -387,15 +392,12 @@ onActivated(async () => {
           }
       )
       myMembers.value = ''
-      groupInfo.value.members.map(async item => {
-        await axios.get(`http://localhost:8080/user?id=${item}`).then(
-            res => {
-              if (myMembers.value.length > 0) {
-                myMembers.value += '，'
-              }
-              myMembers.value += res.data.name
-            }
-        )
+      await axios.get(`http://localhost:8080/group/allMember?groupId=${groupInfo.value.id}`).then(res => {
+        myMembers.value = res.data.map((obj, index) => {
+          return obj.name
+        }).join("，")
+      }).catch(err => {
+        console.log("error in my group allMember reason: " + err)
       })
       break
     } else {
@@ -419,16 +421,14 @@ onActivated(async () => {
                         applyTeam.value.leaderName = res.data.name
                       }
                   )
-                  applyTeam.value.members.map(async item => {
-                    await axios.get(`http://localhost:8080/user?id=${item}`).then(
-                        res => {
-                          if (applyTeam.value.membersName.length > 0) {
-                            applyTeam.value.membersName += '，'
-                          }
-                          applyTeam.value.membersName += res.data.name
-                        }
-                    )
+                  await axios.get(`http://localhost:8080/group/allMember?groupId=${applyTeam.value.id}`).then(res => {
+                    applyTeam.value.membersName = res.data.map((obj, index) => {
+                      return obj.name
+                    }).join("，")
+                  }).catch(err => {
+                    console.log("error in apply allMember reason: " + err)
                   })
+
                 }
               }
           )
