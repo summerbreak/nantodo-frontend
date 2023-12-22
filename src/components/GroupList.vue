@@ -47,18 +47,7 @@ const emit = defineEmits(['toDetail'])
 
 const loading = ref(false)
 let user = userStore.getUser()
-/*
-const groupList = [
-    {id: 'rjjh', name: '人机交互小组', organName: '人机交互系统', leader: '111', type: 'course', other: '1 项待办'},
-    {id: 'ydhl', name: '移动互联网小组', organName: '移动互联网软件工程', leader: '111', type: 'course', other: '1 项待办'},
-    {id: 'kjkt', name: '锟斤拷烫烫烫小队', organName: '2023EL程序设计竞赛', leader: '111', type: 'contest', other: '1 项待办' },
-    {id: 'devo', name: 'DevOps小组', organName: 'DevOps开发', leader: '456', type: 'course', other: '有新任务'},
-    {id: 'czxt', name: '操作系统小组', organName: '操作系统', leader: '456', type: 'course', other: '1 项待办'},
-    {id: 'qxss', name: '栖霞山赏枫', organName: '自由组队', leader: '456', type: 'outdoor', other: '1 项待办' },
-    {id: 'lrss', name: '狼人杀时间', organName: '桌游社', leader: '456', type: 'ent', other: '1 项待办' },
-    {id: 'bowh', name: '北欧文化研讨会', organName: '自由组队', leader: '456', type: 'other', other: '1 项待办' },
-]
-*/
+
 const joinedGroupList = reactive([])
 const adminGroupList = reactive([])
 const iconMap = {course: 'book course-color', contest: 'trophy contest-color', ent: 'controller ent-color',
@@ -74,7 +63,7 @@ const deleteLabel = computed(() => {
     return props.isAdmin ? '解散小组' : '退出小组'
 })
 
-onMounted(() => {
+onMounted(async () => {
     user = userStore.getUser()
     // 如果本地缓存有小组列表，直接从缓存中读取
     // if (localStorage.getItem('groupList')) {
@@ -86,9 +75,9 @@ onMounted(() => {
     //     return
     // }
     loading.value = true
-    axios.get(`http://localhost:8080/group/all?userId=${userStore.getUser().id}`).then(
+    await axios.get(`http://localhost:8080/group/all?userId=${userStore.getUser().id}`).then(
         res => {
-            // console.log(res.data)
+            // console.log('groups', res.data)
             res.data.forEach(group => {
                 group['other'] = TodoNum(group.tasks) + ' 项待办'
                 group.leaderId === user.id ? adminGroupList.push(group) : joinedGroupList.push(group)
@@ -105,7 +94,6 @@ onMounted(() => {
 })
 
 function TodoNum(tasks) {
-    console.log('todonum', user.tasks, tasks)
     let num = 0
     // tasks中每有一个taskId在user的tasks中, num++
     tasks.forEach(task => {

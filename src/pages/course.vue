@@ -5,7 +5,7 @@
       <el-text tag="ins" class="title">我的课程</el-text>
     </el-col>
   </el-row>
-  <invitation-button/>
+  <!-- <invitation-button /> -->
   <div v-loading="isLoading" element-loading-text="加载中..." element-loading-background="transparent">
     <div v-if="userCourses.length!==0">
       <el-row class="outside">
@@ -102,7 +102,7 @@ const ifPossible = ref(false)
 const showCourses = ref([])
 const searchText = ref('')
 const gradeValue = ref('全部年级')
-const user = useUserStore().getUser()
+let user = useUserStore().getUser()
 
 const options = [{value: '全部年级'}, {value: '2020'}, {value: '2021'}, {value: '2022'}, {value: '2023'}]
 
@@ -125,6 +125,7 @@ onActivated(async () => {
         }
       }
   )
+  user = useUserStore().getUser()
   await axios.get(`http://localhost:8080/user?id=${user.id}`).then(
       res => {
         userInfo.value = res.data

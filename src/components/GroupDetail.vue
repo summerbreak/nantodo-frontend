@@ -11,17 +11,17 @@
                     <span style="font-size: 28px;font-weight: bold;">{{ groupInfo.name }}</span>
                 </div>
                 <div class="desc-item" style="display: flex; flex-direction: row;">
-                    <div style="width: 50%;">组长: {{ leaderName }}</div>
-                    <span>邀请码: {{ invitingCode }}
+                    <div style="width: 50%;"><span class="label">组长</span>: {{ leaderName }}</div>
+                    <span><span class="label">邀请码</span>: {{ invitingCode }}
                         <div class="colored-icon" @click="copyCode"><i class="bi bi-copy"></i></div>
                     </span>
                 </div>
-                <div class="desc-item">所属{{ organNameLabel }}: {{ groupInfo.organName }}
+                <div class="desc-item"><span class="label">所属{{ organNameLabel }}</span>: {{ groupInfo.organName }}
                     <div v-show="groupInfo.type === 'course'" class="colored-icon" @click="toCourse">
                         <i class="bi bi-box-arrow-up-right"></i>
                     </div>
                 </div>
-                <div class="desc-item">简介: {{ groupInfo.description }}</div>
+                <div class="desc-item"><span class="label">简介</span>: {{ groupInfo.description }}</div>
             </div>
             <div class="group-info-chart">
                 <el-progress type="dashboard" :percentage="taskProgress" :color="progressColor">
@@ -46,7 +46,7 @@
                         <i class="bi bi-list-task"></i>
                         <span style="margin-left: 10px;">任务列表</span>
                     </template>
-                    <div v-show="isAdmin" style="margin-bottom: 10px;">
+                    <div v-show="isAdmin" style="display:inline;margin-bottom: 10px;">
                         <el-button type="primary" :icon="CirclePlus" @click="addTask"
                             style="background-color: #ff7f50; border-color: #ff7f50;">添加任务</el-button>
                         <el-popover placement="top" content="将每个未分配任务随机分配给一位成员。使用随机分配需要保证未分配任务数与成员数相同" :hide-after="50">
@@ -62,14 +62,25 @@
                         </el-popover>
                         <span v-show="showRandomWarning"
                             style="color: red;font-size: 14px;margin-left: 20px;">未分配任务数与成员数不匹配</span>
-                        <el-popconfirm title="该操作会清空当前所有任务。确定继续吗？" width="200" @confirm="cleanTask" :hide-after="50">
+                        <!-- <el-popconfirm title="该操作会清空当前所有任务。确定继续吗？" width="200" @confirm="cleanTask" :hide-after="50">
                             <template #reference>
                                 <el-button :disabled="!isAllFinished" type="success"
                                     style="float: right;">开启新一轮任务</el-button>
                             </template>
                         </el-popconfirm>
                         <el-button :disabled="!isAllFinished" type="success" @click="toCourse"
-                            style="float: right;margin-right: 10px;">交作业</el-button>
+                            style="float: right;margin-right: 10px;">交作业</el-button> -->
+
+                    </div>
+                    <div style="margin-bottom: 10px;display: inline;">
+                        <el-button type="success" @click="collaborate" style="float: right;">
+                            <template #icon>
+                                <i class="bi bi-people-fill"></i>
+                            </template>
+                            多人协作
+                        </el-button>
+                        <el-button :icon="Histogram" type="primary" @click="statistics"
+                            style="float: right;margin-right: 10px;">数据监控</el-button>
                     </div>
                     <el-table :data="taskInfo" :row-style="rowStyle">
                         <template #empty>
@@ -108,12 +119,12 @@
                                 <div
                                     style="display: flex; justify-content: space-evenly;padding-left: 20px;padding-right: 20px;">
                                     <el-tooltip placement="top" content="编辑任务">
-                                        <el-icon v-show="isAdmin" size="24" class="click-icon" @click="editTask($index)">
+                                        <el-icon color="#888" v-show="isAdmin" size="24" class="click-icon" @click="editTask($index)">
                                             <Edit />
                                         </el-icon>
                                     </el-tooltip>
                                     <el-tooltip placement="top" :content="row.done ? '取消完成' : '强制完成'">
-                                        <el-icon v-show="isAdmin" size="24" class="click-icon" @click="changeStatus(row.id)">
+                                        <el-icon  :color="row.done?'red':'#548B54'" v-show="isAdmin" size="24" class="click-icon" @click="changeStatus(row.id)">
                                             <CircleCheck v-show="!row.done" />
                                             <CircleClose v-show="row.done" />
                                         </el-icon>
@@ -122,7 +133,7 @@
                                         <template #reference>
                                             <div>
                                                 <el-tooltip placement="top" content="删除任务">
-                                                    <el-icon v-show="isAdmin" size="24" class="click-icon">
+                                                    <el-icon color="black" v-show="isAdmin" size="24" class="click-icon">
                                                         <Delete />
                                                     </el-icon>
                                                 </el-tooltip>
@@ -136,7 +147,7 @@
                 </el-tab-pane>
                 <el-tab-pane class="tab-pane">
                     <template #label>
-                        <i class="bi bi-people-fill"></i>
+                        <i class="bi bi-person-fill"></i>
                         <span style="margin-left: 10px;">成员列表</span>
                     </template>
                     <el-table :data="memberInfo" :row-style="rowStyle">
@@ -198,6 +209,14 @@
             <TaskDetail :users="memberInfo" :task="editingTaskIndex >= 0 ? taskInfo[editingTaskIndex] : null"
                 :group-id="groupInfo.id" @close-form="closeForm" @update-task="getTaskInfo"></TaskDetail>
         </el-dialog>
+        <el-dialog v-model="showCollaborate" :title="`多人协作 - ${groupInfo.name}`" width="40%"
+            :close-on-click-modal="false" :close-on-press-escape="false">
+            <CollabTools :tools="groupInfo.tools" :is-admin="isAdmin"></CollabTools>
+        </el-dialog>
+        <el-dialog v-model="showStatistics" :title="`数据监控 - ${groupInfo.name}`" width="40%"
+            :close-on-click-modal="false" :close-on-press-escape="false">
+            <CollabStatistics :tools="groupInfo.tools"></CollabStatistics>
+        </el-dialog>
     </div>
 </template>
 
@@ -205,7 +224,7 @@
 import { ref, reactive, computed, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useUserStore } from '../stores/user'
-import { CirclePlus, ArrowLeft, Edit, Delete, CircleCheck, CircleClose, Check, Close } from '@element-plus/icons-vue';
+import { CirclePlus, ArrowLeft, Edit, Delete, CircleCheck, CircleClose, Check, Close, Histogram } from '@element-plus/icons-vue';
 import { ElMessage } from 'element-plus'
 import axios from 'axios';
 const props = defineProps(['groupId'])
@@ -240,6 +259,8 @@ const taskStatusText = ['未完成', '已完成', '已过期']
 const taskStatusColor = ['gray', '#00CD00', 'red']
 const createTask = ref(false)
 const editingTaskIndex = ref(-1)
+const showCollaborate = ref(false)
+const showStatistics = ref(false)
 
 watch(() => props.groupId, () => {
     getData()
@@ -340,40 +361,6 @@ const organNameLabel = computed(() => {
     return groupInfo.type === 'course' ? '课程' : '组织'
 })
 
-
-/*
-const groupInfo = reactive({
-    id: '6fd3jksdf4vcnc90k3',
-    name: "人机交互小组",
-    leaderId: '111',
-    organName: '人机交互设计',
-    type: 'course',
-    description: '欢迎大家加入我们小组，QQ群坚持中国特色社会主义道路，坚持马克思列宁主义，坚持人民民主专政',
-    courseId: '1141514'
-})
-
-const memberInfo = reactive([
-    { id: '111', name: '张宏鑫', studentNumber: '211250167', phone: '11111111111', email: '123@321.com', grade: '大四', avatarUrl: 'https://picsum.photos/seed/111/100/100' },
-    { id: '222', name: '周豪', studentNumber: '211250167', phone: '11111111111', email: '123@321.com', grade: '大四' , avatarUrl: 'https://picsum.photos/seed/222/100/100' },
-    { id: '333', name: '胡书毓', studentNumber: '211250167', phone: '11111111111', email: '123@321.com', grade: '大四' , avatarUrl: 'https://picsum.photos/seed/333/100/100' },
-    { id: '444', name: '唐扬', studentNumber: '211250167', phone: '11111111111', email: '123@321.com', grade: '大四' , avatarUrl: 'https://picsum.photos/seed/444/100/100' },
-])
-
-const taskInfo = reactive([
-    { id: 't1', title: '做画布', content: '绘制discord商业模式画布', done: false, userId: '', deadline: '2023-12-31 23:59:59' },
-    { id: 't2', title: '商业模式评估', content: '对discord进行商业模式评估', done: true, userId: '', deadline: '2023-12-31 23:59:59' },
-    { id: 't3', title: '任务1', content: '控制ros中小乌龟的移动', done: false, userId: '', deadline: '2023-12-01 23:59:59' },
-    { id: 't4', title: '任务任务任务任务任务', content: '对某一小组的项目完成启发式评估，模仿示例完成相应文档', done: false, userId: '', deadline: '2023-12-31 23:59:59' },
-])
-
-const applicationList = reactive([
-    {timestamp: '2023-09-15 13:01:34', id: '123', name: '匡宏宇', status: 'pending'},
-    {timestamp: '2023-09-15 13:01:34', id: '313', name: '小仙女', status: 'pending'},
-    {timestamp: '2023-09-15 13:01:34', id: '534', name: '张维为', status: 'refused'},
-    {timestamp: '2023-09-15 13:01:34', id: '4ee', name: '刘钦', status: 'accepted'}
-])
-*/
-
 function progressColor(percentage) {
     if (percentage < 50) {
         return '#909399'
@@ -435,9 +422,10 @@ function copyCode() {
 
 function toCourse() {
     router.push({
-        path: '/course',
+        path: '/course-detail',
         query: {
-            id: groupInfo.courseId
+            id: groupInfo.courseId,
+            selected: true
         }
     })
 }
@@ -466,6 +454,14 @@ function assignTaskRandomly() {
         )
     })
     ElMessage.success('任务已随机分配')
+}
+
+function collaborate() {
+    showCollaborate.value = true
+}
+
+function statistics() {
+    showStatistics.value = true
 }
 
 function editTask(index) {
@@ -586,6 +582,11 @@ function decideApp(app, status) {
     display: flex;
     flex-direction: row;
     box-shadow: var(--el-box-shadow-light);
+}
+
+.label {
+    font-weight: 700;
+    color: #666;
 }
 
 .group-desc {
