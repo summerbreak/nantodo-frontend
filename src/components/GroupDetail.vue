@@ -46,7 +46,7 @@
                         <i class="bi bi-list-task"></i>
                         <span style="margin-left: 10px;">任务列表</span>
                     </template>
-                    <div v-show="isAdmin" style="margin-bottom: 10px;">
+                    <div v-show="isAdmin" style="display:inline;margin-bottom: 10px;">
                         <el-button type="primary" :icon="CirclePlus" @click="addTask"
                             style="background-color: #ff7f50; border-color: #ff7f50;">添加任务</el-button>
                         <el-popover placement="top" content="将每个未分配任务随机分配给一位成员。使用随机分配需要保证未分配任务数与成员数相同" :hide-after="50">
@@ -62,14 +62,25 @@
                         </el-popover>
                         <span v-show="showRandomWarning"
                             style="color: red;font-size: 14px;margin-left: 20px;">未分配任务数与成员数不匹配</span>
-                        <el-popconfirm title="该操作会清空当前所有任务。确定继续吗？" width="200" @confirm="cleanTask" :hide-after="50">
+                        <!-- <el-popconfirm title="该操作会清空当前所有任务。确定继续吗？" width="200" @confirm="cleanTask" :hide-after="50">
                             <template #reference>
                                 <el-button :disabled="!isAllFinished" type="success"
                                     style="float: right;">开启新一轮任务</el-button>
                             </template>
                         </el-popconfirm>
                         <el-button :disabled="!isAllFinished" type="success" @click="toCourse"
-                            style="float: right;margin-right: 10px;">交作业</el-button>
+                            style="float: right;margin-right: 10px;">交作业</el-button> -->
+
+                    </div>
+                    <div style="margin-bottom: 10px;display: inline;">
+                        <el-button type="success" @click="collaborate" style="float: right;">
+                            <template #icon>
+                                <i class="bi bi-people-fill"></i>
+                            </template>
+                            多人协作
+                        </el-button>
+                        <el-button :icon="Histogram" type="primary" @click="statistics"
+                            style="float: right;margin-right: 10px;">数据监控</el-button>
                     </div>
                     <el-table :data="taskInfo" :row-style="rowStyle">
                         <template #empty>
@@ -108,12 +119,12 @@
                                 <div
                                     style="display: flex; justify-content: space-evenly;padding-left: 20px;padding-right: 20px;">
                                     <el-tooltip placement="top" content="编辑任务">
-                                        <el-icon color="#aaa" v-show="isAdmin" size="24" class="click-icon" @click="editTask($index)">
+                                        <el-icon color="#888" v-show="isAdmin" size="24" class="click-icon" @click="editTask($index)">
                                             <Edit />
                                         </el-icon>
                                     </el-tooltip>
                                     <el-tooltip placement="top" :content="row.done ? '取消完成' : '强制完成'">
-                                        <el-icon  :color="row.done?'red':'green'" v-show="isAdmin" size="24" class="click-icon" @click="changeStatus(row.id)">
+                                        <el-icon  :color="row.done?'red':'#548B54'" v-show="isAdmin" size="24" class="click-icon" @click="changeStatus(row.id)">
                                             <CircleCheck v-show="!row.done" />
                                             <CircleClose v-show="row.done" />
                                         </el-icon>
@@ -136,7 +147,7 @@
                 </el-tab-pane>
                 <el-tab-pane class="tab-pane">
                     <template #label>
-                        <i class="bi bi-people-fill"></i>
+                        <i class="bi bi-person-fill"></i>
                         <span style="margin-left: 10px;">成员列表</span>
                     </template>
                     <el-table :data="memberInfo" :row-style="rowStyle">
@@ -198,6 +209,14 @@
             <TaskDetail :users="memberInfo" :task="editingTaskIndex >= 0 ? taskInfo[editingTaskIndex] : null"
                 :group-id="groupInfo.id" @close-form="closeForm" @update-task="getTaskInfo"></TaskDetail>
         </el-dialog>
+        <el-dialog v-model="showCollaborate" :title="`多人协作 - ${groupInfo.name}`" width="40%"
+            :close-on-click-modal="false" :close-on-press-escape="false">
+            <CollabTools :tools="groupInfo.tools" :is-admin="isAdmin"></CollabTools>
+        </el-dialog>
+        <el-dialog v-model="showStatistics" :title="`数据监控 - ${groupInfo.name}`" width="40%"
+            :close-on-click-modal="false" :close-on-press-escape="false">
+            <CollabStatistics :tools="groupInfo.tools"></CollabStatistics>
+        </el-dialog>
     </div>
 </template>
 
@@ -205,7 +224,7 @@
 import { ref, reactive, computed, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useUserStore } from '../stores/user'
-import { CirclePlus, ArrowLeft, Edit, Delete, CircleCheck, CircleClose, Check, Close } from '@element-plus/icons-vue';
+import { CirclePlus, ArrowLeft, Edit, Delete, CircleCheck, CircleClose, Check, Close, Histogram } from '@element-plus/icons-vue';
 import { ElMessage } from 'element-plus'
 import axios from 'axios';
 const props = defineProps(['groupId'])
@@ -240,6 +259,8 @@ const taskStatusText = ['未完成', '已完成', '已过期']
 const taskStatusColor = ['gray', '#00CD00', 'red']
 const createTask = ref(false)
 const editingTaskIndex = ref(-1)
+const showCollaborate = ref(false)
+const showStatistics = ref(false)
 
 watch(() => props.groupId, () => {
     getData()
@@ -432,6 +453,14 @@ function assignTaskRandomly() {
         )
     })
     ElMessage.success('任务已随机分配')
+}
+
+function collaborate() {
+    showCollaborate.value = true
+}
+
+function statistics() {
+    showStatistics.value = true
 }
 
 function editTask(index) {

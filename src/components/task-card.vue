@@ -48,7 +48,7 @@
         effect="light"
       >
         <button @click="doHomework">
-          <i class="bi bi-three-dots" style="font-size: 20px;"></i></button
+          <i class="bi bi-pencil-square" style="font-size: 20px;"></i></button
       ></el-tooltip>
       <el-tooltip class="box-item"
         content="完成"
@@ -61,7 +61,7 @@
     </div>
   </div>
   <el-dialog v-model="dialogVisible" width="30%" :before-close="handleClose" center>
-    <template #title>
+    <template #header>
       <h2>{{title}}</h2>
       <div class="date">发布时间: {{ myReleaseTime.toLocaleString('af') }}</div>
     </template>

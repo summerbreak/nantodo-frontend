@@ -31,7 +31,7 @@
     </div>
   </div>
   <el-dialog v-model="dialogVisible" :title="title" width="30%" :before-close="handleClose" center>
-    <template #title>
+    <template #header>
       <h2>{{title}}</h2>
       <div class="date">发布时间: {{ myReleaseTime.toLocaleString('af') }}</div>
     </template>
