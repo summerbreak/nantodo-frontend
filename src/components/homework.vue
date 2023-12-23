@@ -27,53 +27,35 @@
           <el-text>{{ release }} →</el-text>
           <el-text>{{ ddl }}</el-text>
         </div>
-<!--        <el-tooltip-->
-<!--            class="box-item"-->
-<!--            effect="dark"-->
-<!--            :content="teamPromptInfo"-->
-<!--            placement="top"-->
-<!--            v-if="!isLeader"-->
-<!--        >-->
-<!--          <el-button :disabled="!isLeader" style="width: 100px" v-if="hasCommit">修改作业</el-button>-->
-<!--          <el-button :disabled="!isLeader" style="width: 100px" v-else>交作业</el-button>-->
-<!--        </el-tooltip>-->
-<!--        <div v-else>-->
-<!--          <el-button :disabled="!isLeader" style="width: 100px" v-if="hasCommit"-->
-<!--                     @click="dialogVisible=true">修改作业-->
-<!--          </el-button>-->
-<!--          <el-button :disabled="!isLeader" style="width: 100px" v-else @click="dialogVisible=true">交作业-->
-<!--          </el-button>-->
-<!--        </div>-->
+        <el-tooltip
+            class="box-item"
+            effect="dark"
+            :content="teamPromptInfo"
+            placement="top"
+            v-if="!isLeader"
+        >
+          <el-button :disabled="!isLeader" style="width: 100px" v-if="hasCommit">修改作业</el-button>
+          <el-button :disabled="!isLeader" style="width: 100px" v-else>交作业</el-button>
+        </el-tooltip>
+        <div v-else>
+          <el-button :disabled="!isLeader" style="width: 100px" v-if="hasCommit"
+                     @click="dialogVisible=true">修改作业
+          </el-button>
+          <el-button :disabled="!isLeader" style="width: 100px" v-else @click="dialogVisible=true">交作业
+          </el-button>
+        </div>
       </div>
     </template>
   </el-card>
   <el-dialog
       v-model="dialogVisible"
-      title="作业提交"
+      title="提示"
       width="40%"
   >
-    <el-upload
-        class="upload-demo"
-        drag
-        action="https://run.mocky.io/v3/9d059bf9-4660-45f2-925d-ce80ad6c4d15"
-        multiple
-        :auto-upload="false"
-    >
-      <el-icon class="el-icon--upload">
-        <upload-filled/>
-      </el-icon>
-      <div class="el-upload__text">
-        拖拽至此或<em>点击上传</em>
-      </div>
-      <template #tip>
-        <div class="el-upload__tip">
-          文件大小请少于10M
-        </div>
-      </template>
-    </el-upload>
+    <el-text size="large">确认提交当前作业？</el-text>
     <template #footer>
       <span class="dialog-footer">
-        <el-button @click="dialogVisible = false">取消上传</el-button>
+        <el-button @click="dialogVisible = false">取消</el-button>
         <el-button type="primary" @click="updateHomework">
           确认提交
         </el-button>
@@ -154,7 +136,7 @@ import {ElMessage} from "element-plus";
 
 const props = defineProps(['info'])
 const nothing = ref(true)
-const user = useUserStore().getUser()
+// const user = useUserStore().getUser()
 const homeworkInfo = ref({})
 const content = ref('')
 const release = ref('')
@@ -172,6 +154,7 @@ const teamPromptInfo = ref('')
 onActivated(async () => {
   content.value = ''
   console.log('props', props.info)
+  const user = useUserStore().getUser()
   await axios.get(`http://localhost:8080/course?id=${props.info}`).then(async res => {
     teamPromptInfo.value = noTeamInfo.value.slice(0)
     if (res.data.homeworks.length > 0) {
@@ -271,7 +254,7 @@ const updateHomework = async () => {
         type: 'error',
       })
     })
-  }else{
+  } else {
     ElMessage({
       showClose: true,
       message: '作业修改成功',

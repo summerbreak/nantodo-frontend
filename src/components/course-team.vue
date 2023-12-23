@@ -15,29 +15,30 @@
       <el-text>{{ props.groupInfo.name }}</el-text>
     </el-descriptions-item>
     <el-descriptions-item>
-        <template #label>
-          <div class="cell-item">
-            简介
-          </div>
-        </template>
-        <el-text truncated>{{ props.groupInfo.description }}</el-text>
-      </el-descriptions-item>
-    <el-descriptions-item min-width="35%" width="35%">
       <template #label>
         <div class="cell-item">
-          组长
+          简介
         </div>
       </template>
-      <el-text>{{ props.groupInfo.leaderName }}</el-text>
+      <el-text truncated>{{ props.groupInfo.description }}</el-text>
     </el-descriptions-item>
-    
-    <el-descriptions-item>
+
+
+    <el-descriptions-item min-width="25%" width="25%">
       <template #label>
         <div class="cell-item">
           小组人数
         </div>
       </template>
       <el-text>{{ props.groupInfo.members.length }} / {{ props.groupInfo.capacity }}</el-text>
+    </el-descriptions-item>
+    <el-descriptions-item>
+      <template #label>
+        <div class="cell-item">
+          组长
+        </div>
+      </template>
+      <el-text>{{ props.groupInfo.leaderName }}</el-text>
     </el-descriptions-item>
     <el-descriptions-item>
       <template #label>
@@ -61,7 +62,7 @@
           小组状态
         </div>
       </template>
-      <div >小组成员已满</div>
+      <div>小组成员已满</div>
     </el-descriptions-item>
   </el-descriptions>
   <el-divider border-style="dashed"/>
