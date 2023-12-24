@@ -163,6 +163,7 @@ onMounted(async () => {
         groupInfo.push(...res.data)
         currentGroups.push(...res.data)
         isLoading.value = false
+        searchFilter(router.currentRoute.value.query)
     }, err => {
         console.log(err)
         isLoading.value = false
@@ -180,6 +181,8 @@ onBeforeRouteUpdate(to => {
 function searchFilter(query) {
     currentGroups.length = 0
     if ('id' in query) {
+        console.log('id', query.id)
+        console.log(groupInfo)
         currentGroups.splice(0, 0, ...groupInfo.filter(group => group.id === query.id))
         return
     }
@@ -263,6 +266,7 @@ function cancel() {
 }
 
 function joinGroup(id) {
+    ElMessage.success('申请加入小组成功')
 }
 
 function joinByCode() {

@@ -9,7 +9,7 @@
         <h2 class="title" >{{ myTitle }}</h2>
       </div>
 
-      <div class="date" @click="moreDetails">发布时间: {{ myReleaseTime.toLocaleString('af') }}</div>
+      <div class="date" @click="moreDetails">截止时间: {{ myDeadline.toLocaleString('af') }}</div>
     </div>
     <span class="group-name">
       来自

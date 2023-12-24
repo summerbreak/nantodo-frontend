@@ -1,5 +1,5 @@
 <template>
-    <div style="width: 100%;margin-left: 50%;">
+    <div style="width: 95%;margin-left: 50%;">
         <el-form :rules="rule" ref="ruleFormRef" label-width="auto" class="selfInfo" label-position="right"
             hide-required-asterisk size="large">
             <h1 style="font-size: 30px; font-weight: bold; margin-bottom: 20px;margin-left: 5%;">个人信息</h1>
